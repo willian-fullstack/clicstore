@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100">
+  <defs>
+    <style>
+      @font-face {
+        font-family: 'NoirPro';
+        src: url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff2') format('woff2');
+      }
+      .logo-text {
+        font-family: 'NoirPro', sans-serif;
+        font-size: 56px;
+        text-transform: uppercase;
+        fill: #111111;
+        letter-spacing: 1px;
+      }
+      .clic {
+        font-weight: 600;
+        stroke: #111111;
+        stroke-width: 0.04em;
+      }
+      .store {
+        font-weight: normal;
+        stroke: none;
+        opacity: 0.85;
+      }
+    </style>
+  </defs>
+  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" class="logo-text">
+    <tspan class="clic">CLIC</tspan><tspan class="store">STORE</tspan>
+  </text>
+</svg>
