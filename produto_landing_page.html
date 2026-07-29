@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porta-Retrato 20x25 Premium</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --black: #111111;
+            --gray-dark: #333333;
+            --gray-light: #888888;
+            --bg-offwhite: #fafafa;
+            --bg-white: #ffffff;
+            --accent: #8c7a61; /* Soft taupe/gold */
+            --border: #e6e6e6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--black);
+            background-color: var(--bg-white);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .serif {
+            font-family: 'Playfair Display', serif;
+            font-weight: 400;
+        }
+
+        /* Utils */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 4vw;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 40px 0 0 0;
+            text-align: center;
+        }
+
+        .hero-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gray-light);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 6vw, 5rem);
+            line-height: 1.1;
+            margin-bottom: 24px;
+            color: var(--black);
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            max-width: 600px;
+            margin: 0 auto 60px;
+            font-weight: 300;
+        }
+
+        .hero-image-container {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            overflow: hidden;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transform: scale(1.05);
+            transition: transform 1.5s ease-out;
+        }
+        
+        .hero-image.loaded {
+            transform: scale(1);
+        }
+
+        /* Sticky Promo */
+        .promo-banner {
+            background-color: var(--black);
+            color: var(--bg-white);
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 10;
+        }
+        .promo-banner span {
+            color: var(--accent);
+        }
+
+        /* Editorial Section (Features) */
+        .editorial {
+            padding: 120px 0;
+            background: var(--bg-white);
+        }
+
+        .ed-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8vw;
+            align-items: center;
+            margin-bottom: 120px;
+        }
+
+        .ed-grid.reverse {
+            direction: rtl;
+        }
+        
+        .ed-grid.reverse > * {
+            direction: ltr;
+        }
+
+        .ed-image-wrap {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ed-image {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+        }
+
+        .ed-content {
+            padding: 40px 0;
+        }
+
+        .ed-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .ed-title {
+            font-size: 2.5rem;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .ed-desc {
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            font-weight: 300;
+            line-height: 1.8;
+        }
+
+        /* Close-up / Premium Details */
+        .premium-details {
+            background-color: var(--bg-offwhite);
+            padding: 120px 0;
+        }
+
+        .premium-details .container {
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .premium-details h2 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+        }
+
+        .premium-details .lead {
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            margin-bottom: 60px;
+            font-weight: 300;
+        }
+
+        .details-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            text-align: left;
+        }
+
+        .detail-item {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+
+        .detail-item h4 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .detail-item p {
+            font-size: 0.95rem;
+            color: var(--gray-light);
+            font-weight: 300;
+        }
+
+        /* Colors (Zara Home Style) */
+        .gallery {
+            padding: 120px 0;
+            background: var(--bg-white);
+        }
+        
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .gallery-header h2 {
+            font-size: 2.5rem;
+        }
+
+        .colors-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .color-item {
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .color-img-wrap {
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: var(--bg-offwhite);
+        }
+
+        .color-img {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .color-item:hover .color-img {
+            transform: scale(1.05);
+        }
+
+        .color-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-dark);
+        }
+
+        /* Specs & Tech */
+        .specs-section {
+            padding: 120px 0;
+            background: var(--bg-offwhite);
+        }
+
+        .specs-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .specs-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .specs-table tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .specs-table tr:first-child {
+            border-top: 1px solid var(--border);
+        }
+
+        .specs-table td {
+            padding: 24px 0;
+            font-size: 0.95rem;
+        }
+
+        .specs-table td:first-child {
+            color: var(--gray-light);
+            width: 40%;
+        }
+
+        .specs-table td:last-child {
+            font-weight: 500;
+            text-align: right;
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 120px 0;
+        }
+        
+        .faq .container {
+            max-width: 700px;
+        }
+
+        .faq h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+        }
+
+        .faq-item {
+            margin-bottom: 40px;
+        }
+
+        .faq-item h4 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .faq-item p {
+            color: var(--gray-light);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* Footer CTA */
+        .footer-cta {
+            padding: 120px 0;
+            text-align: center;
+            background: var(--black);
+            color: #fff;
+        }
+
+        .footer-cta h2 {
+            font-size: 3rem;
+            margin-bottom: 24px;
+        }
+
+        .footer-cta p {
+            color: var(--gray-light);
+            max-width: 500px;
+            margin: 0 auto 40px;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 40px;
+            background: var(--bg-white);
+            color: var(--black);
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .ed-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .ed-grid.reverse {
+                direction: ltr;
+            }
+            .ed-image {
+                height: 400px;
+            }
+            .colors-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .details-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-image-container {
+                height: 50vh;
+            }
+            .premium-details h2, .footer-cta h2 {
+                font-size: 2rem;
+            }
+            .editorial, .premium-details, .gallery, .specs-section, .faq, .footer-cta {
+                padding: 80px 0;
+            }
+            .specs-table td {
+                padding: 16px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Promo Banner -->
+    <div class="promo-banner">
+        Desconto Progressivo: <span>Leve mais unidades, pague menos.</span>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container fade-in">
+            <span class="hero-tag">Coleção 2026</span>
+            <h1 class="hero-title">A moldura perfeita para<br><em>memórias atemporais.</em></h1>
+            <p class="hero-subtitle">Design minimalista. MDF de alta densidade. Um toque de sofisticação para a sua casa.</p>
+        </div>
+        
+        <div class="hero-image-container fade-in">
+            <img src="https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?auto=format&fit=crop&w=1600&q=80" alt="Porta-retrato em ambiente minimalista" class="hero-image" id="heroImg">
+        </div>
+    </section>
+
+    <!-- Editorial Sections -->
+    <section class="editorial">
+        <div class="container">
+            
+            <div class="ed-grid">
+                <div class="ed-image-wrap fade-in">
+                    <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80" alt="Design Minimalista" class="ed-image">
+                </div>
+                <div class="ed-content fade-in">
+                    <span class="ed-number">01.</span>
+                    <h2 class="ed-title">Design<br>Minimalista.</h2>
+                    <p class="ed-desc">Esqueça os excessos. Projetamos linhas retas e limpas que emolduram a sua fotografia sem roubar o protagonismo. É a união entre a arte que você exibe e o ambiente que você vive.</p>
+                </div>
+            </div>
+
+            <div class="ed-grid reverse">
+                <div class="ed-image-wrap fade-in">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Madeira Premium" class="ed-image">
+                </div>
+                <div class="ed-content fade-in">
+                    <span class="ed-number">02.</span>
+                    <h2 class="ed-title">Construído em<br>MDF Premium.</h2>
+                    <p class="ed-desc">Estrutura sólida, robusta e resistente ao tempo. Cada peça recebe um tratamento rigoroso para garantir uma textura impecável e proteção frontal que preserva a integridade das suas fotos contra luz e poeira.</p>
+                </div>
+            </div>
+
+            <div class="ed-grid">
+                <div class="ed-image-wrap fade-in">
+                    <img src="https://images.unsplash.com/photo-1594498653385-d5172c532c00?auto=format&fit=crop&w=800&q=80" alt="Versatilidade" class="ed-image">
+                </div>
+                <div class="ed-content fade-in">
+                    <span class="ed-number">03.</span>
+                    <h2 class="ed-title">Pensado para<br>a sua parede e mesa.</h2>
+                    <p class="ed-desc">A versatilidade é fundamental. Equipado com gravata traseira de alta resistência e penduradores de parede integrados, ele se adapta à sua decoração, seja na horizontal ou vertical.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Premium Details -->
+    <section class="premium-details">
+        <div class="container">
+            <h2 class="fade-in">A diferença está nos detalhes.</h2>
+            <p class="lead fade-in">Uma peça desenvolvida com engenharia de móveis finos e acabamento de alta costura.</p>
+            
+            <div class="details-list">
+                <div class="detail-item fade-in">
+                    <h4>Acabamento Impecável</h4>
+                    <p>Revestimento liso e fosco, livre de imperfeições, que absorve suavemente a luz do ambiente.</p>
+                </div>
+                <div class="detail-item fade-in">
+                    <h4>Fechamento Traseiro Flexível</h4>
+                    <p>Substitua suas fotos em segundos sem machucar as mãos, através do nosso sistema de flex-points maleáveis.</p>
+                </div>
+                <div class="detail-item fade-in">
+                    <h4>Pronto para Uso</h4>
+                    <p>Não é necessário comprar peças adicionais. Os penduradores (triângulos) e a gravata de mesa já vão perfeitamente montados.</p>
+                </div>
+                <div class="detail-item fade-in">
+                    <h4>Dimensão Ideal</h4>
+                    <p>Projetado milimetricamente para a proporção clássica de 20x25 cm, o tamanho perfeito para dar peso visual às suas maiores memórias.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Color Gallery -->
+    <section class="gallery">
+        <div class="container">
+            <div class="gallery-header fade-in">
+                <h2>Cores Atemporais.</h2>
+                <p class="hero-tag" style="margin-top: 10px;">Selecione a sua variação na loja.</p>
+            </div>
+            
+            <div class="colors-grid">
+                <div class="color-item fade-in">
+                    <div class="color-img-wrap">
+                        <img src="https://placehold.co/400x500/111111/111111.png" alt="Preto" class="color-img">
+                    </div>
+                    <div class="color-name">Preto Absoluto</div>
+                </div>
+                <div class="color-item fade-in">
+                    <div class="color-img-wrap">
+                        <img src="https://placehold.co/400x500/fcfcfc/fcfcfc.png" alt="Branco" class="color-img" style="border: 1px solid #eee;">
+                    </div>
+                    <div class="color-name">Branco Neve</div>
+                </div>
+                <div class="color-item fade-in">
+                    <div class="color-img-wrap">
+                        <img src="https://placehold.co/400x500/4a3728/4a3728.png" alt="Tabaco" class="color-img">
+                    </div>
+                    <div class="color-name">Tabaco Escuro</div>
+                </div>
+                <div class="color-item fade-in">
+                    <div class="color-img-wrap">
+                        <img src="https://placehold.co/400x500/c4a482/c4a482.png" alt="Carvalho" class="color-img">
+                    </div>
+                    <div class="color-name">Carvalho Claro</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specs -->
+    <section class="specs-section">
+        <div class="container">
+            <div class="specs-wrapper fade-in">
+                <div class="specs-header">
+                    <h2>Especificações</h2>
+                </div>
+                <table class="specs-table">
+                    <tr>
+                        <td>Tamanho da Foto</td>
+                        <td>20 x 25 cm</td>
+                    </tr>
+                    <tr>
+                        <td>Material da Estrutura</td>
+                        <td>MDF Alta Densidade</td>
+                    </tr>
+                    <tr>
+                        <td>Proteção Frontal</td>
+                        <td>Vidro ou Acetato (consultar variação)</td>
+                    </tr>
+                    <tr>
+                        <td>Fixação Parede</td>
+                        <td>Triângulos de metal (Horizontal e Vertical)</td>
+                    </tr>
+                    <tr>
+                        <td>Apoio Mesa</td>
+                        <td>Gravata em MDF embutida</td>
+                    </tr>
+                    <tr>
+                        <td>Conteúdo da Embalagem</td>
+                        <td>01x Porta-retrato 20x25</td>
+                    </tr>
+                    <tr>
+                        <td>Cuidados</td>
+                        <td>Limpar a seco ou com pano levemente úmido.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <div class="container fade-in">
+            <h2>Perguntas Frequentes</h2>
+            
+            <div class="faq-item">
+                <h4>Vocês entregam para o meu CEP?</h4>
+                <p>Sim. Nossa logística atende todo o território nacional. A peça viaja em uma embalagem com reforço triplo (plástico bolha duplo, cantoneiras e caixa de papelão grossa), garantindo a integridade até a sua porta.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>O produto tem garantia?</h4>
+                <p>Oferecemos garantia legal contra defeitos de fabricação. Nossa inspeção de qualidade é extremamente rigorosa antes do envio.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>E se a transportadora danificar o produto?</h4>
+                <p>Mesmo com toda a proteção, acidentes raramente ocorrem. Se acontecer, basta nos enviar uma foto do produto via chat no mesmo dia do recebimento e enviaremos uma peça de reposição imediatamente, sem burocracia.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-cta">
+        <div class="container fade-in">
+            <h2 class="serif">Eleve o nível da sua decoração.</h2>
+            <p>Role a tela para cima, selecione a cor ideal para o seu ambiente e garanta suas peças com desconto no kit.</p>
+            <a href="#" class="btn" onclick="window.scrollTo(0,0); return false;">Selecionar Cor</a>
+        </div>
+    </footer>
+
+    <!-- Animations Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hero image scale effect
+            setTimeout(() => {
+                document.getElementById('heroImg').classList.add('loaded');
+            }, 100);
+
+            // Intersection Observer for fade-in animations
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in').forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>
