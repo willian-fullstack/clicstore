@@ -1570,7 +1570,7 @@
 
     roomGroup.add(lampGroup);
 
-    // --- ARCHITECTURAL 3D DIMENSION LINES (DYNAMIC SIZE SORTING GUARANTEES 100% CORRECT LABELS) ---
+    // --- ARCHITECTURAL 3D DIMENSION LINES (NO EXTENSION LINES & COMPRIMENTO ON RIGHT SIDE) ---
     const dimGroup = new THREE.Group();
     scene.add(dimGroup);
 
@@ -1591,11 +1591,7 @@
       const start = p1.clone().add(offset);
       const end = p2.clone().add(offset);
 
-      // Extension lines
-      points.push(p1.x, p1.y, p1.z, start.x, start.y, start.z);
-      points.push(p2.x, p2.y, p2.z, end.x, end.y, end.z);
-
-      // Main dimension line
+      // MAIN DIMENSION LINE ONLY (No extension lines connecting object to arrow!)
       points.push(start.x, start.y, start.z, end.x, end.y, end.z);
 
       const geo = new THREE.BufferGeometry();
@@ -1666,16 +1662,18 @@
         } else if (axisName === 'y') {
           p1.set(bbox.min.x, bbox.min.y, bbox.max.z);
           p2.set(bbox.min.x, bbox.max.y, bbox.max.z);
-        } else {
-          p1.set(bbox.min.x - 0.03, bbox.min.y, bbox.min.z);
-          p2.set(bbox.min.x - 0.03, bbox.min.y, bbox.max.z);
+        } else { // z axis (length along Z)
+          // Position on the RIGHT SIDE of the baseboard (+X side)
+          p1.set(bbox.max.x, bbox.min.y, bbox.min.z);
+          p2.set(bbox.max.x, bbox.min.y, bbox.max.z);
         }
 
         return drawDimensionSegment(p1, p2, offsetVector);
       }
 
-      // Draw COMPRIMENTO strictly along the LARGEST dimension line
-      const cDim = makeAxisSegment(lengthAxis, new THREE.Vector3(0, -0.03, 0.05));
+      // Draw COMPRIMENTO strictly along the LARGEST dimension line on the RIGHT SIDE (+X offset when along Z, or +Z offset when along X)
+      const cOffset = (lengthAxis === 'z') ? new THREE.Vector3(0.06, 0, 0) : new THREE.Vector3(0, -0.03, 0.06);
+      const cDim = makeAxisSegment(lengthAxis, cOffset);
 
       // Draw ESPESSURA strictly along the SMALLEST dimension line
       const tDim = makeAxisSegment(thicknessAxis, new THREE.Vector3(0, 0, 0));
@@ -2168,7 +2166,7 @@
 
       if (dimPoints) {
         projectToBadge(dimPoints.hPoint, hBadge);
-        projectToBadge(dimPoints.cPoint, lBadge); // COMPRIMENTO (90 cm) -> LARGEST DIMENSION LINE!
+        projectToBadge(dimPoints.cPoint, lBadge); // COMPRIMENTO (90 cm) -> LARGEST DIMENSION LINE ON RIGHT SIDE!
         projectToBadge(dimPoints.tPoint, tBadge); // ESPESSURA (9 mm) -> SMALLEST DIMENSION LINE!
 
         if (lampBadge) {
