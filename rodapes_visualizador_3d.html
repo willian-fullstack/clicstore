@@ -2053,53 +2053,81 @@
 
       if (state.realisticRender) {
         if (state.environment === 'room') {
-          // REALISTIC INTERIOR ROOM ILLUMINATION:
-          scene.environment = pbrStudioTexture;
-          renderer.toneMappingExposure = 0.50 + 0.40 * intensityFactor;
+          // ============================================================
+          // MODO ROOM: IBL DESATIVADO - SOMENTE LUZES DIRETAS CONTROLAM
+          // ============================================================
+          // CRITICAL FIX: sem scene.environment, os materiais GLB respondem
+          // 100% às luzes diretas e o slider funciona perfeitamente!
+          scene.environment = null;
+          renderer.toneMappingExposure = 0.85 + 0.40 * intensityFactor;
 
-          // Ambient keeps room from going pitch black at 0%
-          ambientLight.intensity = 0.12 + 0.18 * intensityFactor;
-          ambientLight.color.setHex(0xffeedd); // Warm ambient tint
 
-          // Main light now comes from ABOVE AND FRONT (not behind!) so top/front faces of baseboard get lit
-          mainLight.position.set(1.0, 3.0, 6.0); // Z+ = in front of wall, pointing toward wall
-          mainLight.intensity = 0.15 + 0.65 * intensityFactor;
+          // Zerar envMapIntensity em TODOS materiais carregados do GLB
+          // para garantir que o HDRI não interfira na resposta às luzes diretas
+          mainGroup.traverse((c) => {
+            if (c.isMesh && c.material) {
+              const mats = Array.isArray(c.material) ? c.material : [c.material];
+              mats.forEach(m => { m.envMapIntensity = 0; });
+            }
+          });
+          cornerBarGroup.traverse((c) => {
+            if (c.isMesh && c.material) {
+              const mats = Array.isArray(c.material) ? c.material : [c.material];
+              mats.forEach(m => { m.envMapIntensity = 0; });
+            }
+          });
 
-          // Fill from side (left)
-          fillLight.position.set(-4, 2, 3); // Also from front side now!
-          fillLight.intensity = 0.08 + 0.30 * intensityFactor;
+          // Luz ambiente mínima: quarto não pode ter luz magica de fundo
+          ambientLight.intensity = 0.05 + 0.15 * intensityFactor;
+          ambientLight.color.setHex(0xffeedd);
 
-          // Rim light behind (gives depth rim to edges of baseboard)
-          rimLight.intensity = 0.05 + 0.10 * intensityFactor;
-
-          // FRONT LIGHT — KEY FIX! Shines from camera direction straight onto baseboard FRONT FACE!
-          // Scales 0.20 (min) → 1.80 (max) with slider so face always gets illuminated!
+          // LUZ FRONTAL (KEY FIX): vem de Z+ direto na face frontal do rodapé
+          // Essa é a luz principal que ilumina a face virada pra câmera!
           frontLight.position.set(0.5, 0.8, 6.0);
           frontLight.color.copy(col);
-          frontLight.intensity = 0.20 + 1.60 * intensityFactor;
+          frontLight.intensity = 0.30 + 2.50 * intensityFactor; // 0.30 a 2.80!
+
+          // LUZ PRINCIPAL: de cima-frente para iluminar o topo do rodapé
+          mainLight.position.set(1.0, 4.0, 5.0);
+          mainLight.intensity = 0.10 + 1.20 * intensityFactor;
+
+          // LUZ LATERAL esquerda: preenche sombras do canto
+          fillLight.position.set(-5, 2, 3);
+          fillLight.intensity = 0.05 + 0.40 * intensityFactor;
+          fillLight.color.copy(col);
+
+          // Rim atrás: silhueta do rodapé
+          rimLight.intensity = 0.02 + 0.08 * intensityFactor;
 
           lampGroup.visible = true;
-
-          // Lamp warm point light aimed at baseboard face
-          lampPointLight.intensity = 50.0 * intensityFactor;
-          lampSpotLight.intensity = 70.0 * intensityFactor;
-          lampStemLight.intensity = 12.0 * intensityFactor;
-          shadeMat.emissiveIntensity = 3.5 * intensityFactor;
+          lampPointLight.intensity = 40.0 * intensityFactor;
+          lampSpotLight.intensity = 60.0 * intensityFactor;
+          lampStemLight.intensity = 10.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 3.0 * intensityFactor;
 
         } else {
-          // Studio environment mode (Bright PBR HDRI studio)
+          // MODO ESTÚDIO: IBL ativado para belo HDRI de estúdio
           scene.environment = pbrStudioTexture;
           renderer.toneMappingExposure = 1.2;
+
+          // Restaurar envMapIntensity padrão nos materiais
+          mainGroup.traverse((c) => {
+            if (c.isMesh && c.material) {
+              const mats = Array.isArray(c.material) ? c.material : [c.material];
+              mats.forEach(m => { m.envMapIntensity = 1.0; });
+            }
+          });
 
           ambientLight.intensity = 0.95;
           ambientLight.color.setHex(0xffffff);
           mainLight.intensity = 2.2;
           mainLight.position.set(3, 6, 4);
           fillLight.position.set(-4, 3, -2);
+          fillLight.color.setHex(0x90b0ff);
           fillLight.intensity = 0.9;
           rimLight.intensity = 1.4;
-          frontLight.intensity = 1.2; // Studio also needs front fill
-          frontLight.color.setHex(0xffffff);
+          frontLight.intensity = 1.0;
+          frontLight.color.setHex(0xfff8ee);
 
           lampGroup.visible = false;
           lampPointLight.intensity = 0;
@@ -2107,18 +2135,26 @@
           lampStemLight.intensity = 0;
         }
       } else {
-        // STANDARD RENDER MODE (RENDER PADRÃO):
+        // RENDER PADRÃO: IBL desativado, luzes simples estúdio
         scene.environment = null;
         renderer.toneMappingExposure = 1.2;
+
+        mainGroup.traverse((c) => {
+          if (c.isMesh && c.material) {
+            const mats = Array.isArray(c.material) ? c.material : [c.material];
+            mats.forEach(m => { m.envMapIntensity = 0; });
+          }
+        });
 
         ambientLight.intensity = 0.95;
         ambientLight.color.setHex(0xffffff);
         mainLight.intensity = 2.2;
         mainLight.position.set(3, 6, 4);
         fillLight.position.set(-4, 3, -2);
+        fillLight.color.setHex(0x90b0ff);
         fillLight.intensity = 0.9;
         rimLight.intensity = 1.4;
-        frontLight.intensity = 1.0; // Standard mode front fill
+        frontLight.intensity = 1.0;
         frontLight.color.setHex(0xffffff);
 
         lampGroup.visible = false;
