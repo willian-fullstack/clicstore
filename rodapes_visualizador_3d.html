@@ -1530,6 +1530,13 @@
     rimLight.position.set(0, 4, -4);
     scene.add(rimLight);
 
+    // FRONT FILL LIGHT — aponta da direção da câmera DIRETO para a face frontal do rodapé!
+    // Isso resolve definitivamente o problema de face frontal escura!
+    const frontLight = new THREE.DirectionalLight(0xfff8ee, 2.0);
+    frontLight.position.set(0.5, 1.0, 5); // Vem de Z+ (câmera) e ilumina a FACE FRONTAL!
+    frontLight.castShadow = false;
+    scene.add(frontLight);
+
     // --- ENVIRONMENT ---
     const studioGroup = new THREE.Group();
     scene.add(studioGroup);
@@ -2048,24 +2055,36 @@
         if (state.environment === 'room') {
           // REALISTIC INTERIOR ROOM ILLUMINATION:
           scene.environment = pbrStudioTexture;
-          renderer.toneMappingExposure = 0.50 + 0.40 * intensityFactor; // Exposure increases dynamically!
+          renderer.toneMappingExposure = 0.50 + 0.40 * intensityFactor;
 
-          // Balanced Ambient and Main Lights
-          ambientLight.intensity = 0.08 + 0.22 * intensityFactor;
-          ambientLight.color.setHex(0xffffff);
+          // Ambient keeps room from going pitch black at 0%
+          ambientLight.intensity = 0.12 + 0.18 * intensityFactor;
+          ambientLight.color.setHex(0xffeedd); // Warm ambient tint
 
-          mainLight.intensity = 0.10 + 0.50 * intensityFactor;
-          mainLight.position.set(2, 4, 3);
-          fillLight.intensity = 0.05 + 0.25 * intensityFactor;
-          rimLight.intensity = 0.05 + 0.25 * intensityFactor;
+          // Main light now comes from ABOVE AND FRONT (not behind!) so top/front faces of baseboard get lit
+          mainLight.position.set(1.0, 3.0, 6.0); // Z+ = in front of wall, pointing toward wall
+          mainLight.intensity = 0.15 + 0.65 * intensityFactor;
+
+          // Fill from side (left)
+          fillLight.position.set(-4, 2, 3); // Also from front side now!
+          fillLight.intensity = 0.08 + 0.30 * intensityFactor;
+
+          // Rim light behind (gives depth rim to edges of baseboard)
+          rimLight.intensity = 0.05 + 0.10 * intensityFactor;
+
+          // FRONT LIGHT — KEY FIX! Shines from camera direction straight onto baseboard FRONT FACE!
+          // Scales 0.20 (min) → 1.80 (max) with slider so face always gets illuminated!
+          frontLight.position.set(0.5, 0.8, 6.0);
+          frontLight.color.copy(col);
+          frontLight.intensity = 0.20 + 1.60 * intensityFactor;
 
           lampGroup.visible = true;
 
-          // Lamp lights beaming DIRECTLY ONTO THE BASEBOARD & WALL HARMONIOUSLY!
-          lampPointLight.intensity = 60.0 * intensityFactor;
-          lampSpotLight.intensity = 80.0 * intensityFactor;
-          lampStemLight.intensity = 15.0 * intensityFactor;
-          shadeMat.emissiveIntensity = 4.0 * intensityFactor;
+          // Lamp warm point light aimed at baseboard face
+          lampPointLight.intensity = 50.0 * intensityFactor;
+          lampSpotLight.intensity = 70.0 * intensityFactor;
+          lampStemLight.intensity = 12.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 3.5 * intensityFactor;
 
         } else {
           // Studio environment mode (Bright PBR HDRI studio)
@@ -2076,8 +2095,11 @@
           ambientLight.color.setHex(0xffffff);
           mainLight.intensity = 2.2;
           mainLight.position.set(3, 6, 4);
+          fillLight.position.set(-4, 3, -2);
           fillLight.intensity = 0.9;
           rimLight.intensity = 1.4;
+          frontLight.intensity = 1.2; // Studio also needs front fill
+          frontLight.color.setHex(0xffffff);
 
           lampGroup.visible = false;
           lampPointLight.intensity = 0;
@@ -2093,8 +2115,11 @@
         ambientLight.color.setHex(0xffffff);
         mainLight.intensity = 2.2;
         mainLight.position.set(3, 6, 4);
+        fillLight.position.set(-4, 3, -2);
         fillLight.intensity = 0.9;
         rimLight.intensity = 1.4;
+        frontLight.intensity = 1.0; // Standard mode front fill
+        frontLight.color.setHex(0xffffff);
 
         lampGroup.visible = false;
         lampPointLight.intensity = 0;
