@@ -1712,6 +1712,7 @@
           const isCornerMiter = (state.cornerMode === 'miter');
           if (isCornerMiter) {
             state.cutLeft45 = true;
+            document.getElementById('toggle-cut-left').checked = true;
           }
 
           // 1. Apply 45° Miter Cut Vertex Shear BEFORE rotation/position calculations
@@ -2017,6 +2018,12 @@
         if (state.environment === 'room') {
           studioGroup.visible = false;
           roomGroup.visible = true;
+
+          // AUTO-ENABLE 45° MITER CUTS ON BOTH ENDS BY DEFAULT WHEN ROOM ENVIRONMENT IS SELECTED!
+          state.cutLeft45 = true;
+          state.cutRight45 = true;
+          document.getElementById('toggle-cut-left').checked = true;
+          document.getElementById('toggle-cut-right').checked = true;
         } else {
           studioGroup.visible = true;
           roomGroup.visible = false;
@@ -2033,9 +2040,14 @@
         card.classList.add('active');
         state.cornerMode = card.getAttribute('data-corner');
         
-        // Auto activate room environment when corner installation is selected
+        // Auto activate room environment & 45° miter cuts on both ends when corner installation is selected
         if (state.cornerMode === 'miter') {
           state.environment = 'room';
+          state.cutLeft45 = true;
+          state.cutRight45 = true;
+          document.getElementById('toggle-cut-left').checked = true;
+          document.getElementById('toggle-cut-right').checked = true;
+
           document.querySelectorAll('[data-env]').forEach(c => c.classList.remove('active'));
           document.querySelector('[data-env="room"]').classList.add('active');
           studioGroup.visible = false;
