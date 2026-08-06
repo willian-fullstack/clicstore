@@ -953,6 +953,10 @@
   <div id="measure-length" class="measurement-badge" style="opacity: 0;">
     <i class="ri-expand-horizontal-line" style="color:var(--abs-dourado-claro);"></i> Barra: <span id="val-length">90 cm</span>
   </div>
+  <!-- 3D Callout Overlay for the Floor Lamp when Enabled -->
+  <div id="measure-lamp" class="measurement-badge" style="opacity: 0;">
+    <i class="ri-lightbulb-line" style="color:var(--abs-dourado-claro);"></i> Luminária: <span id="val-lamp">H: 1.40 m · Cúpula: 36 cm</span>
+  </div>
 
   <!-- Top Header Navigation -->
   <header class="top-header">
@@ -1153,6 +1157,25 @@
               <i class="ri-expand-horizontal-line"></i> Comprimento
             </div>
             <span class="dim-value" id="info-l">90.0 cm</span>
+          </div>
+        </div>
+
+        <!-- DIMENSÕES DA LUMINÁRIA DE CANTO (QUANDO HABILITADA) -->
+        <div id="lamp-dim-card" class="dimensions-card" style="margin-top: 8px; display: none;">
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-lightbulb-line"></i> Altura da Luminária
+            </div>
+            <span class="dim-value">1.40 m</span>
+          </div>
+
+          <div class="dim-divider"></div>
+
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-ruler-2-line"></i> Diâmetro da Cúpula
+            </div>
+            <span class="dim-value">36 cm</span>
           </div>
         </div>
       </div>
@@ -1966,6 +1989,12 @@
           document.getElementById('info-t').innerText = `${(t * 1000).toFixed(0)} mm`;
           document.getElementById('info-l').innerText = `${(l * 100).toFixed(1)} cm`;
 
+          // Show/Hide Lamp Card in Medidas Tab dynamically
+          const lampCard = document.getElementById('lamp-dim-card');
+          if (lampCard) {
+            lampCard.style.display = (state.realisticRender && state.environment === 'room') ? 'flex' : 'none';
+          }
+
           // Camera focus target
           if (state.environment === 'room') {
             if (isCornerMiter) {
@@ -1990,11 +2019,13 @@
       const hBadge = document.getElementById('measure-height');
       const tBadge = document.getElementById('measure-thickness');
       const lBadge = document.getElementById('measure-length');
+      const lampBadge = document.getElementById('measure-lamp');
 
       if (!state.showMeasures || state.multiModelMode || state.loadedModels.length === 0) {
         hBadge.style.opacity = 0;
         tBadge.style.opacity = 0;
         lBadge.style.opacity = 0;
+        if (lampBadge) lampBadge.style.opacity = 0;
         return;
       }
 
@@ -2012,6 +2043,19 @@
       projectToBadge(pHeight, hBadge);
       projectToBadge(pThickness, tBadge);
       projectToBadge(pLength, lBadge);
+
+      // Lamp callout badge 3D projection (ONLY DISPLAYED WHEN LAMP IS ENABLED & VISIBLE!)
+      if (lampBadge) {
+        if (state.realisticRender && state.environment === 'room' && lampGroup.visible) {
+          const lampWorldPos = new THREE.Vector3();
+          lampGroup.getWorldPosition(lampWorldPos);
+          // Position callout floating gracefully at the top of the lamp shade (Y = 1.45m)
+          const pLamp = new THREE.Vector3(lampWorldPos.x, 1.45, lampWorldPos.z + 0.12);
+          projectToBadge(pLamp, lampBadge);
+        } else {
+          lampBadge.style.opacity = 0;
+        }
+      }
     }
 
     function projectToBadge(vector3D, element) {
