@@ -1496,18 +1496,18 @@
     baseMesh.receiveShadow = true;
     lampGroup.add(baseMesh);
 
-    // 2. Vertical Brass Stem
+    // 2. Vertical Brass Stem (Straight up to Y = 1.4m)
     const stemMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 1.4, 16), lampBrassMat);
     stemMesh.position.y = 0.71;
     stemMesh.castShadow = true;
     lampGroup.add(stemMesh);
 
-    // 3. Brass Joint Ring
-    const jointMesh = new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 16), lampBrassMat);
+    // 3. Brass Joint Ring (Top of stem)
+    const jointMesh = new THREE.Mesh(new THREE.SphereGeometry(0.018, 16, 16), lampBrassMat);
     jointMesh.position.y = 1.41;
     lampGroup.add(jointMesh);
 
-    // 4. Lamp Shade (Abajur / Luminária de Canto)
+    // 4. Elegant Straight Lamp Shade (Cúpula Retinha e Alinhada Centrada no Haste)
     const shadeMat = new THREE.MeshStandardMaterial({
       color: 0xfff4e5,
       emissive: new THREE.Color(state.lampColor),
@@ -1515,20 +1515,20 @@
       roughness: 0.2,
       side: THREE.DoubleSide
     });
-    const shadeMesh = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.25, 32, 1, true), shadeMat);
-    shadeMesh.position.set(0, 1.32, 0.08);
-    shadeMesh.rotation.x = Math.PI / 6; // Angled slightly towards the baseboard corner!
+    const shadeMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.18, 0.26, 32, 1, true), shadeMat);
+    shadeMesh.position.set(0, 1.30, 0); // PERFECTLY CENTERED ON POLE! NO TILT!
+    shadeMesh.castShadow = true;
     lampGroup.add(shadeMesh);
 
-    // 5. Emissive Bulb Core
+    // 5. Emissive Bulb Core (Inside shade)
     const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.038, 16, 16), bulbMat);
-    bulbMesh.position.set(0, 1.30, 0.08);
+    bulbMesh.position.set(0, 1.28, 0);
     lampGroup.add(bulbMesh);
 
-    // 6. THREE.JS PHYSICAL PBR LIGHT SOURCES (Decay = 2.0 Physical Inverse Square Law)
+    // 6. THREE.JS PHYSICAL PBR LIGHT SOURCES
     const lampPointLight = new THREE.PointLight(new THREE.Color(state.lampColor), 15.0, 8.0, 2.0);
-    lampPointLight.position.set(0, 1.28, 0.08);
+    lampPointLight.position.set(0, 1.25, 0);
     lampPointLight.castShadow = true;
     lampPointLight.shadow.mapSize.width = 2048;
     lampPointLight.shadow.mapSize.height = 2048;
@@ -1536,12 +1536,12 @@
     lampGroup.add(lampPointLight);
 
     const lampSpotLight = new THREE.SpotLight(new THREE.Color(state.lampColor), 25.0, 10.0, Math.PI / 2.2, 0.4, 2.0);
-    lampSpotLight.position.set(0, 1.28, 0.08);
+    lampSpotLight.position.set(0, 1.25, 0);
     lampSpotLight.castShadow = true;
     lampGroup.add(lampSpotLight);
 
     const spotTarget = new THREE.Object3D();
-    spotTarget.position.set(-0.35, 0.05, -0.35);
+    spotTarget.position.set(0, 0, 0);
     lampGroup.add(spotTarget);
     lampSpotLight.target = spotTarget;
 
@@ -1557,31 +1557,46 @@
       lampSpotLight.color.copy(col);
       shadeMat.emissive.copy(col);
 
+      // Realistic Render (PBR HDRI Studio) vs Standard Render
       if (state.realisticRender) {
         scene.environment = pbrStudioTexture;
-      }
 
-      if (state.environment === 'room') {
-        // Balanced ambient light so PBR textures (wood grain, white gloss, MDF) stay 100% visible and vivid!
-        ambientLight.intensity = 0.6;
-        ambientLight.color.setHex(0xffffff);
-        mainLight.intensity = 1.0;
-        fillLight.intensity = 0.4;
-        rimLight.intensity = 0.5;
+        if (state.environment === 'room') {
+          // Balanced ambient light so PBR textures (wood grain, white gloss, MDF) stay 100% visible and vivid!
+          ambientLight.intensity = 0.6;
+          ambientLight.color.setHex(0xffffff);
+          mainLight.intensity = 1.0;
+          fillLight.intensity = 0.4;
+          rimLight.intensity = 0.5;
 
-        lampGroup.visible = true;
+          // ABAJUR / LAMP VISIBLE IN REALISTIC ROOM MODE!
+          lampGroup.visible = true;
 
-        lampPointLight.intensity = 15.0 * intensityFactor;
-        lampSpotLight.intensity = 25.0 * intensityFactor;
-        shadeMat.emissiveIntensity = 2.0 * intensityFactor;
+          lampPointLight.intensity = 15.0 * intensityFactor;
+          lampSpotLight.intensity = 25.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 2.0 * intensityFactor;
+        } else {
+          // Studio environment mode
+          ambientLight.intensity = 0.95;
+          ambientLight.color.setHex(0xffffff);
+          mainLight.intensity = 2.2;
+          fillLight.intensity = 0.9;
+          rimLight.intensity = 1.4;
+
+          lampGroup.visible = false;
+          lampPointLight.intensity = 0;
+          lampSpotLight.intensity = 0;
+        }
       } else {
-        // BRIGHT NEUTRAL STUDIO PRESENTATION MODE
+        // STANDARD RENDER MODE (RENDER PADRÃO):
+        scene.environment = null;
         ambientLight.intensity = 0.95;
         ambientLight.color.setHex(0xffffff);
         mainLight.intensity = 2.2;
         fillLight.intensity = 0.9;
         rimLight.intensity = 1.4;
 
+        // HIDE ABAJUR / LAMP COMPLETELY IN RENDER PADRÃO!
         lampGroup.visible = false;
         lampPointLight.intensity = 0;
         lampSpotLight.intensity = 0;
@@ -1615,14 +1630,10 @@
       state.realisticRender = !state.realisticRender;
       const btn = document.getElementById('btn-toggle-render');
       if (state.realisticRender) {
-        scene.environment = pbrStudioTexture;
-        renderer.toneMappingExposure = 1.2;
         btn.classList.add('render-active');
         btn.innerHTML = '<i class="ri-sparkles-line"></i> Render Realista (Blender PBR)';
         showToast('Render Realista PBR ATIVADO!');
       } else {
-        scene.environment = null;
-        renderer.toneMappingExposure = 1.0;
         btn.classList.remove('render-active');
         btn.innerHTML = '<i class="ri-lightbulb-line"></i> Render Padrão';
         showToast('Render Padrão ATIVADO!');
