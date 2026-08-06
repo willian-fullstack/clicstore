@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClicStore 3D - Catálogo de Rodapés (.GLB Blender)</title>
+  <!-- Google Fonts & Remix Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #0b0d12;
+      --panel-bg: rgba(18, 22, 32, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --accent: #2563eb;
+      --accent-hover: #3b82f6;
+      --accent-glow: rgba(37, 99, 235, 0.4);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --card-bg: rgba(28, 34, 48, 0.65);
+      --card-hover: rgba(42, 50, 70, 0.85);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+    }
+
+    #webgl-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #0b0d12;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: opacity 0.5s ease;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Top Navigation Header */
+    .top-header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .brand-badge {
+      pointer-events: auto;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      pointer-events: auto;
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-action {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .btn-action:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.25);
+      transform: translateY(-2px);
+    }
+
+    .btn-action.primary {
+      background: linear-gradient(135deg, var(--accent), #1d4ed8);
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .btn-action.primary:hover {
+      background: linear-gradient(135deg, var(--accent-hover), #2563eb);
+    }
+
+    /* Left Control Sidebar */
+    .sidebar {
+      position: absolute;
+      top: 85px;
+      left: 20px;
+      bottom: 20px;
+      width: 390px;
+      z-index: 10;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      background: rgba(0,0,0,0.25);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 6px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn i {
+      font-size: 16px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      border: 1px solid var(--panel-border);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+    }
+
+    .tab-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* List of Blender Models */
+    .model-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .model-item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .model-item-card:hover {
+      background: var(--card-hover);
+      border-color: rgba(255,255,255,0.25);
+      transform: translateX(4px);
+    }
+
+    .model-item-card.active {
+      border-color: var(--accent);
+      background: rgba(37, 99, 235, 0.18);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .model-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .model-color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .model-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .model-type-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .model-item-card.active .model-type-tag {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Grid Options */
+    .grid-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .option-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .option-card:hover {
+      background: var(--card-hover);
+      border-color: rgba(255,255,255,0.25);
+      transform: translateY(-2px);
+    }
+
+    .option-card.active {
+      border-color: var(--accent);
+      background: rgba(37, 99, 235, 0.15);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    /* Switch toggle box styling */
+    .switch-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .switch-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .switch-icon {
+      font-size: 20px;
+      color: var(--accent-hover);
+      background: rgba(37, 99, 235, 0.15);
+      padding: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .switch-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .switch-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255,255,255,0.2);
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Dimensions Card */
+    .dimensions-card {
+      background: linear-gradient(135deg, rgba(30, 38, 54, 0.8), rgba(20, 25, 38, 0.8));
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
+      width: 100%;
+    }
+
+    .dim-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dim-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .dim-label i {
+      color: var(--accent-hover);
+      font-size: 16px;
+    }
+
+    .dim-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(255,255,255,0.06);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .dim-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      width: 100%;
+    }
+
+    /* Slider Input Styling */
+    .rot-slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--card-bg);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .rot-slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input[type="range"].rot-slider {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"].rot-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-hover);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Bottom Quick Toolbar */
+    .bottom-toolbar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 30px;
+      padding: 6px 12px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .tool-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: scale(1.1);
+    }
+
+    .tool-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* 3D Measurement Overlay Callouts */
+    .measurement-badge {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.88);
+      border: 1px solid var(--accent);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      z-index: 5;
+      transition: opacity 0.2s ease;
+    }
+
+    .measurement-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    /* Upload Dropzone Modal */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+    }
+
+    .dropzone {
+      border: 2px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone:hover {
+      border-color: var(--accent);
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: absolute;
+      top: 90px;
+      right: 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--accent);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    /* Color picker wrapper */
+    .color-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      width: 100%;
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      background: none;
+      flex-shrink: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: calc(100% - 40px);
+        height: 48%;
+        top: auto;
+        bottom: 75px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div class="loading-overlay" id="loading-screen">
+    <div class="spinner"></div>
+    <div style="font-weight: 700; font-size: 15px;">Carregando Modelos do Blender (rodape.glb)...</div>
+    <div style="font-size: 12px; color: var(--text-muted);">Importando malhas 3D e texturas PBR originais...</div>
+  </div>
+
+  <!-- WebGL Canvas Container -->
+  <div id="webgl-container"></div>
+
+  <!-- 3D Callout Overlays -->
+  <div id="measure-height" class="measurement-badge" style="opacity: 0;">
+    <i class="ri-height-line"></i> Altura: <span id="val-height">10.0 cm</span>
+  </div>
+  <div id="measure-thickness" class="measurement-badge" style="opacity: 0;">
+    <i class="ri-ruler-line"></i> Espessura: <span id="val-thickness">9 mm</span>
+  </div>
+  <div id="measure-length" class="measurement-badge" style="opacity: 0;">
+    <i class="ri-expand-horizontal-line"></i> Barra: <span id="val-length">90 cm</span>
+  </div>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="brand-badge">
+      <div class="brand-logo">3D</div>
+      <div>
+        <div class="brand-title">Catálogo 3D de Rodapés</div>
+        <div class="brand-subtitle">Modelos Blender Original (rodape.glb)</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-action primary" id="btn-toggle-side">
+        <i class="ri-grid-fill"></i> Exibir Todos Lado a Lado
+      </button>
+
+      <button class="btn-action" id="btn-open-upload">
+        <i class="ri-upload-cloud-line"></i> Outro Arquivo .GLB
+      </button>
+
+      <button class="btn-action primary" id="btn-take-photo">
+        <i class="ri-camera-lens-line"></i> Tirar Foto HD
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar Control Panel -->
+  <aside class="sidebar">
+    <nav class="sidebar-tabs">
+      <button class="tab-btn active" data-tab="models">
+        <i class="ri-box-3-line"></i> Rodapés (8)
+      </button>
+
+      <button class="tab-btn" data-tab="dimensions">
+        <i class="ri-ruler-2-line"></i> Medidas
+      </button>
+
+      <button class="tab-btn" data-tab="materials">
+        <i class="ri-palette-line"></i> Tinta Custom
+      </button>
+
+      <button class="tab-btn" data-tab="scene">
+        <i class="ri-sun-line"></i> Cenário
+      </button>
+    </nav>
+
+    <div class="sidebar-content">
+      
+      <!-- TAB 1: LISTA DE RODAPÉS DO BLENDER -->
+      <div class="tab-pane" id="tab-models">
+        <div class="section-title">Selecione o Modelo do Blender</div>
+        
+        <div class="model-list" id="model-list-container">
+          <!-- Dynamically populated from rodape.glb -->
+        </div>
+      </div>
+
+      <!-- TAB 2: DIMENSÕES E MEDIDAS -->
+      <div class="tab-pane" style="display:none;" id="tab-dimensions">
+        <div class="section-title">Visualização de Cotas 3D</div>
+
+        <div class="switch-container">
+          <div class="switch-info">
+            <div class="switch-icon"><i class="ri-ruler-line"></i></div>
+            <div>
+              <div class="switch-title">Exibir Cotas na Tela</div>
+              <div class="switch-desc">Linhas e crachás de medição 3D</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-measures" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- CONTROLE DE ROTAÇÃO MANUAL 3D -->
+        <div class="section-title" style="margin-top: 12px;">Girar Peça Manualmente 3D</div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="rot-slider-row">
+            <div class="rot-slider-header">
+              <span>Giro Eixo X (Cima / Baixo)</span>
+              <span id="lbl-rot-x" style="color:var(--accent-hover);">270°</span>
+            </div>
+            <input type="range" id="slider-rot-x" min="0" max="360" step="90" value="270" class="rot-slider">
+          </div>
+
+          <div class="rot-slider-row">
+            <div class="rot-slider-header">
+              <span>Giro Eixo Y (Frente / Trás)</span>
+              <span id="lbl-rot-y" style="color:var(--accent-hover);">180°</span>
+            </div>
+            <input type="range" id="slider-rot-y" min="0" max="360" step="90" value="180" class="rot-slider">
+          </div>
+
+          <div class="rot-slider-row">
+            <div class="rot-slider-header">
+              <span>Giro Eixo Z (Lado / Lado)</span>
+              <span id="lbl-rot-z" style="color:var(--accent-hover);">0°</span>
+            </div>
+            <input type="range" id="slider-rot-z" min="0" max="360" step="90" value="0" class="rot-slider">
+          </div>
+
+          <div style="display:flex; gap:6px;">
+            <button class="btn-action" id="btn-step-x" style="flex:1; padding:8px; font-size:11px; justify-content:center;">+90° X</button>
+            <button class="btn-action" id="btn-step-y" style="flex:1; padding:8px; font-size:11px; justify-content:center;">+90° Y</button>
+            <button class="btn-action" id="btn-step-z" style="flex:1; padding:8px; font-size:11px; justify-content:center;">+90° Z</button>
+            <button class="btn-action" id="btn-reset-rot" style="padding:8px; font-size:11px; justify-content:center;" title="Resetar Rotação Padrão"><i class="ri-refresh-line"></i></button>
+          </div>
+        </div>
+
+        <!-- CONTROLE DE CORTE 45° MEIA ESQUADRIA -->
+        <div class="section-title" style="margin-top: 12px;">Cortes 45° nas Bordas (Meia-Esquadria)</div>
+
+        <div class="switch-container">
+          <div class="switch-info">
+            <div class="switch-icon"><i class="ri-scissors-2-line"></i></div>
+            <div>
+              <div class="switch-title">Corte 45° na Ponta Esquerda</div>
+              <div class="switch-desc">Biselar borda esquerda em 45°</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-cut-left">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="switch-container">
+          <div class="switch-info">
+            <div class="switch-icon"><i class="ri-scissors-2-line"></i></div>
+            <div>
+              <div class="switch-title">Corte 45° na Ponta Direita</div>
+              <div class="switch-desc">Biselar borda direita em 45°</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-cut-right">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- PROFUNDIDADE E SENTIDO DO CORTE -->
+        <div class="rot-slider-row" style="margin-top: 4px;">
+          <div class="rot-slider-header">
+            <span>Profundidade do Bisel (45°)</span>
+            <span id="lbl-cut-depth" style="color:var(--accent-hover);">9 mm</span>
+          </div>
+          <input type="range" id="slider-cut-depth" min="2" max="50" step="1" value="9" class="rot-slider">
+        </div>
+
+        <div style="display:flex; gap:6px;">
+          <button class="btn-action" id="btn-flip-cut" style="flex:1; padding:8px; font-size:11px; justify-content:center;">
+            <i class="ri-arrow-left-right-line"></i> Inverter Sentido do Bisel
+          </button>
+        </div>
+
+        <div class="section-title" style="margin-top: 8px;">Dimensões Reais da Peça</div>
+
+        <div class="dimensions-card">
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-height-line"></i> Altura Real
+            </div>
+            <span class="dim-value" id="info-h">10.0 cm</span>
+          </div>
+
+          <div class="dim-divider"></div>
+
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-ruler-2-line"></i> Espessura Real
+            </div>
+            <span class="dim-value" id="info-t">9 mm</span>
+          </div>
+
+          <div class="dim-divider"></div>
+
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-expand-horizontal-line"></i> Comprimento
+            </div>
+            <span class="dim-value" id="info-l">90.0 cm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: CORES E ACABAMENTOS -->
+      <div class="tab-pane" style="display:none;" id="tab-materials">
+        <div class="section-title">Sobrepor Cor de Tinta</div>
+        
+        <div class="color-input-wrapper">
+          <input type="color" id="inp-custom-color" value="#ffffff">
+          <div>
+            <div style="font-size:13px; font-weight:700;">Seletor de Cor Customizada</div>
+            <div style="font-size:11px; color:var(--text-muted);">Pintar sobre o modelo 3D</div>
+          </div>
+        </div>
+
+        <button class="btn-action" id="btn-reset-mat" style="margin-top:4px; width:100%; justify-content:center;">
+          <i class="ri-refresh-line"></i> Restaurar Material Original do Blender
+        </button>
+      </div>
+
+      <!-- TAB 4: CENÁRIO & LUZ -->
+      <div class="tab-pane" style="display:none;" id="tab-scene">
+        <div class="section-title">Ambiente de Visualização</div>
+        <div class="grid-options">
+          <div class="option-card active" data-env="studio">
+            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center;">
+              <i class="ri-lightbulb-line" style="font-size:20px;"></i>
+            </div>
+            <span class="option-label">Estúdio Neutro</span>
+          </div>
+
+          <div class="option-card" data-env="room">
+            <div class="option-preview-box" style="background: linear-gradient(to bottom, #777 50%, #333 50%); display:flex; align-items:center; justify-content:center;">
+              <i class="ri-home-4-line" style="font-size:20px;"></i>
+            </div>
+            <span class="option-label">Parede + Piso Real</span>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 12px;">Modo de Instalação no Canto</div>
+        <div class="grid-options">
+          <div class="option-card active" data-corner="single">
+            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center;">
+              <i class="ri-subtract-line" style="font-size:20px;"></i>
+            </div>
+            <span class="option-label">Barra Reta</span>
+          </div>
+
+          <div class="option-card" data-corner="miter">
+            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center;">
+              <i class="ri-corner-down-right-line" style="font-size:20px; color:var(--accent-hover);"></i>
+            </div>
+            <span class="option-label">Canto 90° (Corte 45°)</span>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 12px;">Cor da Parede do Ambiente</div>
+        <div class="color-input-wrapper">
+          <input type="color" id="inp-wall-color" value="#dedede">
+          <div>
+            <div style="font-size:13px; font-weight:700;">Tinta da Parede</div>
+            <div style="font-size:11px; color:var(--text-muted);">Cor do ambiente</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- Bottom Quick Toolbar for Camera Presets -->
+  <div class="bottom-toolbar">
+    <button class="tool-btn active" title="Visão Perspectiva 3D" id="cam-iso">
+      <i class="ri-box-3-line"></i>
+    </button>
+    <button class="tool-btn" title="Corte Lateral (Espessura)" id="cam-side">
+      <i class="ri-side-bar-line"></i>
+    </button>
+    <button class="tool-btn" title="Vista Frontal (Altura)" id="cam-front">
+      <i class="ri-layout-top-line"></i>
+    </button>
+    <button class="tool-btn" title="Close do Friso / Detalhe" id="cam-zoom">
+      <i class="ri-zoom-in-line"></i>
+    </button>
+    <button class="tool-btn" title="Resetar Câmera" id="cam-reset">
+      <i class="ri-refresh-line"></i>
+    </button>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="upload-modal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:16px; font-weight:700;">Carregar Novo Arquivo .GLB</h3>
+        <i class="ri-close-line" id="btn-close-modal" style="font-size:22px; cursor:pointer;"></i>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">
+        Arraste outro arquivo <b>.GLB</b> exportado do Blender para atualizar o catálogo 3D na hora.
+      </p>
+
+      <div class="dropzone" id="dropzone">
+        <i class="ri-file-3-line" style="font-size:40px; color:var(--accent-hover);"></i>
+        <div style="margin-top:10px; font-weight:600; font-size:13px;">Arraste o arquivo .glb aqui</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">ou clique para selecionar do computador</div>
+        <input type="file" id="file-input" accept=".glb,.gltf" style="display:none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Message -->
+  <div class="toast" id="toast-msg">
+    <i class="ri-checkbox-circle-fill" style="font-size:18px; color:#10b981;"></i>
+    <span id="toast-text">Foto HD gerada com sucesso!</span>
+  </div>
+
+  <!-- THREE.JS and ORBIT CONTROLS VIA ES MODULES -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    // --- GLOBAL STATE ---
+    const state = {
+      loadedModels: [],
+      activeModelIndex: 0,
+      showMeasures: true,
+      cutLeft45: false,
+      cutRight45: false,
+      cutDepthMm: 9,          // Default 9mm cut depth
+      cutDirection: 'back',   // Default 'back' cut slope direction
+      userRotX: 270, // DEFAULT: 270° X
+      userRotY: 180, // DEFAULT: 180° Y
+      userRotZ: 0,   // DEFAULT: 0° Z
+      environment: 'studio',
+      wallColor: '#dedede',
+      cornerMode: 'single', // single or miter (Canto 90° Meia Esquadria)
+      multiModelMode: true // Default: show all 8 side-by-side as in Blender!
+    };
+
+    // Metadata for the 8 Blender objects
+    const modelMetaMap = [
+      { name: "Carvalho (Com Friso)", color: "#cba376", tag: "Friso" },
+      { name: "Tabaco (Com Friso)", color: "#382013", tag: "Friso" },
+      { name: "Tabaco (Liso)", color: "#382013", tag: "Liso" },
+      { name: "Carvalho (Liso)", color: "#cba376", tag: "Liso" },
+      { name: "Branco (Com Friso)", color: "#ffffff", tag: "Friso" },
+      { name: "Escuro / Wengé (Com Friso)", color: "#1c1410", tag: "Friso" },
+      { name: "Escuro / Wengé (Liso)", color: "#1c1410", tag: "Liso" },
+      { name: "Branco (Liso)", color: "#ffffff", tag: "Liso" }
+    ];
+
+    // --- THREE.JS SYSTEM SETUP ---
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b0d12);
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 100);
+    camera.position.set(1.1, 1.2, 3.4);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.25;
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.02;
+    controls.target.set(1.1, 0.4, 0);
+
+    // --- LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
+    scene.add(ambientLight);
+
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    mainLight.position.set(3, 6, 4);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    mainLight.shadow.bias = -0.0001;
+    scene.add(mainLight);
+
+    const fillLight = new THREE.DirectionalLight(0x90b0ff, 0.9);
+    fillLight.position.set(-4, 3, -2);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xfff0dd, 1.4);
+    rimLight.position.set(0, 4, -4);
+    scene.add(rimLight);
+
+    // --- ENVIRONMENT ---
+    const studioGroup = new THREE.Group();
+    scene.add(studioGroup);
+
+    // Ground Floor
+    const floorGeo = new THREE.PlaneGeometry(20, 20);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x141824, roughness: 0.8 });
+    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.receiveShadow = true;
+    studioGroup.add(floorMesh);
+
+    // Grid Helper
+    const gridHelper = new THREE.GridHelper(10, 20, 0x2563eb, 0x222838);
+    gridHelper.position.y = 0.001;
+    studioGroup.add(gridHelper);
+
+    // Room Group (Corner Wall Setup 90°)
+    const roomGroup = new THREE.Group();
+    roomGroup.visible = false;
+    scene.add(roomGroup);
+
+    const wallMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(state.wallColor), roughness: 0.9, side: THREE.DoubleSide });
+    
+    // Back Wall at Z = 0 (Baseboard sits 100% flush against Z = 0)
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(20, 8), wallMat);
+    backWall.position.set(0, 4, 0);
+    backWall.receiveShadow = true;
+    roomGroup.add(backWall);
+
+    // Side Corner Wall at X = -0.45 (Runs along Z axis from Z=0)
+    const sideWall = new THREE.Mesh(new THREE.PlaneGeometry(20, 8), wallMat);
+    sideWall.rotation.y = Math.PI / 2;
+    sideWall.position.set(-0.45, 4, 10);
+    sideWall.receiveShadow = true;
+    roomGroup.add(sideWall);
+
+    // Room Floor (Parquet / Tile extending forward from Z = 0)
+    const roomFloorCanvas = document.createElement('canvas');
+    roomFloorCanvas.width = 512;
+    roomFloorCanvas.height = 512;
+    const rctx = roomFloorCanvas.getContext('2d');
+    rctx.fillStyle = '#b8895e';
+    rctx.fillRect(0,0,512,512);
+    rctx.fillStyle = '#9b6d45';
+    for(let i=0; i<512; i+=64) {
+      for(let j=0; j<512; j+=64) {
+        if((i+j)%128===0) rctx.fillRect(i,j,64,64);
+      }
+    }
+    const roomFloorTex = new THREE.CanvasTexture(roomFloorCanvas);
+    roomFloorTex.wrapS = THREE.RepeatWrapping;
+    roomFloorTex.wrapT = THREE.RepeatWrapping;
+    roomFloorTex.repeat.set(8,8);
+    const roomFloorMat = new THREE.MeshStandardMaterial({ map: roomFloorTex, roughness: 0.35 });
+    const roomFloorMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), roomFloorMat);
+    roomFloorMesh.rotation.x = -Math.PI / 2;
+    roomFloorMesh.position.set(0, 0, 10);
+    roomFloorMesh.receiveShadow = true;
+    roomGroup.add(roomFloorMesh);
+
+    // --- MAIN 3D BASEBOARD GROUP ---
+    const mainGroup = new THREE.Group();
+    scene.add(mainGroup);
+
+    // Second Corner Bar Group for 90° Miter Corner Mode
+    const cornerBarGroup = new THREE.Group();
+    scene.add(cornerBarGroup);
+
+    // Helper function to clone original materials safely
+    function storeOriginalMaterials(rootObj) {
+      rootObj.traverse((c) => {
+        if (c.isMesh) {
+          c.castShadow = true;
+          c.receiveShadow = true;
+          if (!c.userData.originalMaterial) {
+            if (Array.isArray(c.material)) {
+              c.userData.originalMaterial = c.material.map(m => m.clone());
+            } else {
+              c.userData.originalMaterial = c.material.clone();
+            }
+          }
+        }
+      });
+    }
+
+    // --- DYNAMIC GEOMETRY MITER CUT (SHEAR VERTICES) ---
+    function applyGeometryMiterCut(rootObj, forceCutLeft = false, forceCutRight = false) {
+      rootObj.traverse((c) => {
+        if (c.isMesh && c.geometry) {
+          const posAttr = c.geometry.attributes.position;
+          if (!posAttr) return;
+
+          // Store original vertex array
+          if (!c.userData.originalPositions) {
+            c.userData.originalPositions = Float32Array.from(posAttr.array);
+          }
+
+          const origPos = c.userData.originalPositions;
+          const currentPos = posAttr.array;
+
+          // Find local bounding limits
+          let minX = Infinity, maxX = -Infinity;
+          let minY = Infinity, maxY = -Infinity;
+
+          for (let i = 0; i < origPos.length; i += 3) {
+            const x = origPos[i];
+            const y = origPos[i + 1];
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+
+          const localThickness = (maxX - minX);
+          const localLength = (maxY - minY);
+          const endMargin = localLength * 0.25; // 25% threshold for end vertices
+
+          const scaleX = c.scale ? c.scale.x : 1;
+          const scaleY = c.scale ? c.scale.y : 1;
+
+          // User customizable cut depth in meters (e.g. 9mm = 0.009m)
+          const targetCutDepthMeters = (state.cutDepthMm / 1000);
+
+          // Convert target cut depth to local Y units
+          const maxDeltaY = targetCutDepthMeters / (scaleY || 1);
+
+          const doLeft = forceCutLeft || state.cutLeft45;
+          const doRight = forceCutRight || state.cutRight45;
+
+          for (let i = 0; i < origPos.length; i += 3) {
+            let x = origPos[i];
+            let y = origPos[i + 1];
+            let z = origPos[i + 2];
+
+            // Ratio: 0 at back face, 1 at front face
+            let ratio = (x - minX) / (localThickness || 1);
+
+            // Flip cut direction if requested
+            if (state.cutDirection === 'back') {
+              ratio = 1.0 - ratio;
+            }
+
+            // 45° Miter Cut on Left End (y near minY)
+            if (doLeft && Math.abs(y - minY) < endMargin) {
+              y = minY + ratio * maxDeltaY;
+            }
+
+            // 45° Miter Cut on Right End (y near maxY)
+            if (doRight && Math.abs(y - maxY) < endMargin) {
+              y = maxY - ratio * maxDeltaY;
+            }
+
+            currentPos[i] = x;
+            currentPos[i + 1] = y;
+            currentPos[i + 2] = z;
+          }
+
+          posAttr.needsUpdate = true;
+          c.geometry.computeVertexNormals();
+          c.geometry.computeBoundingBox();
+          c.geometry.computeBoundingSphere();
+        }
+      });
+    }
+
+    // --- LOAD BLENDER GLB FILE ---
+    function loadBlenderGLB(urlOrBuffer) {
+      document.getElementById('loading-screen').style.opacity = '1';
+      document.getElementById('loading-screen').style.pointerEvents = 'auto';
+
+      const loader = new GLTFLoader();
+
+      const onLoadSuccess = (gltf) => {
+        while(mainGroup.children.length > 0) {
+          mainGroup.remove(mainGroup.children[0]);
+        }
+        while(cornerBarGroup.children.length > 0) {
+          cornerBarGroup.remove(cornerBarGroup.children[0]);
+        }
+        state.loadedModels = [];
+
+        const loadedScene = gltf.scene;
+        mainGroup.add(loadedScene);
+
+        // Get EXACT 8 root Blender objects (gltf.scene.children)
+        const rootObjects = loadedScene.children;
+
+        rootObjects.forEach((rootObj, idx) => {
+          storeOriginalMaterials(rootObj);
+
+          const originalPos = rootObj.position.clone();
+
+          // Calculate world bounding box
+          const bbox = new THREE.Box3().setFromObject(rootObj);
+          const center = new THREE.Vector3();
+          bbox.getCenter(center);
+          const size = new THREE.Vector3();
+          bbox.getSize(size);
+
+          const meta = modelMetaMap[idx % modelMetaMap.length] || { name: rootObj.name, color: '#2563eb', tag: 'Modelo' };
+
+          state.loadedModels.push({
+            index: idx,
+            name: meta.name,
+            color: meta.color,
+            tag: meta.tag,
+            object: rootObj,
+            originalPosition: originalPos,
+            center: center,
+            size: size,
+            bbox: bbox
+          });
+        });
+
+        populateModelList();
+        renderSceneMode();
+
+        document.getElementById('loading-screen').style.opacity = '0';
+        document.getElementById('loading-screen').style.pointerEvents = 'none';
+      };
+
+      if (typeof urlOrBuffer === 'string') {
+        loader.load(urlOrBuffer, onLoadSuccess, undefined, (err) => {
+          console.error('Error loading GLB:', err);
+          showToast('Erro ao carregar rodape.glb!');
+        });
+      } else {
+        loader.parse(urlOrBuffer, '', onLoadSuccess);
+      }
+    }
+
+    // Load default rodape.glb
+    loadBlenderGLB('./rodape.glb');
+
+    // Populate Sidebar Cards
+    function populateModelList() {
+      const container = document.getElementById('model-list-container');
+      container.innerHTML = '';
+
+      state.loadedModels.forEach((m, idx) => {
+        const card = document.createElement('div');
+        card.className = `model-item-card ${idx === state.activeModelIndex ? 'active' : ''}`;
+        card.setAttribute('data-model-idx', idx);
+
+        card.innerHTML = `
+          <div class="model-info">
+            <div class="model-color-dot" style="background:${m.color};"></div>
+            <div class="model-name">${m.name}</div>
+          </div>
+          <div class="model-type-tag">${m.tag}</div>
+        `;
+
+        card.addEventListener('click', () => {
+          state.activeModelIndex = idx;
+          state.multiModelMode = false;
+          document.querySelectorAll('.model-item-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+
+          const btn = document.getElementById('btn-toggle-side');
+          btn.classList.remove('primary');
+          btn.innerHTML = '<i class="ri-grid-fill"></i> Exibir Todos Lado a Lado';
+
+          renderSceneMode();
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // Render Scene Layout Mode (Single vs Multi Side-by-Side)
+    function renderSceneMode() {
+      if (state.loadedModels.length === 0) return;
+
+      // Clear corner group
+      while(cornerBarGroup.children.length > 0) {
+        cornerBarGroup.remove(cornerBarGroup.children[0]);
+      }
+
+      if (state.multiModelMode) {
+        // Show ALL 8 Blender root objects side-by-side (restored to original positions)
+        state.loadedModels.forEach((m) => {
+          // Apply geometry cuts in multi mode as well
+          applyGeometryMiterCut(m.object);
+          m.object.position.copy(m.originalPosition);
+          m.object.visible = true;
+        });
+
+        // Frame all 8 models nicely in view
+        controls.target.set(1.1, 0.4, 0);
+        camera.position.set(1.1, 1.2, 3.4);
+
+      } else {
+        // Single Item Inspector Mode:
+        state.loadedModels.forEach((m, idx) => {
+          m.object.position.copy(m.originalPosition);
+          m.object.visible = (idx === state.activeModelIndex);
+        });
+
+        const selected = state.loadedModels[state.activeModelIndex];
+
+        if (selected) {
+          // If Canto 90° Miter mode is active, automatically force 45° cut on left end
+          const isCornerMiter = (state.cornerMode === 'miter');
+          if (isCornerMiter) {
+            state.cutLeft45 = true;
+          }
+
+          // 1. Apply 45° Miter Cut Vertex Shear BEFORE rotation/position calculations
+          applyGeometryMiterCut(selected.object);
+
+          // 2. Apply user manual 3D rotation (degrees -> radians)
+          const rx = THREE.MathUtils.degToRad(state.userRotX);
+          const ry = THREE.MathUtils.degToRad(state.userRotY);
+          const rz = THREE.MathUtils.degToRad(state.userRotZ);
+
+          selected.object.rotation.set(rx, ry, rz);
+
+          // 3. Calculate bounding box at user rotation
+          const bbox = new THREE.Box3().setFromObject(selected.object);
+
+          // Delta alignment: Center X, align bottom Y EXACTLY at 0 (on floor) and back Z EXACTLY flush at 0 (against wall!)
+          const deltaX = - (bbox.min.x + bbox.max.x) / 2;
+          const deltaY = - bbox.min.y; // Sitting flat on floor Y=0!
+          const deltaZ = - bbox.min.z + 0.001; // Sitting 100% flush against wall at Z=0!
+
+          selected.object.position.x += deltaX;
+          selected.object.position.y += deltaY;
+          selected.object.position.z += deltaZ;
+
+          // Recalculate new world bbox & center
+          const newBbox = new THREE.Box3().setFromObject(selected.object);
+          const newCenter = new THREE.Vector3();
+          newBbox.getCenter(newCenter);
+          const newSize = new THREE.Vector3();
+          newBbox.getSize(newSize);
+
+          selected.center = newCenter;
+          selected.size = newSize;
+
+          // Position room side wall flush at the left corner edge of baseboard
+          sideWall.position.set(newBbox.min.x, 4, 10);
+
+          // Handle 90° Miter Corner Mode (Canto de Parede em Meia Esquadria 45°)
+          if (isCornerMiter) {
+            // Create second baseboard clone for the side wall
+            const secondBar = selected.object.clone(true);
+            
+            // Align geometry of second bar with matching 45° cut on its back end
+            applyGeometryMiterCut(secondBar, true, false);
+
+            // Copy upright rotation of main bar, then rotate -90° on World Y axis so finish face faces front into room!
+            secondBar.rotation.copy(selected.object.rotation);
+            secondBar.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
+
+            // Calculate world bbox of second bar AFTER world Y rotation
+            const sBbox = new THREE.Box3().setFromObject(secondBar);
+
+            // Snap secondBar:
+            // 1. Back face flush against side wall (X = newBbox.min.x)
+            // 2. Bottom flat on floor (Y = 0)
+            // 3. Back end meeting back wall (Z = 0)
+            const sDeltaX = (newBbox.min.x - sBbox.min.x);
+            const sDeltaY = - sBbox.min.y;
+            const sDeltaZ = - sBbox.min.z;
+
+            secondBar.position.x += sDeltaX;
+            secondBar.position.y += sDeltaY;
+            secondBar.position.z += sDeltaZ;
+
+            cornerBarGroup.add(secondBar);
+          }
+
+          // Dimensions info
+          const h = (newSize.z > 0.5 ? newSize.y : newSize.z);
+          const t = Math.min(newSize.x, newSize.y, newSize.z);
+          const l = Math.max(newSize.x, newSize.y, newSize.z);
+
+          document.getElementById('info-h').innerText = `${(h * 100).toFixed(1)} cm`;
+          document.getElementById('info-t').innerText = `${(t * 1000).toFixed(0)} mm`;
+          document.getElementById('info-l').innerText = `${(l * 100).toFixed(1)} cm`;
+
+          // Camera focus target
+          if (state.environment === 'room') {
+            if (isCornerMiter) {
+              camera.position.set(newBbox.min.x + 0.6, h + 0.35, 1.2);
+              controls.target.set(newBbox.min.x, h / 2, 0.3);
+            } else {
+              camera.position.set(0.6, h + 0.25, 1.1);
+              controls.target.set(0, h / 2, 0.2);
+            }
+          } else {
+            camera.position.set(0.4, h / 2 + 0.1, 1.2);
+            controls.target.set(0, h / 2, 0);
+          }
+        }
+      }
+
+      updateMeasurements();
+    }
+
+    // --- 3D MEASUREMENT CALLOUTS ---
+    function updateMeasurements() {
+      const hBadge = document.getElementById('measure-height');
+      const tBadge = document.getElementById('measure-thickness');
+      const lBadge = document.getElementById('measure-length');
+
+      if (!state.showMeasures || state.multiModelMode || state.loadedModels.length === 0) {
+        hBadge.style.opacity = 0;
+        tBadge.style.opacity = 0;
+        lBadge.style.opacity = 0;
+        return;
+      }
+
+      const activeObj = state.loadedModels[state.activeModelIndex];
+      if (!activeObj) return;
+
+      const c = activeObj.center;
+      const s = activeObj.size;
+
+      // Callout points attached to world bounding box of selected object
+      const pHeight = new THREE.Vector3(c.x, c.y + s.y/2 + 0.04, c.z);
+      const pThickness = new THREE.Vector3(c.x, c.y, c.z + s.z/2 + 0.02);
+      const pLength = new THREE.Vector3(c.x + s.x/2, c.y, c.z);
+
+      projectToBadge(pHeight, hBadge);
+      projectToBadge(pThickness, tBadge);
+      projectToBadge(pLength, lBadge);
+    }
+
+    function projectToBadge(vector3D, element) {
+      const tempVec = vector3D.clone();
+      tempVec.project(camera);
+
+      if (tempVec.z > 1) {
+        element.style.opacity = 0;
+        return;
+      }
+
+      const x = (tempVec.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-(tempVec.y * 0.5) + 0.5) * window.innerHeight;
+
+      element.style.left = `${x}px`;
+      element.style.top = `${y}px`;
+      element.style.opacity = 1;
+    }
+
+    // --- ANIMATION LOOP ---
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+      if (state.showMeasures) updateMeasurements();
+    }
+    animate();
+
+    // --- UI EVENT HANDLERS ---
+
+    // Tab Switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+        
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(`tab-${tabId}`).style.display = 'flex';
+      });
+    });
+
+    // Toggle Multi/Single View
+    document.getElementById('btn-toggle-side').addEventListener('click', () => {
+      state.multiModelMode = !state.multiModelMode;
+      const btn = document.getElementById('btn-toggle-side');
+      if (state.multiModelMode) {
+        btn.classList.add('primary');
+        btn.innerHTML = '<i class="ri-user-3-line"></i> Modo Peça Única';
+      } else {
+        btn.classList.remove('primary');
+        btn.innerHTML = '<i class="ri-grid-fill"></i> Exibir Todos Lado a Lado';
+      }
+      renderSceneMode();
+    });
+
+    // Manual Rotation Sliders
+    const sRotX = document.getElementById('slider-rot-x');
+    const sRotY = document.getElementById('slider-rot-y');
+    const sRotZ = document.getElementById('slider-rot-z');
+    const lRotX = document.getElementById('lbl-rot-x');
+    const lRotY = document.getElementById('lbl-rot-y');
+    const lRotZ = document.getElementById('lbl-rot-z');
+
+    function updateRotationFromSliders() {
+      state.userRotX = parseInt(sRotX.value);
+      state.userRotY = parseInt(sRotY.value);
+      state.userRotZ = parseInt(sRotZ.value);
+
+      lRotX.innerText = `${state.userRotX}°`;
+      lRotY.innerText = `${state.userRotY}°`;
+      lRotZ.innerText = `${state.userRotZ}°`;
+
+      renderSceneMode();
+    }
+
+    sRotX.addEventListener('input', updateRotationFromSliders);
+    sRotY.addEventListener('input', updateRotationFromSliders);
+    sRotZ.addEventListener('input', updateRotationFromSliders);
+
+    // Quick Step Rotation Buttons
+    document.getElementById('btn-step-x').addEventListener('click', () => {
+      sRotX.value = (parseInt(sRotX.value) + 90) % 360;
+      updateRotationFromSliders();
+    });
+
+    document.getElementById('btn-step-y').addEventListener('click', () => {
+      sRotY.value = (parseInt(sRotY.value) + 90) % 360;
+      updateRotationFromSliders();
+    });
+
+    document.getElementById('btn-step-z').addEventListener('click', () => {
+      sRotZ.value = (parseInt(sRotZ.value) + 90) % 360;
+      updateRotationFromSliders();
+    });
+
+    document.getElementById('btn-reset-rot').addEventListener('click', () => {
+      sRotX.value = 270;
+      sRotY.value = 180;
+      sRotZ.value = 0;
+      updateRotationFromSliders();
+    });
+
+    // Cut Depth Slider & Flip Direction
+    const sCutDepth = document.getElementById('slider-cut-depth');
+    const lCutDepth = document.getElementById('lbl-cut-depth');
+
+    sCutDepth.addEventListener('input', () => {
+      state.cutDepthMm = parseInt(sCutDepth.value);
+      lCutDepth.innerText = `${state.cutDepthMm} mm`;
+      renderSceneMode();
+    });
+
+    document.getElementById('btn-flip-cut').addEventListener('click', () => {
+      state.cutDirection = (state.cutDirection === 'front' ? 'back' : 'front');
+      showToast(`Sentido do corte: ${state.cutDirection === 'front' ? 'Bisel na Frente' : 'Bisel no Verso'}`);
+      renderSceneMode();
+    });
+
+    // Helper to paint material safely without Z-fighting or touching MDF-crespo
+    function paintSubMaterial(mat, hex) {
+      const matName = (mat && mat.name) ? mat.name.toLowerCase() : '';
+
+      // NEVER PAINT RAW MDF TEXTURE (mdf-crespo)!
+      if (matName.includes('mdf')) {
+        return mat;
+      }
+
+      const painted = mat.clone();
+      painted.color.set(hex);
+      painted.map = null; // Clean solid paint
+      painted.polygonOffset = true;
+      painted.polygonOffsetFactor = -1;
+      painted.polygonOffsetUnits = -1;
+      return painted;
+    }
+
+    // Custom Tint Color Handler
+    document.getElementById('inp-custom-color').addEventListener('input', (e) => {
+      const hex = e.target.value;
+      if (state.loadedModels.length > 0) {
+        const sel = state.loadedModels[state.activeModelIndex];
+        sel.object.traverse((c) => {
+          if (c.isMesh) {
+            const origMat = c.userData.originalMaterial || c.material;
+
+            if (Array.isArray(origMat)) {
+              c.material = origMat.map(m => paintSubMaterial(m, hex));
+            } else {
+              c.material = paintSubMaterial(origMat, hex);
+            }
+          }
+        });
+      }
+    });
+
+    // Reset Material to Blender Original
+    document.getElementById('btn-reset-mat').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const sel = state.loadedModels[state.activeModelIndex];
+        sel.object.traverse((c) => {
+          if (c.isMesh && c.userData.originalMaterial) {
+            if (Array.isArray(c.userData.originalMaterial)) {
+              c.material = c.userData.originalMaterial.map(m => m.clone());
+            } else {
+              c.material = c.userData.originalMaterial.clone();
+            }
+          }
+        });
+        showToast('Material original do Blender restaurado!');
+      }
+    });
+
+    // Environment Toggle
+    document.querySelectorAll('[data-env]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-env]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.environment = card.getAttribute('data-env');
+        
+        if (state.environment === 'room') {
+          studioGroup.visible = false;
+          roomGroup.visible = true;
+        } else {
+          studioGroup.visible = true;
+          roomGroup.visible = false;
+        }
+
+        renderSceneMode();
+      });
+    });
+
+    // Corner Installation Mode Toggle (Single vs Miter Corner 90°)
+    document.querySelectorAll('[data-corner]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-corner]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.cornerMode = card.getAttribute('data-corner');
+        
+        // Auto activate room environment when corner installation is selected
+        if (state.cornerMode === 'miter') {
+          state.environment = 'room';
+          document.querySelectorAll('[data-env]').forEach(c => c.classList.remove('active'));
+          document.querySelector('[data-env="room"]').classList.add('active');
+          studioGroup.visible = false;
+          roomGroup.visible = true;
+        }
+
+        renderSceneMode();
+      });
+    });
+
+    document.getElementById('inp-wall-color').addEventListener('input', (e) => {
+      state.wallColor = e.target.value;
+      wallMat.color.set(state.wallColor);
+    });
+
+    // Toggle Measures
+    document.getElementById('toggle-measures').addEventListener('change', (e) => {
+      state.showMeasures = e.target.checked;
+      updateMeasurements();
+    });
+
+    // Toggle 45-degree Miter Cut Left Edge
+    document.getElementById('toggle-cut-left').addEventListener('change', (e) => {
+      state.cutLeft45 = e.target.checked;
+
+      // Auto zoom to left edge if cut is enabled & in single mode
+      if (state.cutLeft45 && !state.multiModelMode && state.loadedModels.length > 0) {
+        const sel = state.loadedModels[state.activeModelIndex];
+        const bbox = new THREE.Box3().setFromObject(sel.object);
+        controls.target.set(bbox.min.x + 0.05, 0.05, 0);
+        camera.position.set(bbox.min.x - 0.25, 0.15, 0.35);
+      }
+
+      renderSceneMode();
+    });
+
+    // Toggle 45-degree Miter Cut Right Edge
+    document.getElementById('toggle-cut-right').addEventListener('change', (e) => {
+      state.cutRight45 = e.target.checked;
+
+      // Auto zoom to right edge if cut is enabled & in single mode
+      if (state.cutRight45 && !state.multiModelMode && state.loadedModels.length > 0) {
+        const sel = state.loadedModels[state.activeModelIndex];
+        const bbox = new THREE.Box3().setFromObject(sel.object);
+        controls.target.set(bbox.max.x - 0.05, 0.05, 0);
+        camera.position.set(bbox.max.x + 0.25, 0.15, 0.35);
+      }
+
+      renderSceneMode();
+    });
+
+    // Camera Presets
+    document.getElementById('cam-iso').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(0.4, h / 2 + 0.1, 1.2);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-side').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(1.4, h / 2, 0);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-front').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(0, h / 2, 1.4);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-zoom').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(0.2, h / 2 + 0.05, 0.35);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-reset').addEventListener('click', () => {
+      renderSceneMode();
+    });
+
+    // Take HD Photo Snapshot
+    document.getElementById('btn-take-photo').addEventListener('click', () => {
+      const tempMeasures = state.showMeasures;
+      state.showMeasures = false;
+      updateMeasurements();
+
+      renderer.render(scene, camera);
+      const dataURL = renderer.domElement.toDataURL('image/png');
+
+      const link = document.createElement('a');
+      link.download = `rodapé-clicstore-blender-render.png`;
+      link.href = dataURL;
+      link.click();
+
+      state.showMeasures = tempMeasures;
+      updateMeasurements();
+
+      showToast('Foto HD gerada com sucesso!');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      document.getElementById('toast-text').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    // Custom Upload Modal logic
+    const modal = document.getElementById('upload-modal');
+    document.getElementById('btn-open-upload').addEventListener('click', () => modal.classList.add('active'));
+    document.getElementById('btn-close-modal').addEventListener('click', () => modal.classList.remove('active'));
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInp = document.getElementById('file-input');
+    dropzone.addEventListener('click', () => fileInp.click());
+
+    fileInp.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    dropzone.addEventListener('dragover', (e) => e.preventDefault());
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        loadBlenderGLB(evt.target.result);
+        modal.classList.remove('active');
+        showToast('Novo arquivo .GLB carregado!');
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+  </script>
+</body>
+</html>
