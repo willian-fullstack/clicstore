@@ -1570,7 +1570,7 @@
 
     roomGroup.add(lampGroup);
 
-    // --- ARCHITECTURAL 3D DIMENSION LINES (PROPERLY PUSHED OUT & MICRO ARROWS FOR THICKNESS) ---
+    // --- ARCHITECTURAL 3D DIMENSION LINES (PROPERLY VISIBLE & CRISP 3D ARROWS) ---
     const dimGroup = new THREE.Group();
     scene.add(dimGroup);
 
@@ -1582,15 +1582,11 @@
       opacity: 0.95
     });
 
-    // Standard arrow geometry for long lines
-    const arrowGeoStandard = new THREE.ConeGeometry(0.003, 0.012, 12);
-    
-    // Micro arrow geometry for tiny 9mm thickness line (so cones don't overlap into a blob!)
-    const arrowGeoMicro = new THREE.ConeGeometry(0.0012, 0.0035, 10);
-    
+    // Standard crisp arrow geometry for all lines
+    const arrowGeoStandard = new THREE.ConeGeometry(0.0025, 0.009, 12);
     const arrowMat = new THREE.MeshBasicMaterial({ color: 0xc59d4a, depthTest: false, transparent: true, opacity: 0.95 });
 
-    function drawDimensionSegment(p1, p2, offset, isMicro = false) {
+    function drawDimensionSegment(p1, p2, offset) {
       const points = [];
       const start = p1.clone().add(offset);
       const end = p2.clone().add(offset);
@@ -1604,10 +1600,8 @@
       lineSegs.renderOrder = 999;
       dimGroup.add(lineSegs);
 
-      const currentArrowGeo = isMicro ? arrowGeoMicro : arrowGeoStandard;
-
       // Arrowhead 1 pointing outwards at 'start'
-      const arrow1 = new THREE.Mesh(currentArrowGeo, arrowMat);
+      const arrow1 = new THREE.Mesh(arrowGeoStandard, arrowMat);
       arrow1.position.copy(start);
       const dir1 = p1.clone().sub(p2).normalize();
       arrow1.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir1);
@@ -1615,7 +1609,7 @@
       dimGroup.add(arrow1);
 
       // Arrowhead 2 pointing outwards at 'end'
-      const arrow2 = new THREE.Mesh(currentArrowGeo, arrowMat);
+      const arrow2 = new THREE.Mesh(arrowGeoStandard, arrowMat);
       arrow2.position.copy(end);
       const dir2 = p2.clone().sub(p1).normalize();
       arrow2.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir2);
@@ -1657,38 +1651,61 @@
       const heightAxis = axes[1].name;    // Middle = 10cm
       const lengthAxis = axes[2].name;    // Largest = 90cm
 
-      // Helper to generate 3D segment endpoints along a specified world axis
-      function makeAxisSegment(axisName, offsetVector, isMicro = false) {
-        let p1 = new THREE.Vector3();
-        let p2 = new THREE.Vector3();
+      // 1. COMPRIMENTO (90 cm) - Drawn along LARGEST axis on the RIGHT side
+      let cP1 = new THREE.Vector3();
+      let cP2 = new THREE.Vector3();
+      let cOffset = new THREE.Vector3();
 
-        if (axisName === 'x') {
-          p1.set(bbox.min.x, bbox.min.y, bbox.max.z);
-          p2.set(bbox.max.x, bbox.min.y, bbox.max.z);
-        } else if (axisName === 'y') {
-          p1.set(bbox.min.x, bbox.min.y, bbox.max.z);
-          p2.set(bbox.min.x, bbox.max.y, bbox.max.z);
-        } else { // z axis (length along Z)
-          // Position on the RIGHT SIDE of the baseboard (+X side)
-          p1.set(bbox.max.x, bbox.min.y, bbox.min.z);
-          p2.set(bbox.max.x, bbox.min.y, bbox.max.z);
-        }
-
-        return drawDimensionSegment(p1, p2, offsetVector, isMicro);
+      if (lengthAxis === 'z') {
+        cP1.set(bbox.max.x, bbox.min.y, bbox.min.z);
+        cP2.set(bbox.max.x, bbox.min.y, bbox.max.z);
+        cOffset.set(0.08, 0, 0);
+      } else {
+        cP1.set(bbox.min.x, bbox.min.y, bbox.max.z);
+        cP2.set(bbox.max.x, bbox.min.y, bbox.max.z);
+        cOffset.set(0, -0.04, 0.08);
       }
+      const cDim = drawDimensionSegment(cP1, cP2, cOffset);
 
-      // 1. Draw COMPRIMENTO strictly along the LARGEST dimension line (90cm) on the RIGHT SIDE
-      const cOffset = (lengthAxis === 'z') ? new THREE.Vector3(0.08, 0, 0) : new THREE.Vector3(0, -0.04, 0.08);
-      const cDim = makeAxisSegment(lengthAxis, cOffset, false);
+      // 2. ESPESSURA (9 mm) - Drawn along SMALLEST axis at the front-left edge, pushed out cleanly
+      let tP1 = new THREE.Vector3();
+      let tP2 = new THREE.Vector3();
+      let tOffset = new THREE.Vector3();
 
-      // 2. Draw ESPESSURA strictly along the SMALLEST dimension line (9mm)
-      // PUSHED WELL AWAY FROM BASEBOARD EDGE (-0.12m X, +0.10m Z) so label floats clearly in open space!
-      const tOffset = new THREE.Vector3(-0.12, -0.02, 0.10);
-      const tDim = makeAxisSegment(thicknessAxis, tOffset, true); // true = use micro arrows for 9mm!
+      if (thicknessAxis === 'z') {
+        tP1.set(bbox.min.x, bbox.min.y, bbox.min.z);
+        tP2.set(bbox.min.x, bbox.min.y, bbox.max.z);
+        tOffset.set(-0.06, 0, 0);
+      } else if (thicknessAxis === 'x') {
+        tP1.set(bbox.min.x, bbox.min.y, bbox.max.z);
+        tP2.set(bbox.max.x, bbox.min.y, bbox.max.z);
+        tOffset.set(0, -0.02, 0.06);
+      } else {
+        tP1.set(bbox.min.x, bbox.min.y, bbox.min.z);
+        tP2.set(bbox.min.x, bbox.max.y, bbox.min.z);
+        tOffset.set(-0.06, 0, 0);
+      }
+      const tDim = drawDimensionSegment(tP1, tP2, tOffset);
 
-      // 3. Draw ALTURA strictly along the MIDDLE dimension line (10cm)
-      const hOffset = new THREE.Vector3(-0.10, 0, 0.04);
-      const hDim = makeAxisSegment(heightAxis, hOffset, false);
+      // 3. ALTURA (10.0 cm) - Drawn along MIDDLE axis on left side
+      let hP1 = new THREE.Vector3();
+      let hP2 = new THREE.Vector3();
+      let hOffset = new THREE.Vector3();
+
+      if (heightAxis === 'y') {
+        hP1.set(bbox.min.x, bbox.min.y, bbox.max.z);
+        hP2.set(bbox.min.x, bbox.max.y, bbox.max.z);
+        hOffset.set(-0.06, 0, 0.02);
+      } else if (heightAxis === 'z') {
+        hP1.set(bbox.min.x, bbox.min.y, bbox.min.z);
+        hP2.set(bbox.min.x, bbox.min.y, bbox.max.z);
+        hOffset.set(-0.06, 0, 0);
+      } else {
+        hP1.set(bbox.min.x, bbox.min.y, bbox.max.z);
+        hP2.set(bbox.max.x, bbox.min.y, bbox.max.z);
+        hOffset.set(0, -0.06, 0);
+      }
+      const hDim = drawDimensionSegment(hP1, hP2, hOffset);
 
       // 4. Lamp Dimension Line (When Lamp is Enabled & Visible!)
       let lampMidPoint = null;
@@ -1698,7 +1715,7 @@
 
         const lP1 = new THREE.Vector3(lampPos.x, 0, lampPos.z);
         const lP2 = new THREE.Vector3(lampPos.x, 1.40, lampPos.z);
-        const lDim = drawDimensionSegment(lP1, lP2, new THREE.Vector3(0.18, 0, 0.03), false);
+        const lDim = drawDimensionSegment(lP1, lP2, new THREE.Vector3(0.18, 0, 0.03));
         lampMidPoint = lDim.midPoint;
       }
 
@@ -2176,7 +2193,7 @@
       if (dimPoints) {
         projectToBadge(dimPoints.hPoint, hBadge);
         projectToBadge(dimPoints.cPoint, lBadge); // COMPRIMENTO (90 cm) -> LARGEST DIMENSION LINE ON RIGHT SIDE!
-        projectToBadge(dimPoints.tPoint, tBadge); // ESPESSURA (9 mm) -> SMALLEST DIMENSION LINE PUSHED OUT WITH MICRO ARROWS!
+        projectToBadge(dimPoints.tPoint, tBadge); // ESPESSURA (9 mm) -> SMALLEST DIMENSION LINE PUSHED OUT WITH CRISP ARROWS!
 
         if (lampBadge) {
           if (dimPoints.lampPoint) {
