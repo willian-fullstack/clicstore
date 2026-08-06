@@ -1,35 +1,125 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="preto">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClicStore 3D - Catálogo de Rodapés (.GLB Blender)</title>
-  <!-- Google Fonts & Remix Icons -->
+  <title>ClicStore Studio — Visualizador 3D de Rodapés</title>
+  
+  <!-- Google Fonts (Cormorant Garamond & Plus Jakarta Sans) & Remix Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
   <style>
+    @font-face {
+      font-family: 'NoirPro';
+      src: url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff2') format('woff2'),
+           url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'NoirPro';
+      src: url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff2') format('woff2'),
+           url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff') format('woff');
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    /* --- CLICSTORE OFFICIAL VISUAL IDENTITY DESIGN SYSTEM TOKENS --- */
     :root {
-      --bg-dark: #0b0d12;
-      --panel-bg: rgba(18, 22, 32, 0.88);
-      --panel-border: rgba(255, 255, 255, 0.12);
-      --accent: #2563eb;
-      --accent-hover: #3b82f6;
-      --accent-glow: rgba(37, 99, 235, 0.4);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --card-bg: rgba(28, 34, 48, 0.65);
-      --card-hover: rgba(42, 50, 70, 0.85);
+      --abs-preto: #111111;
+      --abs-preto-fosco: #1a1a1a;
+      --abs-dourado: #C59D4A;
+      --abs-dourado-claro: #E0BD7A;
+      --abs-creme: #F3EBE3;
+      --abs-offwhite: #E7D8C3;
+
+      --preto: var(--abs-preto);
+      --preto-fosco: var(--abs-preto-fosco);
+      --dourado: var(--abs-dourado);
+      --dourado-claro: var(--abs-dourado-claro);
+      --creme: var(--abs-creme);
+      --offwhite: var(--abs-offwhite);
+      --linha: rgba(197, 157, 74, 0.35);
+
+      --bg-dark: var(--preto);
+      --panel-bg: rgba(26, 26, 26, 0.90);
+      --panel-border: var(--linha);
+      --accent: var(--dourado);
+      --accent-hover: var(--dourado-claro);
+      --accent-glow: rgba(197, 157, 74, 0.35);
+      --text-main: var(--creme);
+      --text-muted: var(--offwhite);
+      --card-bg: rgba(17, 17, 17, 0.70);
+      --card-hover: rgba(197, 157, 74, 0.15);
       --radius: 12px;
+    }
+
+    /* THEME SWITCHING (5 Official ClicStore Themes) */
+    html[data-theme="creme"] {
+      --preto: var(--abs-creme);
+      --preto-fosco: var(--abs-offwhite);
+      --creme: var(--abs-preto);
+      --offwhite: var(--abs-preto-fosco);
+      --dourado-claro: var(--abs-dourado);
+      --dourado: var(--abs-preto);
+      --linha: rgba(17, 17, 17, 0.25);
+      --panel-bg: rgba(243, 235, 227, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.25);
+      --card-bg: rgba(231, 216, 195, 0.6);
+      --card-hover: rgba(197, 157, 74, 0.3);
+    }
+
+    html[data-theme="offwhite"] {
+      --preto: var(--abs-offwhite);
+      --preto-fosco: var(--abs-creme);
+      --creme: var(--abs-preto);
+      --offwhite: var(--abs-preto-fosco);
+      --dourado-claro: var(--abs-dourado);
+      --dourado: var(--abs-preto);
+      --linha: rgba(17, 17, 17, 0.25);
+      --panel-bg: rgba(231, 216, 195, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.25);
+      --card-bg: rgba(243, 235, 227, 0.6);
+      --card-hover: rgba(197, 157, 74, 0.3);
+    }
+
+    html[data-theme="dourado"] {
+      --preto: var(--abs-dourado);
+      --preto-fosco: var(--abs-dourado-claro);
+      --creme: var(--abs-preto);
+      --offwhite: var(--abs-preto-fosco);
+      --dourado-claro: var(--abs-creme);
+      --dourado: var(--abs-preto);
+      --linha: rgba(17, 17, 17, 0.35);
+      --panel-bg: rgba(197, 157, 74, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.35);
+      --card-bg: rgba(224, 189, 122, 0.6);
+      --card-hover: rgba(17, 17, 17, 0.2);
+    }
+
+    html[data-theme="dourado-claro"] {
+      --preto: var(--abs-dourado-claro);
+      --preto-fosco: var(--abs-dourado);
+      --creme: var(--abs-preto);
+      --offwhite: var(--abs-preto-fosco);
+      --dourado-claro: var(--abs-creme);
+      --dourado: var(--abs-preto);
+      --linha: rgba(17, 17, 17, 0.35);
+      --panel-bg: rgba(224, 189, 122, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.35);
+      --card-bg: rgba(197, 157, 74, 0.6);
+      --card-hover: rgba(17, 17, 17, 0.2);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'NoirPro', 'Plus Jakarta Sans', sans-serif;
       user-select: none;
     }
 
@@ -37,8 +127,23 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
+      background-color: var(--preto);
+      color: var(--creme);
+    }
+
+    h1, h2, h3, .serif, em {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* Gold Progress Rail */
+    #rail {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--abs-dourado), var(--abs-dourado-claro));
+      z-index: 999;
     }
 
     #webgl-container {
@@ -54,7 +159,7 @@
     .loading-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: #0b0d12;
+      background: var(--abs-preto);
       z-index: 200;
       display: flex;
       flex-direction: column;
@@ -67,8 +172,8 @@
     .spinner {
       width: 48px;
       height: 48px;
-      border: 4px solid rgba(255,255,255,0.1);
-      border-top-color: var(--accent);
+      border: 3px solid rgba(197, 157, 74, 0.2);
+      border-top-color: var(--abs-dourado);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -99,70 +204,139 @@
       border-radius: var(--radius);
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      gap: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
-    .brand-logo {
-      width: 34px;
-      height: 34px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      border-radius: 8px;
-      display: flex;
+    .mock-logo {
+      font-family: 'NoirPro', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 15px;
-      color: #fff;
+      gap: 4px;
+      font-size: 18px;
+      color: var(--creme);
+    }
+
+    .mock-logo .clic {
+      font-weight: 600;
+      -webkit-text-stroke: 0.03em currentColor;
+    }
+
+    .mock-logo .store {
+      font-weight: normal;
+      opacity: 0.85;
+    }
+
+    .studio-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: var(--abs-dourado);
+      color: var(--abs-preto);
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      margin-left: 4px;
+      font-family: 'NoirPro', sans-serif;
     }
 
     .brand-title {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--creme);
     }
+
+    .brand-title em {
+      color: var(--abs-dourado-claro);
+      font-style: italic;
+      font-weight: 500;
+    }
+
     .brand-subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
+      font-size: 10px;
+      color: var(--offwhite);
+      letter-spacing: 0.5px;
     }
 
     .header-actions {
       pointer-events: auto;
       display: flex;
-      gap: 10px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Theme Switcher Dots */
+    .theme-picker-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .theme-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--abs-dourado-claro);
+      margin-right: 2px;
+    }
+
+    .theme-picker-header button {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .theme-picker-header button:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 8px var(--abs-dourado);
     }
 
     .btn-action {
       background: var(--panel-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--panel-border);
-      color: var(--text-main);
+      color: var(--creme);
       padding: 10px 18px;
       border-radius: var(--radius);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
+      letter-spacing: 0.5px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
 
     .btn-action:hover {
-      background: rgba(255,255,255,0.12);
-      border-color: rgba(255,255,255,0.25);
+      background: rgba(197, 157, 74, 0.15);
+      border-color: var(--abs-dourado);
       transform: translateY(-2px);
     }
 
     .btn-action.primary {
-      background: linear-gradient(135deg, var(--accent), #1d4ed8);
-      border-color: rgba(255,255,255,0.2);
+      background: linear-gradient(135deg, var(--abs-dourado), var(--abs-dourado-claro));
+      color: var(--abs-preto);
+      border: none;
+      font-weight: 700;
       box-shadow: 0 4px 20px var(--accent-glow);
     }
 
     .btn-action.primary:hover {
-      background: linear-gradient(135deg, var(--accent-hover), #2563eb);
+      background: linear-gradient(135deg, var(--abs-dourado-claro), var(--abs-dourado));
+      box-shadow: 0 6px 25px rgba(197, 157, 74, 0.6);
     }
 
     /* Left Control Sidebar */
@@ -171,7 +345,7 @@
       top: 85px;
       left: 20px;
       bottom: 20px;
-      width: 390px;
+      width: 400px;
       z-index: 10;
       background: var(--panel-bg);
       backdrop-filter: blur(20px);
@@ -179,13 +353,13 @@
       border-radius: var(--radius);
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
       overflow: hidden;
     }
 
     .sidebar-tabs {
       display: flex;
-      background: rgba(0,0,0,0.25);
+      background: rgba(0,0,0,0.3);
       border-bottom: 1px solid var(--panel-border);
       padding: 6px;
       gap: 4px;
@@ -196,9 +370,10 @@
       padding: 10px 4px;
       background: transparent;
       border: none;
-      color: var(--text-muted);
-      font-size: 12px;
+      color: var(--offwhite);
+      font-size: 11px;
       font-weight: 600;
+      letter-spacing: 0.5px;
       cursor: pointer;
       border-radius: 8px;
       display: flex;
@@ -213,15 +388,15 @@
     }
 
     .tab-btn:hover {
-      color: var(--text-main);
-      background: rgba(255,255,255,0.05);
+      color: var(--creme);
+      background: rgba(197, 157, 74, 0.1);
     }
 
     .tab-btn.active {
       background: var(--card-bg);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      border: 1px solid var(--panel-border);
+      color: var(--abs-dourado-claro);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid var(--linha);
     }
 
     .sidebar-content {
@@ -234,10 +409,10 @@
     }
 
     .sidebar-content::-webkit-scrollbar {
-      width: 6px;
+      width: 5px;
     }
     .sidebar-content::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.15);
+      background: var(--linha);
       border-radius: 3px;
     }
 
@@ -248,16 +423,24 @@
       width: 100%;
     }
 
-    .section-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
+    /* Section Tag (ClicStore Brand Book Pattern) */
+    .section-tag {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 8px;
+      color: var(--abs-dourado);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .section-tag::before {
+      content: "";
+      width: 16px;
+      height: 1px;
+      background: var(--abs-dourado);
     }
 
     /* List of Blender Models */
@@ -281,13 +464,13 @@
 
     .model-item-card:hover {
       background: var(--card-hover);
-      border-color: rgba(255,255,255,0.25);
+      border-color: var(--abs-dourado);
       transform: translateX(4px);
     }
 
     .model-item-card.active {
-      border-color: var(--accent);
-      background: rgba(37, 99, 235, 0.18);
+      border-color: var(--abs-dourado);
+      background: rgba(197, 157, 74, 0.18);
       box-shadow: 0 0 15px var(--accent-glow);
     }
 
@@ -301,26 +484,29 @@
       width: 24px;
       height: 24px;
       border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid var(--linha);
     }
 
     .model-name {
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
+      color: var(--creme);
     }
 
     .model-type-tag {
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 12px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(197, 157, 74, 0.15);
       font-weight: 600;
-      color: var(--text-muted);
+      color: var(--abs-dourado-claro);
+      border: 1px solid var(--linha);
     }
 
     .model-item-card.active .model-type-tag {
-      background: var(--accent);
-      color: #fff;
+      background: var(--abs-dourado);
+      color: var(--abs-preto);
+      border: none;
     }
 
     /* Grid Options */
@@ -334,7 +520,7 @@
       background: var(--card-bg);
       border: 1px solid var(--panel-border);
       border-radius: 10px;
-      padding: 12px;
+      padding: 14px 12px;
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -346,14 +532,20 @@
 
     .option-card:hover {
       background: var(--card-hover);
-      border-color: rgba(255,255,255,0.25);
+      border-color: var(--abs-dourado);
       transform: translateY(-2px);
     }
 
     .option-card.active {
-      border-color: var(--accent);
-      background: rgba(37, 99, 235, 0.15);
+      border-color: var(--abs-dourado);
+      background: rgba(197, 157, 74, 0.18);
       box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .option-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--creme);
     }
 
     /* Switch toggle box styling */
@@ -376,25 +568,26 @@
     }
 
     .switch-icon {
-      font-size: 20px;
-      color: var(--accent-hover);
-      background: rgba(37, 99, 235, 0.15);
+      font-size: 18px;
+      color: var(--abs-dourado-claro);
+      background: rgba(197, 157, 74, 0.15);
       padding: 8px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 1px solid var(--linha);
     }
 
     .switch-title {
       font-size: 13px;
-      font-weight: 700;
-      color: #fff;
+      font-weight: 600;
+      color: var(--creme);
     }
 
     .switch-desc {
       font-size: 11px;
-      color: var(--text-muted);
+      color: var(--offwhite);
     }
 
     .switch {
@@ -433,7 +626,7 @@
     }
 
     input:checked + .slider {
-      background-color: var(--accent);
+      background-color: var(--abs-dourado);
     }
 
     input:checked + .slider:before {
@@ -442,8 +635,8 @@
 
     /* Dimensions Card */
     .dimensions-card {
-      background: linear-gradient(135deg, rgba(30, 38, 54, 0.8), rgba(20, 25, 38, 0.8));
-      border: 1px solid var(--panel-border);
+      background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(17, 17, 17, 0.9));
+      border: 1px solid var(--linha);
       border-radius: 14px;
       padding: 16px 18px;
       display: flex;
@@ -464,29 +657,30 @@
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
+      font-weight: 500;
+      color: var(--offwhite);
     }
 
     .dim-label i {
-      color: var(--accent-hover);
+      color: var(--abs-dourado-claro);
       font-size: 16px;
     }
 
     .dim-value {
       font-size: 14px;
-      font-weight: 800;
-      color: #fff;
-      background: rgba(255,255,255,0.06);
+      font-weight: 700;
+      color: var(--abs-dourado-claro);
+      background: rgba(197, 157, 74, 0.12);
       padding: 4px 10px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid var(--linha);
     }
 
     .dim-divider {
       height: 1px;
-      background: rgba(255,255,255,0.06);
+      background: var(--linha);
       width: 100%;
+      opacity: 0.5;
     }
 
     /* Slider Input Styling */
@@ -505,13 +699,14 @@
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
+      color: var(--creme);
     }
 
     input[type="range"].rot-slider {
       width: 100%;
       height: 6px;
-      background: rgba(255,255,255,0.15);
+      background: rgba(197, 157, 74, 0.2);
       border-radius: 3px;
       outline: none;
       -webkit-appearance: none;
@@ -522,7 +717,7 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: var(--accent-hover);
+      background: var(--abs-dourado);
       cursor: pointer;
       box-shadow: 0 0 10px var(--accent-glow);
     }
@@ -541,7 +736,7 @@
       padding: 6px 12px;
       display: flex;
       gap: 8px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
     .tool-btn {
@@ -550,7 +745,7 @@
       border-radius: 50%;
       background: transparent;
       border: none;
-      color: var(--text-main);
+      color: var(--creme);
       font-size: 18px;
       cursor: pointer;
       display: flex;
@@ -560,28 +755,29 @@
     }
 
     .tool-btn:hover {
-      background: rgba(255,255,255,0.15);
+      background: rgba(197, 157, 74, 0.15);
+      color: var(--abs-dourado-claro);
       transform: scale(1.1);
     }
 
     .tool-btn.active {
-      background: var(--accent);
-      color: #fff;
+      background: var(--abs-dourado);
+      color: var(--abs-preto);
     }
 
     /* 3D Measurement Overlay Callouts */
     .measurement-badge {
       position: absolute;
-      background: rgba(0, 0, 0, 0.88);
-      border: 1px solid var(--accent);
-      color: #fff;
-      padding: 4px 10px;
+      background: rgba(17, 17, 17, 0.92);
+      border: 1px solid var(--abs-dourado);
+      color: var(--abs-creme);
+      padding: 4px 12px;
       border-radius: 20px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -594,7 +790,7 @@
       content: '';
       width: 6px;
       height: 6px;
-      background: var(--accent);
+      background: var(--abs-dourado);
       border-radius: 50%;
     }
 
@@ -602,7 +798,7 @@
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.75);
       backdrop-filter: blur(10px);
       z-index: 100;
       display: flex;
@@ -627,11 +823,11 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
     }
 
     .dropzone {
-      border: 2px dashed rgba(255,255,255,0.2);
+      border: 2px dashed var(--linha);
       border-radius: 12px;
       padding: 30px;
       text-align: center;
@@ -640,8 +836,8 @@
     }
 
     .dropzone:hover {
-      border-color: var(--accent);
-      background: rgba(37, 99, 235, 0.05);
+      border-color: var(--abs-dourado);
+      background: rgba(197, 157, 74, 0.08);
     }
 
     /* Toast Notification */
@@ -650,8 +846,8 @@
       top: 90px;
       right: 20px;
       background: var(--panel-bg);
-      border: 1px solid var(--accent);
-      color: #fff;
+      border: 1px solid var(--abs-dourado);
+      color: var(--creme);
       padding: 12px 20px;
       border-radius: 10px;
       font-size: 13px;
@@ -660,7 +856,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
       transform: translateX(120%);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -696,7 +892,7 @@
       padding: 0;
     }
     input[type="color"]::-webkit-color-swatch {
-      border: 1px solid rgba(255,255,255,0.3);
+      border: 1px solid var(--linha);
       border-radius: 8px;
     }
 
@@ -712,11 +908,14 @@
 </head>
 <body>
 
+  <!-- ClicStore Gold Progress Rail -->
+  <div id="rail"></div>
+
   <!-- Loading Screen -->
   <div class="loading-overlay" id="loading-screen">
     <div class="spinner"></div>
-    <div style="font-weight: 700; font-size: 15px;">Carregando Modelos do Blender (rodape.glb)...</div>
-    <div style="font-size: 12px; color: var(--text-muted);">Importando malhas 3D e texturas PBR originais...</div>
+    <div style="font-weight: 700; font-size: 15px; color:var(--abs-dourado-claro);">Carregando ClicStore Studio (rodape.glb)...</div>
+    <div style="font-size: 12px; color: var(--offwhite);">Importando malhas 3D e texturas PBR originais...</div>
   </div>
 
   <!-- WebGL Canvas Container -->
@@ -724,26 +923,38 @@
 
   <!-- 3D Callout Overlays -->
   <div id="measure-height" class="measurement-badge" style="opacity: 0;">
-    <i class="ri-height-line"></i> Altura: <span id="val-height">10.0 cm</span>
+    <i class="ri-height-line" style="color:var(--abs-dourado-claro);"></i> Altura: <span id="val-height">10.0 cm</span>
   </div>
   <div id="measure-thickness" class="measurement-badge" style="opacity: 0;">
-    <i class="ri-ruler-line"></i> Espessura: <span id="val-thickness">9 mm</span>
+    <i class="ri-ruler-line" style="color:var(--abs-dourado-claro);"></i> Espessura: <span id="val-thickness">9 mm</span>
   </div>
   <div id="measure-length" class="measurement-badge" style="opacity: 0;">
-    <i class="ri-expand-horizontal-line"></i> Barra: <span id="val-length">90 cm</span>
+    <i class="ri-expand-horizontal-line" style="color:var(--abs-dourado-claro);"></i> Barra: <span id="val-length">90 cm</span>
   </div>
 
   <!-- Top Header Navigation -->
   <header class="top-header">
     <div class="brand-badge">
-      <div class="brand-logo">3D</div>
-      <div>
-        <div class="brand-title">Catálogo 3D de Rodapés</div>
-        <div class="brand-subtitle">Modelos Blender Original (rodape.glb)</div>
+      <div class="mock-logo">
+        <span class="clic">CLIC</span><span class="store">STORE</span><span class="studio-badge">STUDIO</span>
+      </div>
+      <div style="display:flex; flex-direction:column; border-left:1px solid var(--linha); padding-left:12px;">
+        <div class="brand-title">Catálogo 3D <em>Premium</em></div>
+        <div class="brand-subtitle">Visualizador Oficial da Marca</div>
       </div>
     </div>
 
     <div class="header-actions">
+      <!-- Live ClicStore 5-Theme Switcher -->
+      <div class="theme-picker-header">
+        <span class="theme-label">TEMA:</span>
+        <button onclick="setTheme('preto')" style="background:var(--abs-preto)" title="Absolute Black"></button>
+        <button onclick="setTheme('dourado')" style="background:var(--abs-dourado)" title="Classic Gold"></button>
+        <button onclick="setTheme('dourado-claro')" style="background:var(--abs-dourado-claro)" title="Soft Gold"></button>
+        <button onclick="setTheme('creme')" style="background:var(--abs-creme)" title="Cream White"></button>
+        <button onclick="setTheme('offwhite')" style="background:var(--abs-offwhite)" title="Warm Off-White"></button>
+      </div>
+
       <button class="btn-action primary" id="btn-toggle-side">
         <i class="ri-grid-fill"></i> Exibir Todos Lado a Lado
       </button>
@@ -782,7 +993,7 @@
       
       <!-- TAB 1: LISTA DE RODAPÉS DO BLENDER -->
       <div class="tab-pane" id="tab-models">
-        <div class="section-title">Selecione o Modelo do Blender</div>
+        <div class="section-tag">01 · Coleção de Rodapés</div>
         
         <div class="model-list" id="model-list-container">
           <!-- Dynamically populated from rodape.glb -->
@@ -791,7 +1002,7 @@
 
       <!-- TAB 2: DIMENSÕES E MEDIDAS -->
       <div class="tab-pane" style="display:none;" id="tab-dimensions">
-        <div class="section-title">Visualização de Cotas 3D</div>
+        <div class="section-tag">02 · Visualização de Cotas</div>
 
         <div class="switch-container">
           <div class="switch-info">
@@ -808,13 +1019,13 @@
         </div>
 
         <!-- CONTROLE DE ROTAÇÃO MANUAL 3D -->
-        <div class="section-title" style="margin-top: 12px;">Girar Peça Manualmente 3D</div>
+        <div class="section-tag" style="margin-top: 8px;">Girar Peça Manualmente 3D</div>
 
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div class="rot-slider-row">
             <div class="rot-slider-header">
               <span>Giro Eixo X (Cima / Baixo)</span>
-              <span id="lbl-rot-x" style="color:var(--accent-hover);">270°</span>
+              <span id="lbl-rot-x" style="color:var(--abs-dourado-claro);">270°</span>
             </div>
             <input type="range" id="slider-rot-x" min="0" max="360" step="90" value="270" class="rot-slider">
           </div>
@@ -822,7 +1033,7 @@
           <div class="rot-slider-row">
             <div class="rot-slider-header">
               <span>Giro Eixo Y (Frente / Trás)</span>
-              <span id="lbl-rot-y" style="color:var(--accent-hover);">180°</span>
+              <span id="lbl-rot-y" style="color:var(--abs-dourado-claro);">180°</span>
             </div>
             <input type="range" id="slider-rot-y" min="0" max="360" step="90" value="180" class="rot-slider">
           </div>
@@ -830,7 +1041,7 @@
           <div class="rot-slider-row">
             <div class="rot-slider-header">
               <span>Giro Eixo Z (Lado / Lado)</span>
-              <span id="lbl-rot-z" style="color:var(--accent-hover);">0°</span>
+              <span id="lbl-rot-z" style="color:var(--abs-dourado-claro);">0°</span>
             </div>
             <input type="range" id="slider-rot-z" min="0" max="360" step="90" value="0" class="rot-slider">
           </div>
@@ -844,7 +1055,7 @@
         </div>
 
         <!-- CONTROLE DE CORTE 45° MEIA ESQUADRIA -->
-        <div class="section-title" style="margin-top: 12px;">Cortes 45° nas Bordas (Meia-Esquadria)</div>
+        <div class="section-tag" style="margin-top: 8px;">Cortes 45° nas Bordas</div>
 
         <div class="switch-container">
           <div class="switch-info">
@@ -875,10 +1086,10 @@
         </div>
 
         <!-- PROFUNDIDADE E SENTIDO DO CORTE -->
-        <div class="rot-slider-row" style="margin-top: 4px;">
+        <div class="rot-slider-row" style="margin-top: 2px;">
           <div class="rot-slider-header">
             <span>Profundidade do Bisel (45°)</span>
-            <span id="lbl-cut-depth" style="color:var(--accent-hover);">9 mm</span>
+            <span id="lbl-cut-depth" style="color:var(--abs-dourado-claro);">9 mm</span>
           </div>
           <input type="range" id="slider-cut-depth" min="2" max="50" step="1" value="9" class="rot-slider">
         </div>
@@ -889,7 +1100,7 @@
           </button>
         </div>
 
-        <div class="section-title" style="margin-top: 8px;">Dimensões Reais da Peça</div>
+        <div class="section-tag" style="margin-top: 8px;">Dimensões Reais da Peça</div>
 
         <div class="dimensions-card">
           <div class="dim-row">
@@ -921,13 +1132,13 @@
 
       <!-- TAB 3: CORES E ACABAMENTOS -->
       <div class="tab-pane" style="display:none;" id="tab-materials">
-        <div class="section-title">Sobrepor Cor de Tinta</div>
+        <div class="section-tag">03 · Personalização de Cor</div>
         
         <div class="color-input-wrapper">
           <input type="color" id="inp-custom-color" value="#ffffff">
           <div>
-            <div style="font-size:13px; font-weight:700;">Seletor de Cor Customizada</div>
-            <div style="font-size:11px; color:var(--text-muted);">Pintar sobre o modelo 3D</div>
+            <div style="font-size:13px; font-weight:600; color:var(--creme);">Seletor de Cor Customizada</div>
+            <div style="font-size:11px; color:var(--offwhite);">Sobrepor pintura no modelo 3D</div>
           </div>
         </div>
 
@@ -938,46 +1149,46 @@
 
       <!-- TAB 4: CENÁRIO & LUZ -->
       <div class="tab-pane" style="display:none;" id="tab-scene">
-        <div class="section-title">Ambiente de Visualização</div>
+        <div class="section-tag">04 · Ambiente Virtual</div>
         <div class="grid-options">
           <div class="option-card active" data-env="studio">
-            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center;">
-              <i class="ri-lightbulb-line" style="font-size:20px;"></i>
+            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-lightbulb-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
             </div>
             <span class="option-label">Estúdio Neutro</span>
           </div>
 
           <div class="option-card" data-env="room">
-            <div class="option-preview-box" style="background: linear-gradient(to bottom, #777 50%, #333 50%); display:flex; align-items:center; justify-content:center;">
-              <i class="ri-home-4-line" style="font-size:20px;"></i>
+            <div class="option-preview-box" style="background: linear-gradient(to bottom, #777 50%, #333 50%); display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-home-4-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
             </div>
             <span class="option-label">Parede + Piso Real</span>
           </div>
         </div>
 
-        <div class="section-title" style="margin-top: 12px;">Modo de Instalação no Canto</div>
+        <div class="section-tag" style="margin-top: 8px;">Modo de Instalação de Canto</div>
         <div class="grid-options">
           <div class="option-card active" data-corner="single">
-            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center;">
-              <i class="ri-subtract-line" style="font-size:20px;"></i>
+            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-subtract-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
             </div>
             <span class="option-label">Barra Reta</span>
           </div>
 
           <div class="option-card" data-corner="miter">
-            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center;">
-              <i class="ri-corner-down-right-line" style="font-size:20px; color:var(--accent-hover);"></i>
+            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-corner-down-right-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
             </div>
             <span class="option-label">Canto 90° (Corte 45°)</span>
           </div>
         </div>
 
-        <div class="section-title" style="margin-top: 12px;">Cor da Parede do Ambiente</div>
+        <div class="section-tag" style="margin-top: 8px;">Cor da Parede do Ambiente</div>
         <div class="color-input-wrapper">
           <input type="color" id="inp-wall-color" value="#dedede">
           <div>
-            <div style="font-size:13px; font-weight:700;">Tinta da Parede</div>
-            <div style="font-size:11px; color:var(--text-muted);">Cor do ambiente</div>
+            <div style="font-size:13px; font-weight:600; color:var(--creme);">Tinta da Parede</div>
+            <div style="font-size:11px; color:var(--offwhite);">Cor do ambiente</div>
           </div>
         </div>
       </div>
@@ -1008,17 +1219,17 @@
   <div class="modal-overlay" id="upload-modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size:16px; font-weight:700;">Carregar Novo Arquivo .GLB</h3>
-        <i class="ri-close-line" id="btn-close-modal" style="font-size:22px; cursor:pointer;"></i>
+        <h3 style="font-size:16px; font-weight:700; color:var(--creme);">Carregar Novo Arquivo .GLB</h3>
+        <i class="ri-close-line" id="btn-close-modal" style="font-size:22px; cursor:pointer; color:var(--offwhite);"></i>
       </div>
-      <p style="font-size:12px; color:var(--text-muted);">
-        Arraste outro arquivo <b>.GLB</b> exportado do Blender para atualizar o catálogo 3D na hora.
+      <p style="font-size:12px; color:var(--offwhite);">
+        Arraste outro arquivo <b>.GLB</b> exportado do Blender para atualizar o catálogo ClicStore Studio.
       </p>
 
       <div class="dropzone" id="dropzone">
-        <i class="ri-file-3-line" style="font-size:40px; color:var(--accent-hover);"></i>
-        <div style="margin-top:10px; font-weight:600; font-size:13px;">Arraste o arquivo .glb aqui</div>
-        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">ou clique para selecionar do computador</div>
+        <i class="ri-file-3-line" style="font-size:40px; color:var(--abs-dourado-claro);"></i>
+        <div style="margin-top:10px; font-weight:600; font-size:13px; color:var(--creme);">Arraste o arquivo .glb aqui</div>
+        <div style="font-size:11px; color:var(--offwhite); margin-top:4px;">ou clique para selecionar do computador</div>
         <input type="file" id="file-input" accept=".glb,.gltf" style="display:none;">
       </div>
     </div>
@@ -1026,7 +1237,7 @@
 
   <!-- Toast Message -->
   <div class="toast" id="toast-msg">
-    <i class="ri-checkbox-circle-fill" style="font-size:18px; color:#10b981;"></i>
+    <i class="ri-checkbox-circle-fill" style="font-size:18px; color:var(--abs-dourado-claro);"></i>
     <span id="toast-text">Foto HD gerada com sucesso!</span>
   </div>
 
@@ -1078,7 +1289,7 @@
     // --- THREE.JS SYSTEM SETUP ---
     const container = document.getElementById('webgl-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0d12);
+    scene.background = new THREE.Color(0x111111);
 
     const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 100);
     camera.position.set(1.1, 1.2, 3.4);
@@ -1097,6 +1308,24 @@
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2 + 0.02;
     controls.target.set(1.1, 0.4, 0);
+
+    // Dynamic Theme Functionality attached to Window for ClicStore Brand Identity
+    window.setTheme = function(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'creme' || theme === 'offwhite') {
+        scene.background = new THREE.Color(0xf3ebe3);
+        floorMat.color.set(0xe7d8c3);
+        gridHelper.material.color.set(0xc59d4a);
+      } else if (theme === 'dourado' || theme === 'dourado-claro') {
+        scene.background = new THREE.Color(0x382013);
+        floorMat.color.set(0x28170d);
+        gridHelper.material.color.set(0xe0bd7a);
+      } else {
+        scene.background = new THREE.Color(0x111111);
+        floorMat.color.set(0x1a1a1a);
+        gridHelper.material.color.set(0xc59d4a);
+      }
+    };
 
     // --- LIGHTING ---
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
@@ -1124,14 +1353,14 @@
 
     // Ground Floor
     const floorGeo = new THREE.PlaneGeometry(20, 20);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x141824, roughness: 0.8 });
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.rotation.x = -Math.PI / 2;
     floorMesh.receiveShadow = true;
     studioGroup.add(floorMesh);
 
     // Grid Helper
-    const gridHelper = new THREE.GridHelper(10, 20, 0x2563eb, 0x222838);
+    const gridHelper = new THREE.GridHelper(10, 20, 0xc59d4a, 0x2d2618);
     gridHelper.position.y = 0.001;
     studioGroup.add(gridHelper);
 
@@ -1318,7 +1547,7 @@
           const size = new THREE.Vector3();
           bbox.getSize(size);
 
-          const meta = modelMetaMap[idx % modelMetaMap.length] || { name: rootObj.name, color: '#2563eb', tag: 'Modelo' };
+          const meta = modelMetaMap[idx % modelMetaMap.length] || { name: rootObj.name, color: '#C59D4A', tag: 'Modelo' };
 
           state.loadedModels.push({
             index: idx,
@@ -1850,7 +2079,7 @@
       const dataURL = renderer.domElement.toDataURL('image/png');
 
       const link = document.createElement('a');
-      link.download = `rodapé-clicstore-blender-render.png`;
+      link.download = `rodapé-clicstore-studio-render.png`;
       link.href = dataURL;
       link.click();
 
