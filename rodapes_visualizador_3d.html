@@ -46,73 +46,86 @@
       --linha: rgba(197, 157, 74, 0.35);
 
       --bg-dark: var(--preto);
-      --panel-bg: rgba(26, 26, 26, 0.90);
+      --panel-bg: rgba(26, 26, 26, 0.92);
       --panel-border: var(--linha);
       --accent: var(--dourado);
       --accent-hover: var(--dourado-claro);
       --accent-glow: rgba(197, 157, 74, 0.35);
       --text-main: var(--creme);
       --text-muted: var(--offwhite);
+      --tag-color: var(--abs-dourado-claro);
       --card-bg: rgba(17, 17, 17, 0.70);
-      --card-hover: rgba(197, 157, 74, 0.15);
+      --card-hover: rgba(197, 157, 74, 0.18);
       --radius: 12px;
     }
 
-    /* THEME SWITCHING (5 Official ClicStore Themes) */
+    /* CONTRAST-OPTIMIZED THEME SWITCHING (5 Official ClicStore Themes) */
     html[data-theme="creme"] {
       --preto: var(--abs-creme);
       --preto-fosco: var(--abs-offwhite);
-      --creme: var(--abs-preto);
-      --offwhite: var(--abs-preto-fosco);
-      --dourado-claro: var(--abs-dourado);
-      --dourado: var(--abs-preto);
+      --creme: #111111;
+      --offwhite: #2a2a2a;
+      --dourado-claro: #8b6823;
+      --dourado: #111111;
+      --tag-color: #725213;
       --linha: rgba(17, 17, 17, 0.25);
       --panel-bg: rgba(243, 235, 227, 0.94);
       --panel-border: rgba(17, 17, 17, 0.25);
-      --card-bg: rgba(231, 216, 195, 0.6);
-      --card-hover: rgba(197, 157, 74, 0.3);
+      --card-bg: rgba(231, 216, 195, 0.65);
+      --card-hover: rgba(197, 157, 74, 0.35);
+      --text-main: #111111;
+      --text-muted: #333333;
     }
 
     html[data-theme="offwhite"] {
       --preto: var(--abs-offwhite);
       --preto-fosco: var(--abs-creme);
-      --creme: var(--abs-preto);
-      --offwhite: var(--abs-preto-fosco);
-      --dourado-claro: var(--abs-dourado);
-      --dourado: var(--abs-preto);
+      --creme: #111111;
+      --offwhite: #2a2a2a;
+      --dourado-claro: #8b6823;
+      --dourado: #111111;
+      --tag-color: #725213;
       --linha: rgba(17, 17, 17, 0.25);
       --panel-bg: rgba(231, 216, 195, 0.94);
       --panel-border: rgba(17, 17, 17, 0.25);
-      --card-bg: rgba(243, 235, 227, 0.6);
-      --card-hover: rgba(197, 157, 74, 0.3);
+      --card-bg: rgba(243, 235, 227, 0.65);
+      --card-hover: rgba(197, 157, 74, 0.35);
+      --text-main: #111111;
+      --text-muted: #333333;
     }
 
     html[data-theme="dourado"] {
       --preto: var(--abs-dourado);
       --preto-fosco: var(--abs-dourado-claro);
-      --creme: var(--abs-preto);
-      --offwhite: var(--abs-preto-fosco);
-      --dourado-claro: var(--abs-creme);
-      --dourado: var(--abs-preto);
+      --creme: #111111;
+      --offwhite: #222222;
+      --dourado-claro: #111111;
+      --dourado: #111111;
+      --tag-color: #111111; /* HIGH CONTRAST DARK TEXT IN GOLD THEME! */
       --linha: rgba(17, 17, 17, 0.35);
       --panel-bg: rgba(197, 157, 74, 0.94);
       --panel-border: rgba(17, 17, 17, 0.35);
-      --card-bg: rgba(224, 189, 122, 0.6);
+      --card-bg: rgba(243, 235, 227, 0.55);
       --card-hover: rgba(17, 17, 17, 0.2);
+      --text-main: #111111;
+      --text-muted: #2a2a2a;
     }
 
     html[data-theme="dourado-claro"] {
       --preto: var(--abs-dourado-claro);
       --preto-fosco: var(--abs-dourado);
-      --creme: var(--abs-preto);
-      --offwhite: var(--abs-preto-fosco);
-      --dourado-claro: var(--abs-creme);
-      --dourado: var(--abs-preto);
+      --creme: #111111;
+      --offwhite: #222222;
+      --dourado-claro: #111111;
+      --dourado: #111111;
+      --tag-color: #111111; /* HIGH CONTRAST DARK TEXT IN SOFT GOLD THEME! */
       --linha: rgba(17, 17, 17, 0.35);
       --panel-bg: rgba(224, 189, 122, 0.94);
       --panel-border: rgba(17, 17, 17, 0.35);
-      --card-bg: rgba(197, 157, 74, 0.6);
+      --card-bg: rgba(243, 235, 227, 0.55);
       --card-hover: rgba(17, 17, 17, 0.2);
+      --text-main: #111111;
+      --text-muted: #2a2a2a;
     }
 
     * {
@@ -128,7 +141,7 @@
       height: 100%;
       overflow: hidden;
       background-color: var(--preto);
-      color: var(--creme);
+      color: var(--text-main);
     }
 
     h1, h2, h3, .serif, em {
@@ -216,7 +229,7 @@
       align-items: center;
       gap: 4px;
       font-size: 18px;
-      color: var(--creme);
+      color: var(--text-main);
     }
 
     .mock-logo .clic {
@@ -245,18 +258,18 @@
       font-size: 14px;
       font-weight: 600;
       letter-spacing: -0.2px;
-      color: var(--creme);
+      color: var(--text-main);
     }
 
     .brand-title em {
-      color: var(--abs-dourado-claro);
+      color: var(--tag-color);
       font-style: italic;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .brand-subtitle {
       font-size: 10px;
-      color: var(--offwhite);
+      color: var(--text-muted);
       letter-spacing: 0.5px;
     }
 
@@ -264,7 +277,7 @@
       pointer-events: auto;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     /* Theme Switcher Dots */
@@ -282,9 +295,9 @@
 
     .theme-label {
       font-size: 9px;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 1.5px;
-      color: var(--abs-dourado-claro);
+      color: var(--tag-color);
       margin-right: 2px;
     }
 
@@ -292,13 +305,13 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      border: 1.5px solid rgba(255,255,255,0.25);
+      border: 1.5px solid rgba(0, 0, 0, 0.25);
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .theme-picker-header button:hover {
-      transform: scale(1.2);
+      transform: scale(1.25);
       box-shadow: 0 0 8px var(--abs-dourado);
     }
 
@@ -306,8 +319,8 @@
       background: var(--panel-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--panel-border);
-      color: var(--creme);
-      padding: 10px 18px;
+      color: var(--text-main);
+      padding: 10px 16px;
       border-radius: var(--radius);
       font-size: 12px;
       font-weight: 600;
@@ -321,14 +334,14 @@
     }
 
     .btn-action:hover {
-      background: rgba(197, 157, 74, 0.15);
+      background: rgba(197, 157, 74, 0.25);
       border-color: var(--abs-dourado);
       transform: translateY(-2px);
     }
 
     .btn-action.primary {
       background: linear-gradient(135deg, var(--abs-dourado), var(--abs-dourado-claro));
-      color: var(--abs-preto);
+      color: #111111;
       border: none;
       font-weight: 700;
       box-shadow: 0 4px 20px var(--accent-glow);
@@ -337,6 +350,13 @@
     .btn-action.primary:hover {
       background: linear-gradient(135deg, var(--abs-dourado-claro), var(--abs-dourado));
       box-shadow: 0 6px 25px rgba(197, 157, 74, 0.6);
+    }
+
+    .btn-action.render-active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
     }
 
     /* Left Control Sidebar */
@@ -359,7 +379,7 @@
 
     .sidebar-tabs {
       display: flex;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0,0,0,0.15);
       border-bottom: 1px solid var(--panel-border);
       padding: 6px;
       gap: 4px;
@@ -370,7 +390,7 @@
       padding: 10px 4px;
       background: transparent;
       border: none;
-      color: var(--offwhite);
+      color: var(--text-muted);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.5px;
@@ -388,14 +408,14 @@
     }
 
     .tab-btn:hover {
-      color: var(--creme);
-      background: rgba(197, 157, 74, 0.1);
+      color: var(--text-main);
+      background: rgba(197, 157, 74, 0.15);
     }
 
     .tab-btn.active {
       background: var(--card-bg);
-      color: var(--abs-dourado-claro);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      color: var(--tag-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       border: 1px solid var(--linha);
     }
 
@@ -423,24 +443,24 @@
       width: 100%;
     }
 
-    /* Section Tag (ClicStore Brand Book Pattern) */
+    /* Section Tag (HIGH-CONTRAST BRAND BOOK PATTERN) */
     .section-tag {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: var(--abs-dourado);
-      font-size: 10px;
+      color: var(--tag-color);
+      font-size: 11px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 6px;
     }
 
     .section-tag::before {
       content: "";
       width: 16px;
-      height: 1px;
-      background: var(--abs-dourado);
+      height: 2px;
+      background: var(--tag-color);
     }
 
     /* List of Blender Models */
@@ -464,13 +484,13 @@
 
     .model-item-card:hover {
       background: var(--card-hover);
-      border-color: var(--abs-dourado);
+      border-color: var(--tag-color);
       transform: translateX(4px);
     }
 
     .model-item-card.active {
-      border-color: var(--abs-dourado);
-      background: rgba(197, 157, 74, 0.18);
+      border-color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.22);
       box-shadow: 0 0 15px var(--accent-glow);
     }
 
@@ -489,23 +509,23 @@
 
     .model-name {
       font-size: 13px;
-      font-weight: 600;
-      color: var(--creme);
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     .model-type-tag {
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 12px;
-      background: rgba(197, 157, 74, 0.15);
-      font-weight: 600;
-      color: var(--abs-dourado-claro);
+      background: rgba(197, 157, 74, 0.2);
+      font-weight: 700;
+      color: var(--text-main);
       border: 1px solid var(--linha);
     }
 
     .model-item-card.active .model-type-tag {
       background: var(--abs-dourado);
-      color: var(--abs-preto);
+      color: #111111;
       border: none;
     }
 
@@ -532,20 +552,20 @@
 
     .option-card:hover {
       background: var(--card-hover);
-      border-color: var(--abs-dourado);
+      border-color: var(--tag-color);
       transform: translateY(-2px);
     }
 
     .option-card.active {
-      border-color: var(--abs-dourado);
-      background: rgba(197, 157, 74, 0.18);
+      border-color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.22);
       box-shadow: 0 0 15px var(--accent-glow);
     }
 
     .option-label {
       font-size: 12px;
-      font-weight: 600;
-      color: var(--creme);
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     /* Switch toggle box styling */
@@ -569,8 +589,8 @@
 
     .switch-icon {
       font-size: 18px;
-      color: var(--abs-dourado-claro);
-      background: rgba(197, 157, 74, 0.15);
+      color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.2);
       padding: 8px;
       border-radius: 8px;
       display: flex;
@@ -581,13 +601,13 @@
 
     .switch-title {
       font-size: 13px;
-      font-weight: 600;
-      color: var(--creme);
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     .switch-desc {
       font-size: 11px;
-      color: var(--offwhite);
+      color: var(--text-muted);
     }
 
     .switch {
@@ -608,16 +628,17 @@
       position: absolute;
       cursor: pointer;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(255,255,255,0.2);
+      background-color: rgba(0,0,0,0.25);
       transition: .3s;
       border-radius: 24px;
+      border: 1px solid var(--linha);
     }
 
     .slider:before {
       position: absolute;
       content: "";
-      height: 18px;
-      width: 18px;
+      height: 16px;
+      width: 16px;
       left: 3px;
       bottom: 3px;
       background-color: white;
@@ -631,11 +652,12 @@
 
     input:checked + .slider:before {
       transform: translateX(20px);
+      background-color: #111111;
     }
 
     /* Dimensions Card */
     .dimensions-card {
-      background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(17, 17, 17, 0.9));
+      background: var(--card-bg);
       border: 1px solid var(--linha);
       border-radius: 14px;
       padding: 16px 18px;
@@ -657,20 +679,20 @@
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      font-weight: 500;
-      color: var(--offwhite);
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
     .dim-label i {
-      color: var(--abs-dourado-claro);
+      color: var(--tag-color);
       font-size: 16px;
     }
 
     .dim-value {
       font-size: 14px;
-      font-weight: 700;
-      color: var(--abs-dourado-claro);
-      background: rgba(197, 157, 74, 0.12);
+      font-weight: 800;
+      color: var(--text-main);
+      background: rgba(197, 157, 74, 0.2);
       padding: 4px 10px;
       border-radius: 8px;
       border: 1px solid var(--linha);
@@ -699,14 +721,14 @@
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
-      font-weight: 600;
-      color: var(--creme);
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     input[type="range"].rot-slider {
       width: 100%;
       height: 6px;
-      background: rgba(197, 157, 74, 0.2);
+      background: rgba(197, 157, 74, 0.25);
       border-radius: 3px;
       outline: none;
       -webkit-appearance: none;
@@ -745,7 +767,7 @@
       border-radius: 50%;
       background: transparent;
       border: none;
-      color: var(--creme);
+      color: var(--text-main);
       font-size: 18px;
       cursor: pointer;
       display: flex;
@@ -755,26 +777,26 @@
     }
 
     .tool-btn:hover {
-      background: rgba(197, 157, 74, 0.15);
-      color: var(--abs-dourado-claro);
+      background: rgba(197, 157, 74, 0.2);
+      color: var(--tag-color);
       transform: scale(1.1);
     }
 
     .tool-btn.active {
       background: var(--abs-dourado);
-      color: var(--abs-preto);
+      color: #111111;
     }
 
     /* 3D Measurement Overlay Callouts */
     .measurement-badge {
       position: absolute;
-      background: rgba(17, 17, 17, 0.92);
+      background: rgba(17, 17, 17, 0.94);
       border: 1px solid var(--abs-dourado);
       color: var(--abs-creme);
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       pointer-events: none;
       transform: translate(-50%, -50%);
       box-shadow: 0 4px 15px rgba(0,0,0,0.6);
@@ -847,7 +869,7 @@
       right: 20px;
       background: var(--panel-bg);
       border: 1px solid var(--abs-dourado);
-      color: var(--creme);
+      color: var(--text-main);
       padding: 12px 20px;
       border-radius: 10px;
       font-size: 13px;
@@ -915,7 +937,7 @@
   <div class="loading-overlay" id="loading-screen">
     <div class="spinner"></div>
     <div style="font-weight: 700; font-size: 15px; color:var(--abs-dourado-claro);">Carregando ClicStore Studio (rodape.glb)...</div>
-    <div style="font-size: 12px; color: var(--offwhite);">Importando malhas 3D e texturas PBR originais...</div>
+    <div style="font-size: 12px; color: var(--abs-offwhite);">Gerando estúdio de iluminação PBR estilo Blender Cycles...</div>
   </div>
 
   <!-- WebGL Canvas Container -->
@@ -945,6 +967,11 @@
     </div>
 
     <div class="header-actions">
+      <!-- RENDERIZADOR REALISTA BLENDER PBR TOGGLE -->
+      <button class="btn-action primary render-active" id="btn-toggle-render" title="Alternar entre Render Realista PBR (Blender) e Estúdio Simples">
+        <i class="ri-sparkles-line"></i> Render Realista (Blender PBR)
+      </button>
+
       <!-- Live ClicStore 5-Theme Switcher -->
       <div class="theme-picker-header">
         <span class="theme-label">TEMA:</span>
@@ -1025,7 +1052,7 @@
           <div class="rot-slider-row">
             <div class="rot-slider-header">
               <span>Giro Eixo X (Cima / Baixo)</span>
-              <span id="lbl-rot-x" style="color:var(--abs-dourado-claro);">270°</span>
+              <span id="lbl-rot-x">270°</span>
             </div>
             <input type="range" id="slider-rot-x" min="0" max="360" step="90" value="270" class="rot-slider">
           </div>
@@ -1033,7 +1060,7 @@
           <div class="rot-slider-row">
             <div class="rot-slider-header">
               <span>Giro Eixo Y (Frente / Trás)</span>
-              <span id="lbl-rot-y" style="color:var(--abs-dourado-claro);">180°</span>
+              <span id="lbl-rot-y">180°</span>
             </div>
             <input type="range" id="slider-rot-y" min="0" max="360" step="90" value="180" class="rot-slider">
           </div>
@@ -1041,7 +1068,7 @@
           <div class="rot-slider-row">
             <div class="rot-slider-header">
               <span>Giro Eixo Z (Lado / Lado)</span>
-              <span id="lbl-rot-z" style="color:var(--abs-dourado-claro);">0°</span>
+              <span id="lbl-rot-z">0°</span>
             </div>
             <input type="range" id="slider-rot-z" min="0" max="360" step="90" value="0" class="rot-slider">
           </div>
@@ -1089,7 +1116,7 @@
         <div class="rot-slider-row" style="margin-top: 2px;">
           <div class="rot-slider-header">
             <span>Profundidade do Bisel (45°)</span>
-            <span id="lbl-cut-depth" style="color:var(--abs-dourado-claro);">9 mm</span>
+            <span id="lbl-cut-depth">9 mm</span>
           </div>
           <input type="range" id="slider-cut-depth" min="2" max="50" step="1" value="9" class="rot-slider">
         </div>
@@ -1137,8 +1164,8 @@
         <div class="color-input-wrapper">
           <input type="color" id="inp-custom-color" value="#ffffff">
           <div>
-            <div style="font-size:13px; font-weight:600; color:var(--creme);">Seletor de Cor Customizada</div>
-            <div style="font-size:11px; color:var(--offwhite);">Sobrepor pintura no modelo 3D</div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-main);">Seletor de Cor Customizada</div>
+            <div style="font-size:11px; color:var(--text-muted);">Sobrepor pintura no modelo 3D</div>
           </div>
         </div>
 
@@ -1152,15 +1179,15 @@
         <div class="section-tag">04 · Ambiente Virtual</div>
         <div class="grid-options">
           <div class="option-card active" data-env="studio">
-            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
-              <i class="ri-lightbulb-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
+            <div class="option-preview-box" style="background: #1a1a1a; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-lightbulb-line" style="font-size:20px; color:var(--tag-color);"></i>
             </div>
             <span class="option-label">Estúdio Neutro</span>
           </div>
 
           <div class="option-card" data-env="room">
             <div class="option-preview-box" style="background: linear-gradient(to bottom, #777 50%, #333 50%); display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
-              <i class="ri-home-4-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
+              <i class="ri-home-4-line" style="font-size:20px; color:var(--tag-color);"></i>
             </div>
             <span class="option-label">Parede + Piso Real</span>
           </div>
@@ -1169,15 +1196,15 @@
         <div class="section-tag" style="margin-top: 8px;">Modo de Instalação de Canto</div>
         <div class="grid-options">
           <div class="option-card active" data-corner="single">
-            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
-              <i class="ri-subtract-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
+            <div class="option-preview-box" style="background: #1a1a1a; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-subtract-line" style="font-size:20px; color:var(--tag-color);"></i>
             </div>
             <span class="option-label">Barra Reta</span>
           </div>
 
           <div class="option-card" data-corner="miter">
-            <div class="option-preview-box" style="background: #1e2430; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
-              <i class="ri-corner-down-right-line" style="font-size:20px; color:var(--abs-dourado-claro);"></i>
+            <div class="option-preview-box" style="background: #1a1a1a; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-corner-down-right-line" style="font-size:20px; color:var(--tag-color);"></i>
             </div>
             <span class="option-label">Canto 90° (Corte 45°)</span>
           </div>
@@ -1187,8 +1214,8 @@
         <div class="color-input-wrapper">
           <input type="color" id="inp-wall-color" value="#dedede">
           <div>
-            <div style="font-size:13px; font-weight:600; color:var(--creme);">Tinta da Parede</div>
-            <div style="font-size:11px; color:var(--offwhite);">Cor do ambiente</div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-main);">Tinta da Parede</div>
+            <div style="font-size:11px; color:var(--text-muted);">Cor do ambiente</div>
           </div>
         </div>
       </div>
@@ -1219,17 +1246,17 @@
   <div class="modal-overlay" id="upload-modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size:16px; font-weight:700; color:var(--creme);">Carregar Novo Arquivo .GLB</h3>
-        <i class="ri-close-line" id="btn-close-modal" style="font-size:22px; cursor:pointer; color:var(--offwhite);"></i>
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">Carregar Novo Arquivo .GLB</h3>
+        <i class="ri-close-line" id="btn-close-modal" style="font-size:22px; cursor:pointer; color:var(--text-muted);"></i>
       </div>
-      <p style="font-size:12px; color:var(--offwhite);">
+      <p style="font-size:12px; color:var(--text-muted);">
         Arraste outro arquivo <b>.GLB</b> exportado do Blender para atualizar o catálogo ClicStore Studio.
       </p>
 
       <div class="dropzone" id="dropzone">
-        <i class="ri-file-3-line" style="font-size:40px; color:var(--abs-dourado-claro);"></i>
-        <div style="margin-top:10px; font-weight:600; font-size:13px; color:var(--creme);">Arraste o arquivo .glb aqui</div>
-        <div style="font-size:11px; color:var(--offwhite); margin-top:4px;">ou clique para selecionar do computador</div>
+        <i class="ri-file-3-line" style="font-size:40px; color:var(--tag-color);"></i>
+        <div style="margin-top:10px; font-weight:700; font-size:13px; color:var(--text-main);">Arraste o arquivo .glb aqui</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">ou clique para selecionar do computador</div>
         <input type="file" id="file-input" accept=".glb,.gltf" style="display:none;">
       </div>
     </div>
@@ -1237,11 +1264,11 @@
 
   <!-- Toast Message -->
   <div class="toast" id="toast-msg">
-    <i class="ri-checkbox-circle-fill" style="font-size:18px; color:var(--abs-dourado-claro);"></i>
+    <i class="ri-checkbox-circle-fill" style="font-size:18px; color:var(--abs-dourado);"></i>
     <span id="toast-text">Foto HD gerada com sucesso!</span>
   </div>
 
-  <!-- THREE.JS and ORBIT CONTROLS VIA ES MODULES -->
+  <!-- THREE.JS, ORBIT CONTROLS, GLTF LOADER, AND ROOMENVIRONMENT REALISTIC RENDERER -->
   <script type="importmap">
     {
       "imports": {
@@ -1255,6 +1282,7 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
     // --- GLOBAL STATE ---
     const state = {
@@ -1271,7 +1299,8 @@
       environment: 'studio',
       wallColor: '#dedede',
       cornerMode: 'single', // single or miter (Canto 90° Meia Esquadria)
-      multiModelMode: true // Default: show all 8 side-by-side as in Blender!
+      multiModelMode: true, // Default: show all 8 side-by-side as in Blender!
+      realisticRender: true // DEFAULT: Photorealistic Blender PBR environment ON!
     };
 
     // Metadata for the 8 Blender objects
@@ -1300,7 +1329,7 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -1308,6 +1337,36 @@
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2 + 0.02;
     controls.target.set(1.1, 0.4, 0);
+
+    // --- BLENDER REALISTIC PBR ENVIRONMENT GENERATOR (RoomEnvironment HDRI) ---
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    const roomEnvironment = new RoomEnvironment(renderer);
+    const pbrStudioTexture = pmremGenerator.fromScene(roomEnvironment).texture;
+
+    // Apply HDRI Environment Map for Blender-level realistic PBR reflections & lighting
+    if (state.realisticRender) {
+      scene.environment = pbrStudioTexture;
+    }
+
+    // Toggle Realistic Renderer
+    document.getElementById('btn-toggle-render').addEventListener('click', () => {
+      state.realisticRender = !state.realisticRender;
+      const btn = document.getElementById('btn-toggle-render');
+      if (state.realisticRender) {
+        scene.environment = pbrStudioTexture;
+        renderer.toneMappingExposure = 1.35;
+        btn.classList.add('render-active');
+        btn.innerHTML = '<i class="ri-sparkles-line"></i> Render Realista (Blender PBR)';
+        showToast('Render Realista PBR (Blender Cycles/EEVEE) ATIVADO!');
+      } else {
+        scene.environment = null;
+        renderer.toneMappingExposure = 1.0;
+        btn.classList.remove('render-active');
+        btn.innerHTML = '<i class="ri-lightbulb-line"></i> Render Padrão';
+        showToast('Render Padrão ATIVADO!');
+      }
+    });
 
     // Dynamic Theme Functionality attached to Window for ClicStore Brand Identity
     window.setTheme = function(theme) {
@@ -1353,7 +1412,7 @@
 
     // Ground Floor
     const floorGeo = new THREE.PlaneGeometry(20, 20);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 });
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8, metalness: 0.1 });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.rotation.x = -Math.PI / 2;
     floorMesh.receiveShadow = true;
@@ -1401,7 +1460,7 @@
     roomFloorTex.wrapS = THREE.RepeatWrapping;
     roomFloorTex.wrapT = THREE.RepeatWrapping;
     roomFloorTex.repeat.set(8,8);
-    const roomFloorMat = new THREE.MeshStandardMaterial({ map: roomFloorTex, roughness: 0.35 });
+    const roomFloorMat = new THREE.MeshStandardMaterial({ map: roomFloorTex, roughness: 0.35, metalness: 0.05 });
     const roomFloorMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), roomFloorMat);
     roomFloorMesh.rotation.x = -Math.PI / 2;
     roomFloorMesh.position.set(0, 0, 10);
