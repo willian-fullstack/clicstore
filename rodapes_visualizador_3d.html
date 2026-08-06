@@ -744,6 +744,55 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
+    /* Floor Texture Selector Cards */
+    .floor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .floor-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .floor-card:hover {
+      background: var(--card-hover);
+      border-color: var(--tag-color);
+      transform: translateY(-2px);
+    }
+
+    .floor-card.active {
+      border-color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.25);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .floor-thumb {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--linha);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .floor-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
     /* Bottom Quick Toolbar */
     .bottom-toolbar {
       position: absolute;
@@ -1016,7 +1065,7 @@
       </button>
 
       <button class="tab-btn" data-tab="scene">
-        <i class="ri-sun-line"></i> Cenário
+        <i class="ri-sun-line"></i> Cenário & Piso
       </button>
     </nav>
 
@@ -1197,7 +1246,7 @@
         </button>
       </div>
 
-      <!-- TAB 4: CENÁRIO & LUZ -->
+      <!-- TAB 4: CENÁRIO & PISO -->
       <div class="tab-pane" style="display:none;" id="tab-scene">
         <div class="section-tag">04 · Ambiente Virtual</div>
         <div class="grid-options">
@@ -1215,6 +1264,46 @@
             <span class="option-label">Parede + Piso Real</span>
           </div>
         </div>
+
+        <!-- SELETOR EM TEMPO REAL DE TEXTURAS DE PISO -->
+        <div class="section-tag" style="margin-top: 8px;">Textura do Piso (Tempo Real)</div>
+
+        <div class="floor-grid">
+          <div class="floor-card active" data-floor-type="parquet">
+            <div class="floor-thumb" id="thumb-parquet" style="background:#b8895e;"></div>
+            <span class="floor-label">Parquet Espinha</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="oak">
+            <div class="floor-thumb" id="thumb-oak" style="background:#d4a373;"></div>
+            <span class="floor-label">Laminado Carvalho</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="wenge">
+            <div class="floor-thumb" id="thumb-wenge" style="background:#382013;"></div>
+            <span class="floor-label">Vinílico Wengé</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="carrara">
+            <div class="floor-thumb" id="thumb-carrara" style="background:#eef2f5;"></div>
+            <span class="floor-label">Mármore Carrara</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="marquina">
+            <div class="floor-thumb" id="thumb-marquina" style="background:#1a1a1a;"></div>
+            <span class="floor-label">Mármore Preto</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="concrete">
+            <div class="floor-thumb" id="thumb-concrete" style="background:#a0a5aa;"></div>
+            <span class="floor-label">Cimento Queimado</span>
+          </div>
+        </div>
+
+        <button class="btn-action" id="btn-upload-floor" style="margin-top:4px; width:100%; justify-content:center;">
+          <i class="ri-image-add-line"></i> Carregar Foto de Piso (.JPG/.PNG)
+        </button>
+        <input type="file" id="inp-floor-file" accept="image/*" style="display:none;">
 
         <div class="section-tag" style="margin-top: 8px;">Modo de Instalação de Canto</div>
         <div class="grid-options">
@@ -1262,7 +1351,7 @@
 
         <div class="section-tag" style="margin-top: 8px;">Cor da Parede do Ambiente</div>
         <div class="color-input-wrapper">
-          <input type="color" id="inp-wall-color" value="#dedede">
+          <input type="color" id="inp-wall-color" value="#888888">
           <div>
             <div style="font-size:13px; font-weight:700; color:var(--text-main);">Tinta da Parede</div>
             <div style="font-size:11px; color:var(--text-muted);">Cor do ambiente</div>
@@ -1347,7 +1436,8 @@
       userRotY: 180, // DEFAULT: 180° Y
       userRotZ: 0,   // DEFAULT: 0° Z
       environment: 'studio',
-      wallColor: '#dedede',
+      wallColor: '#888888',
+      floorType: 'parquet',   // parquet, oak, wenge, carrara, marquina, concrete
       cornerMode: 'single', // single or miter (Canto 90° Meia Esquadria)
       multiModelMode: true, // Default: show all 8 side-by-side as in Blender!
       realisticRender: true, // DEFAULT: Photorealistic Blender PBR environment ON!
@@ -1395,11 +1485,6 @@
     pmremGenerator.compileEquirectangularShader();
     const roomEnvironment = new RoomEnvironment(renderer);
     const pbrStudioTexture = pmremGenerator.fromScene(roomEnvironment).texture;
-
-    // ALWAYS keep HDRI Environment map active when realisticRender is ON to preserve PBR textures & prevent black meshes!
-    if (state.realisticRender) {
-      scene.environment = pbrStudioTexture;
-    }
 
     // Dynamic Theme Functionality for ClicStore Brand Identity
     function applyTheme(theme) {
@@ -1482,36 +1567,251 @@
     sideWall.receiveShadow = true;
     roomGroup.add(sideWall);
 
-    // Room Floor (Parquet / Tile extending forward from Z = 0)
-    const roomFloorCanvas = document.createElement('canvas');
-    roomFloorCanvas.width = 512;
-    roomFloorCanvas.height = 512;
-    const rctx = roomFloorCanvas.getContext('2d');
-    rctx.fillStyle = '#b8895e';
-    rctx.fillRect(0,0,512,512);
-    rctx.fillStyle = '#9b6d45';
-    for(let i=0; i<512; i+=64) {
-      for(let j=0; j<512; j+=64) {
-        if((i+j)%128===0) rctx.fillRect(i,j,64,64);
+    // --- PROCEDURAL HIGH-DEFINITION FLOOR TEXTURE GENERATORS ---
+
+    // 1. Parquet Espinha de Peixe (Herringbone Wood)
+    function createParquetTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#b8895e';
+      ctx.fillRect(0,0,512,512);
+      ctx.fillStyle = '#9b6d45';
+      for(let i=0; i<512; i+=64) {
+        for(let j=0; j<512; j+=64) {
+          if((i+j)%128===0) ctx.fillRect(i,j,64,64);
+        }
       }
+      ctx.strokeStyle = 'rgba(60,40,20,0.3)';
+      ctx.lineWidth = 2;
+      for(let i=0; i<=512; i+=64) {
+        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,512); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(512,i); ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(8,8);
+      return { tex, roughness: 0.35, metalness: 0.05, bgThumb: '#b8895e' };
     }
-    const roomFloorTex = new THREE.CanvasTexture(roomFloorCanvas);
-    roomFloorTex.wrapS = THREE.RepeatWrapping;
-    roomFloorTex.wrapT = THREE.RepeatWrapping;
-    roomFloorTex.repeat.set(8,8);
-    const roomFloorMat = new THREE.MeshStandardMaterial({ map: roomFloorTex, roughness: 0.35, metalness: 0.05 });
+
+    // 2. Laminado Carvalho Claro (Straight Oak Wood Planks)
+    function createOakTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#d4a373';
+      ctx.fillRect(0,0,512,512);
+      for(let y=0; y<512; y+=128) {
+        ctx.fillStyle = (y%256===0)? '#c79260' : '#e0b080';
+        ctx.fillRect(0, y, 512, 126);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(0, y+126, 512, 2);
+      }
+      // Grain lines
+      ctx.strokeStyle = 'rgba(100,60,30,0.15)';
+      ctx.lineWidth = 1;
+      for(let i=0; i<512; i+=8) {
+        ctx.beginPath();
+        ctx.moveTo(0, i + Math.sin(i*0.1)*4);
+        ctx.lineTo(512, i + Math.sin(i*0.1)*4);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6,6);
+      return { tex, roughness: 0.30, metalness: 0.05, bgThumb: '#d4a373' };
+    }
+
+    // 3. Vinílico Wengé Escuro (Dark Walnut Wood Planks)
+    function createWengeTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#2b1a11';
+      ctx.fillRect(0,0,512,512);
+      for(let y=0; y<512; y+=128) {
+        ctx.fillStyle = (y%256===0)? '#1f120b' : '#382217';
+        ctx.fillRect(0, y, 512, 126);
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(0, y+126, 512, 2);
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6,6);
+      return { tex, roughness: 0.25, metalness: 0.08, bgThumb: '#382013' };
+    }
+
+    // 4. Mármore Carrara Branco (White Carrara Marble with Grey Veins)
+    function createCarraraTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#f4f6f8';
+      ctx.fillRect(0,0,512,512);
+      // Soft marble veins
+      ctx.strokeStyle = 'rgba(160,175,190,0.35)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(30,0); ctx.bezierCurveTo(150,120, 80,300, 300,512);
+      ctx.moveTo(200,0); ctx.bezierCurveTo(350,180, 220,380, 512,420);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(120,135,150,0.2)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0,100); ctx.bezierCurveTo(200,80, 400,300, 512,250);
+      ctx.stroke();
+
+      // Grout lines for 60x60 tiles
+      ctx.strokeStyle = 'rgba(200,205,210,0.6)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0,0,512,512);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(5,5);
+      return { tex, roughness: 0.12, metalness: 0.15, bgThumb: '#eef2f5' };
+    }
+
+    // 5. Mármore Preto Marquina (Black Marble with White/Gold Veins)
+    function createMarquinaTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#141414';
+      ctx.fillRect(0,0,512,512);
+      // White & Gold veins
+      ctx.strokeStyle = 'rgba(240,240,240,0.65)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0,40); ctx.bezierCurveTo(180,140, 220,320, 512,480);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(197,157,74,0.55)'; // Gold vein!
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(120,0); ctx.bezierCurveTo(280,180, 380,260, 450,512);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(35,35,35,0.8)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0,0,512,512);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(5,5);
+      return { tex, roughness: 0.10, metalness: 0.20, bgThumb: '#1a1a1a' };
+    }
+
+    // 6. Porcelanato Cimento Queimado (Polished Light Microcement)
+    function createConcreteTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#a0a5aa';
+      ctx.fillRect(0,0,512,512);
+      // Concrete clouding
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      for(let i=0; i<40; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random()*512, Math.random()*512, 30+Math.random()*60, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.05)';
+      for(let i=0; i<40; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random()*512, Math.random()*512, 30+Math.random()*60, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = 'rgba(120,125,130,0.5)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0,0,512,512);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6,6);
+      return { tex, roughness: 0.40, metalness: 0.05, bgThumb: '#a0a5aa' };
+    }
+
+    // Room Floor Material Setup
+    const defaultFloorData = createParquetTexture();
+    const roomFloorMat = new THREE.MeshStandardMaterial({
+      map: defaultFloorData.tex,
+      roughness: defaultFloorData.roughness,
+      metalness: defaultFloorData.metalness
+    });
+
     const roomFloorMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), roomFloorMat);
     roomFloorMesh.rotation.x = -Math.PI / 2;
     roomFloorMesh.position.set(0, 0, 10);
     roomFloorMesh.receiveShadow = true;
     roomGroup.add(roomFloorMesh);
 
+    // Dynamic Floor Texture Switcher Function
+    function applyFloorTexture(type, customImgElement = null) {
+      state.floorType = type;
+      let floorData;
+
+      if (type === 'parquet') floorData = createParquetTexture();
+      else if (type === 'oak') floorData = createOakTexture();
+      else if (type === 'wenge') floorData = createWengeTexture();
+      else if (type === 'carrara') floorData = createCarraraTexture();
+      else if (type === 'marquina') floorData = createMarquinaTexture();
+      else if (type === 'concrete') floorData = createConcreteTexture();
+      else if (type === 'custom' && customImgElement) {
+        const tex = new THREE.CanvasTexture(customImgElement);
+        tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(6,6);
+        floorData = { tex: tex, roughness: 0.3, metalness: 0.05 };
+      }
+
+      if (floorData) {
+        roomFloorMat.map = floorData.tex;
+        roomFloorMat.roughness = floorData.roughness;
+        roomFloorMat.metalness = floorData.metalness;
+        roomFloorMat.needsUpdate = true;
+      }
+    }
+
+    // Bind Floor Selector UI Cards
+    document.querySelectorAll('[data-floor-type]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-floor-type]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        const type = card.getAttribute('data-floor-type');
+        applyFloorTexture(type);
+        showToast(`Piso alterado em tempo real!`);
+      });
+    });
+
+    // Custom Floor Image File Upload
+    const btnUploadFloor = document.getElementById('btn-upload-floor');
+    const inpFloorFile = document.getElementById('inp-floor-file');
+
+    btnUploadFloor.addEventListener('click', () => inpFloorFile.click());
+    inpFloorFile.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const img = new Image();
+          img.onload = () => {
+            document.querySelectorAll('[data-floor-type]').forEach(c => c.classList.remove('active'));
+            applyFloorTexture('custom', img);
+            showToast('Foto de piso customizada aplicada!');
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
     // --- REALISTIC 3D CORNER FLOOR LAMP (LUMINÁRIA DE CANTO DE PISO PBR) ---
     const lampGroup = new THREE.Group();
 
-    // 1. Lamp Base
-    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.95, roughness: 0.15 });
-    const lampBrassMat = new THREE.MeshStandardMaterial({ color: 0xc59d4a, metalness: 0.9, roughness: 0.2 });
+    // 1. Lamp Base (Elegant Brushed Bronze Metal Plate)
+    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x3d352a, metalness: 0.85, roughness: 0.25 });
+    const lampBrassMat = new THREE.MeshStandardMaterial({ color: 0xc59d4a, metalness: 0.85, roughness: 0.25 });
     
     const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.02, 32), lampBaseMat);
     baseMesh.position.y = 0.01;
@@ -1550,23 +1850,29 @@
     lampGroup.add(bulbMesh);
 
     // 6. THREE.JS PHYSICAL PBR LIGHT SOURCES
-    const lampPointLight = new THREE.PointLight(new THREE.Color(state.lampColor), 15.0, 8.0, 2.0);
-    lampPointLight.position.set(0, 1.25, 0);
+    const lampPointLight = new THREE.PointLight(new THREE.Color(state.lampColor), 20.0, 10.0, 2.0);
+    lampPointLight.position.set(0.1, 1.25, 0.3); // Positioned slightly in front of shade so it casts light DIRECTLY ONTO baseboard face!
     lampPointLight.castShadow = true;
     lampPointLight.shadow.mapSize.width = 2048;
     lampPointLight.shadow.mapSize.height = 2048;
     lampPointLight.shadow.bias = -0.0002;
     lampGroup.add(lampPointLight);
 
-    const lampSpotLight = new THREE.SpotLight(new THREE.Color(state.lampColor), 25.0, 10.0, Math.PI / 2.2, 0.4, 2.0);
-    lampSpotLight.position.set(0, 1.25, 0);
+    const lampSpotLight = new THREE.SpotLight(new THREE.Color(state.lampColor), 35.0, 10.0, Math.PI / 2.0, 0.5, 2.0);
+    lampSpotLight.position.set(0, 1.25, 0.2);
     lampSpotLight.castShadow = true;
     lampGroup.add(lampSpotLight);
 
+    // Dedicated Spotlight Target pointing DIRECTLY AT THE BASEBOARD CENTER!
     const spotTarget = new THREE.Object3D();
-    spotTarget.position.set(0, 0, 0);
+    spotTarget.position.set(0.40, 0.10, 0.0);
     lampGroup.add(spotTarget);
     lampSpotLight.target = spotTarget;
+
+    // Dedicated Stem & Base illumination light source
+    const lampStemLight = new THREE.PointLight(new THREE.Color(state.lampColor), 8.0, 4.0, 2.0);
+    lampStemLight.position.set(0, 0.50, 0);
+    lampGroup.add(lampStemLight);
 
     roomGroup.add(lampGroup);
 
@@ -1727,7 +2033,7 @@
       };
     }
 
-    // Update Lighting Balance & Custom Lamp Color / Intensity
+    // Update Lighting Balance & Custom Lamp Color / Intensity (PERFECT HARMONIOUS WALL & BASEBOARD ILLUMINATION)
     function updateLightingBalance() {
       const col = new THREE.Color(state.lampColor);
       const intensityFactor = (state.lampIntensity / 100);
@@ -1735,51 +2041,65 @@
       // Copy exact color to Three.js light instances
       lampPointLight.color.copy(col);
       lampSpotLight.color.copy(col);
+      lampStemLight.color.copy(col);
       shadeMat.emissive.copy(col);
 
-      // Realistic Render (PBR HDRI Studio) vs Standard Render
       if (state.realisticRender) {
-        scene.environment = pbrStudioTexture;
-
         if (state.environment === 'room') {
-          // Balanced ambient light so PBR textures (wood grain, white gloss, MDF) stay 100% visible and vivid!
-          ambientLight.intensity = 0.6;
-          ambientLight.color.setHex(0xffffff);
-          mainLight.intensity = 1.0;
-          fillLight.intensity = 0.4;
-          rimLight.intensity = 0.5;
+          // REALISTIC INTERIOR ROOM ILLUMINATION:
+          scene.environment = pbrStudioTexture;
+          renderer.toneMappingExposure = 0.50 + 0.40 * intensityFactor; // Exposure increases dynamically!
 
-          // ABAJUR / LAMP VISIBLE IN REALISTIC ROOM MODE!
+          // Balanced Ambient and Main Lights
+          ambientLight.intensity = 0.08 + 0.22 * intensityFactor;
+          ambientLight.color.setHex(0xffffff);
+
+          mainLight.intensity = 0.10 + 0.50 * intensityFactor;
+          mainLight.position.set(2, 4, 3);
+          fillLight.intensity = 0.05 + 0.25 * intensityFactor;
+          rimLight.intensity = 0.05 + 0.25 * intensityFactor;
+
           lampGroup.visible = true;
 
-          lampPointLight.intensity = 15.0 * intensityFactor;
-          lampSpotLight.intensity = 25.0 * intensityFactor;
-          shadeMat.emissiveIntensity = 2.0 * intensityFactor;
+          // Lamp lights beaming DIRECTLY ONTO THE BASEBOARD & WALL HARMONIOUSLY!
+          lampPointLight.intensity = 60.0 * intensityFactor;
+          lampSpotLight.intensity = 80.0 * intensityFactor;
+          lampStemLight.intensity = 15.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 4.0 * intensityFactor;
+
         } else {
-          // Studio environment mode
+          // Studio environment mode (Bright PBR HDRI studio)
+          scene.environment = pbrStudioTexture;
+          renderer.toneMappingExposure = 1.2;
+
           ambientLight.intensity = 0.95;
           ambientLight.color.setHex(0xffffff);
           mainLight.intensity = 2.2;
+          mainLight.position.set(3, 6, 4);
           fillLight.intensity = 0.9;
           rimLight.intensity = 1.4;
 
           lampGroup.visible = false;
           lampPointLight.intensity = 0;
           lampSpotLight.intensity = 0;
+          lampStemLight.intensity = 0;
         }
       } else {
         // STANDARD RENDER MODE (RENDER PADRÃO):
         scene.environment = null;
+        renderer.toneMappingExposure = 1.2;
+
         ambientLight.intensity = 0.95;
         ambientLight.color.setHex(0xffffff);
         mainLight.intensity = 2.2;
+        mainLight.position.set(3, 6, 4);
         fillLight.intensity = 0.9;
         rimLight.intensity = 1.4;
 
-        // HIDE ABAJUR / LAMP COMPLETELY IN RENDER PADRÃO!
         lampGroup.visible = false;
         lampPointLight.intensity = 0;
         lampSpotLight.intensity = 0;
+        lampStemLight.intensity = 0;
       }
     }
 
