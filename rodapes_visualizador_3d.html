@@ -1349,25 +1349,6 @@
       scene.environment = pbrStudioTexture;
     }
 
-    // Toggle Realistic Renderer
-    document.getElementById('btn-toggle-render').addEventListener('click', () => {
-      state.realisticRender = !state.realisticRender;
-      const btn = document.getElementById('btn-toggle-render');
-      if (state.realisticRender) {
-        scene.environment = pbrStudioTexture;
-        renderer.toneMappingExposure = 1.35;
-        btn.classList.add('render-active');
-        btn.innerHTML = '<i class="ri-sparkles-line"></i> Render Realista (Blender PBR)';
-        showToast('Render Realista PBR (Blender Cycles/EEVEE) ATIVADO!');
-      } else {
-        scene.environment = null;
-        renderer.toneMappingExposure = 1.0;
-        btn.classList.remove('render-active');
-        btn.innerHTML = '<i class="ri-lightbulb-line"></i> Render Padrão';
-        showToast('Render Padrão ATIVADO!');
-      }
-    });
-
     // Dynamic Theme Functionality attached to Window for ClicStore Brand Identity
     window.setTheme = function(theme) {
       document.documentElement.setAttribute('data-theme', theme);
@@ -1466,6 +1447,96 @@
     roomFloorMesh.position.set(0, 0, 10);
     roomFloorMesh.receiveShadow = true;
     roomGroup.add(roomFloorMesh);
+
+    // --- REALISTIC 3D CORNER FLOOR LAMP (LUMINÁRIA DE CANTO DE PISO) ---
+    const lampGroup = new THREE.Group();
+
+    // 1. Lamp Base
+    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.9, roughness: 0.2 });
+    const lampBrassMat = new THREE.MeshStandardMaterial({ color: 0xc59d4a, metalness: 0.9, roughness: 0.2 });
+    
+    const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.02, 32), lampBaseMat);
+    baseMesh.position.y = 0.01;
+    baseMesh.castShadow = true;
+    baseMesh.receiveShadow = true;
+    lampGroup.add(baseMesh);
+
+    // 2. Vertical Brass Stem
+    const stemMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 1.4, 16), lampBrassMat);
+    stemMesh.position.y = 0.71;
+    stemMesh.castShadow = true;
+    lampGroup.add(stemMesh);
+
+    // 3. Brass Joint Ring
+    const jointMesh = new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 16), lampBrassMat);
+    jointMesh.position.y = 1.41;
+    lampGroup.add(jointMesh);
+
+    // 4. Lamp Shade (Abajur / Luminária de Canto)
+    const shadeMat = new THREE.MeshStandardMaterial({
+      color: 0xfff5e6,
+      emissive: 0xffb84d,
+      emissiveIntensity: 2.5,
+      roughness: 0.3,
+      side: THREE.DoubleSide
+    });
+    const shadeMesh = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.25, 32, 1, true), shadeMat);
+    shadeMesh.position.set(0, 1.32, 0.08);
+    shadeMesh.rotation.x = Math.PI / 6; // Angled slightly towards the baseboard corner!
+    lampGroup.add(shadeMesh);
+
+    // 5. Emissive Bulb Core
+    const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.038, 16, 16), bulbMat);
+    bulbMesh.position.set(0, 1.30, 0.08);
+    lampGroup.add(bulbMesh);
+
+    // 6. Warm PointLight (Radiating Warm Gold Light from Lamp Shade)
+    const lampPointLight = new THREE.PointLight(0xffdfa3, 6.0, 7.5, 1.4);
+    lampPointLight.position.set(0, 1.28, 0.08);
+    lampPointLight.castShadow = true;
+    lampPointLight.shadow.mapSize.width = 2048;
+    lampPointLight.shadow.mapSize.height = 2048;
+    lampPointLight.shadow.bias = -0.0002;
+    lampGroup.add(lampPointLight);
+
+    // 7. SpotLight aiming directly at baseboard corner junction
+    const lampSpotLight = new THREE.SpotLight(0xffe6b3, 9.0, 8.0, Math.PI / 2.2, 0.4, 1.2);
+    lampSpotLight.position.set(0, 1.28, 0.08);
+    lampSpotLight.castShadow = true;
+    lampGroup.add(lampSpotLight);
+
+    const spotTarget = new THREE.Object3D();
+    spotTarget.position.set(-0.35, 0.05, -0.35);
+    lampGroup.add(spotTarget);
+    lampSpotLight.target = spotTarget;
+
+    roomGroup.add(lampGroup);
+
+    // Toggle Realistic Renderer
+    document.getElementById('btn-toggle-render').addEventListener('click', () => {
+      state.realisticRender = !state.realisticRender;
+      const btn = document.getElementById('btn-toggle-render');
+      if (state.realisticRender) {
+        scene.environment = pbrStudioTexture;
+        renderer.toneMappingExposure = 1.35;
+        lampGroup.visible = true;
+        lampPointLight.intensity = 6.0;
+        lampSpotLight.intensity = 9.0;
+        btn.classList.add('render-active');
+        btn.innerHTML = '<i class="ri-sparkles-line"></i> Render Realista (Blender PBR)';
+        showToast('Render Realista PBR com Luminária de Canto ATIVADO!');
+      } else {
+        scene.environment = null;
+        renderer.toneMappingExposure = 1.0;
+        lampGroup.visible = false;
+        lampPointLight.intensity = 0;
+        lampSpotLight.intensity = 0;
+        btn.classList.remove('render-active');
+        btn.innerHTML = '<i class="ri-lightbulb-line"></i> Render Padrão';
+        showToast('Render Padrão ATIVADO!');
+      }
+    });
 
     // --- MAIN 3D BASEBOARD GROUP ---
     const mainGroup = new THREE.Group();
@@ -1747,8 +1818,9 @@
           selected.center = newCenter;
           selected.size = newSize;
 
-          // Position room side wall flush at the left corner edge of baseboard
+          // Position room side wall & corner floor lamp flush at the left corner edge of baseboard
           sideWall.position.set(newBbox.min.x, 4, 10);
+          lampGroup.position.set(newBbox.min.x + 0.45, 0, 0.45);
 
           // Handle 90° Miter Corner Mode (Canto de Parede em Meia Esquadria 45°)
           if (isCornerMiter) {
@@ -1792,8 +1864,8 @@
           // Camera focus target
           if (state.environment === 'room') {
             if (isCornerMiter) {
-              camera.position.set(newBbox.min.x + 0.6, h + 0.35, 1.2);
-              controls.target.set(newBbox.min.x, h / 2, 0.3);
+              camera.position.set(newBbox.min.x + 0.7, h + 0.45, 1.45);
+              controls.target.set(newBbox.min.x, h / 2, 0.35);
             } else {
               camera.position.set(0.6, h + 0.25, 1.1);
               controls.target.set(0, h / 2, 0.2);
