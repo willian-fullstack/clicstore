@@ -2171,7 +2171,7 @@
       updateMeasurements();
     }
 
-    // --- 3D MEASUREMENT CALLOUTS (ARCHITECTURAL COTAS) ---
+    // --- 3D MEASUREMENT CALLOUTS (OFFSET 2D TEXT BADGES SO THEY FLOAT ABOVE/BESIDE 3D ARROWS) ---
     function updateMeasurements() {
       const hBadge = document.getElementById('measure-height');
       const tBadge = document.getElementById('measure-thickness');
@@ -2192,8 +2192,13 @@
 
       if (dimPoints) {
         projectToBadge(dimPoints.hPoint, hBadge);
-        projectToBadge(dimPoints.cPoint, lBadge); // COMPRIMENTO (90 cm) -> LARGEST DIMENSION LINE ON RIGHT SIDE!
-        projectToBadge(dimPoints.tPoint, tBadge); // ESPESSURA (9 mm) -> SMALLEST DIMENSION LINE PUSHED OUT WITH CRISP ARROWS!
+        projectToBadge(dimPoints.cPoint, lBadge);
+
+        // OFFSET ESPESSURA BADGE POINT UPWARDS (+0.035m in 3D Y) SO TEXT FLOATS CLEANLY ABOVE THE 3D GOLDEN ARROWS!
+        if (dimPoints.tPoint) {
+          const tPointAbove = dimPoints.tPoint.clone().add(new THREE.Vector3(0, 0.035, 0));
+          projectToBadge(tPointAbove, tBadge);
+        }
 
         if (lampBadge) {
           if (dimPoints.lampPoint) {
