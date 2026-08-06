@@ -975,11 +975,11 @@
       <!-- Live ClicStore 5-Theme Switcher -->
       <div class="theme-picker-header">
         <span class="theme-label">TEMA:</span>
-        <button onclick="setTheme('preto')" style="background:var(--abs-preto)" title="Absolute Black"></button>
-        <button onclick="setTheme('dourado')" style="background:var(--abs-dourado)" title="Classic Gold"></button>
-        <button onclick="setTheme('dourado-claro')" style="background:var(--abs-dourado-claro)" title="Soft Gold"></button>
-        <button onclick="setTheme('creme')" style="background:var(--abs-creme)" title="Cream White"></button>
-        <button onclick="setTheme('offwhite')" style="background:var(--abs-offwhite)" title="Warm Off-White"></button>
+        <button class="btn-theme-dot" data-theme-id="preto" style="background:var(--abs-preto)" title="Absolute Black"></button>
+        <button class="btn-theme-dot" data-theme-id="dourado" style="background:var(--abs-dourado)" title="Classic Gold"></button>
+        <button class="btn-theme-dot" data-theme-id="dourado-claro" style="background:var(--abs-dourado-claro)" title="Soft Gold"></button>
+        <button class="btn-theme-dot" data-theme-id="creme" style="background:var(--abs-creme)" title="Cream White"></button>
+        <button class="btn-theme-dot" data-theme-id="offwhite" style="background:var(--abs-offwhite)" title="Warm Off-White"></button>
       </div>
 
       <button class="btn-action primary" id="btn-toggle-side">
@@ -1210,9 +1210,36 @@
           </div>
         </div>
 
+        <!-- CONTROLE DA LUMINÁRIA DE CANTO (ABAJUR) -->
+        <div class="section-tag" style="margin-top: 8px;">Luminária de Canto (Abajur PBR)</div>
+
+        <div class="color-input-wrapper">
+          <input type="color" id="inp-lamp-color" value="#ffe4b5">
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-main);">Cor da Luz do Abajur</div>
+            <div style="font-size:11px; color:var(--text-muted);">Temperatura de iluminação realista</div>
+          </div>
+        </div>
+
+        <!-- Quick Temperature Presets -->
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;">
+          <button class="btn-action btn-temp" data-temp="#ffe4b5" style="padding:6px 4px; font-size:10px; justify-content:center;" title="2700K Quente">2700K</button>
+          <button class="btn-action btn-temp" data-temp="#fff4e5" style="padding:6px 4px; font-size:10px; justify-content:center;" title="3000K Soft">3000K</button>
+          <button class="btn-action btn-temp" data-temp="#ffffff" style="padding:6px 4px; font-size:10px; justify-content:center;" title="4000K Neutra">4000K</button>
+          <button class="btn-action btn-temp" data-temp="#e8f4ff" style="padding:6px 4px; font-size:10px; justify-content:center;" title="6000K Fria">6000K</button>
+        </div>
+
+        <div class="rot-slider-row">
+          <div class="rot-slider-header">
+            <span>Intensidade da Luz</span>
+            <span id="lbl-lamp-intensity">70%</span>
+          </div>
+          <input type="range" id="slider-lamp-intensity" min="0" max="100" value="70" class="rot-slider">
+        </div>
+
         <div class="section-tag" style="margin-top: 8px;">Cor da Parede do Ambiente</div>
         <div class="color-input-wrapper">
-          <input type="color" id="inp-wall-color" value="#b8af0a">
+          <input type="color" id="inp-wall-color" value="#dedede">
           <div>
             <div style="font-size:13px; font-weight:700; color:var(--text-main);">Tinta da Parede</div>
             <div style="font-size:11px; color:var(--text-muted);">Cor do ambiente</div>
@@ -1297,10 +1324,12 @@
       userRotY: 180, // DEFAULT: 180° Y
       userRotZ: 0,   // DEFAULT: 0° Z
       environment: 'studio',
-      wallColor: '#b8a898', // Soft warm neutral greige wall color for realistic lamp shadows!
+      wallColor: '#dedede',
       cornerMode: 'single', // single or miter (Canto 90° Meia Esquadria)
       multiModelMode: true, // Default: show all 8 side-by-side as in Blender!
-      realisticRender: true // DEFAULT: Photorealistic Blender PBR environment ON!
+      realisticRender: true, // DEFAULT: Photorealistic Blender PBR environment ON!
+      lampColor: '#ffe4b5',   // Realistic 2700K Warm White default
+      lampIntensity: 70       // 70% default intensity
     };
 
     // Metadata for the 8 Blender objects
@@ -1329,7 +1358,7 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.2;
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -1344,13 +1373,13 @@
     const roomEnvironment = new RoomEnvironment(renderer);
     const pbrStudioTexture = pmremGenerator.fromScene(roomEnvironment).texture;
 
-    // Apply HDRI Environment Map for Blender-level realistic PBR reflections & lighting
+    // ALWAYS keep HDRI Environment map active when realisticRender is ON to preserve PBR textures & prevent black meshes!
     if (state.realisticRender) {
       scene.environment = pbrStudioTexture;
     }
 
-    // Dynamic Theme Functionality attached to Window for ClicStore Brand Identity
-    window.setTheme = function(theme) {
+    // Dynamic Theme Functionality for ClicStore Brand Identity
+    function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       if (theme === 'creme' || theme === 'offwhite') {
         scene.background = new THREE.Color(0xf3ebe3);
@@ -1365,7 +1394,13 @@
         floorMat.color.set(0x1a1a1a);
         gridHelper.material.color.set(0xc59d4a);
       }
-    };
+    }
+
+    document.querySelectorAll('.btn-theme-dot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyTheme(btn.getAttribute('data-theme-id'));
+      });
+    });
 
     // --- LIGHTING ---
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
@@ -1448,11 +1483,11 @@
     roomFloorMesh.receiveShadow = true;
     roomGroup.add(roomFloorMesh);
 
-    // --- REALISTIC 3D CORNER FLOOR LAMP (LUMINÁRIA DE CANTO DE PISO) ---
+    // --- REALISTIC 3D CORNER FLOOR LAMP (LUMINÁRIA DE CANTO DE PISO PBR) ---
     const lampGroup = new THREE.Group();
 
     // 1. Lamp Base
-    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.9, roughness: 0.2 });
+    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.95, roughness: 0.15 });
     const lampBrassMat = new THREE.MeshStandardMaterial({ color: 0xc59d4a, metalness: 0.9, roughness: 0.2 });
     
     const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.02, 32), lampBaseMat);
@@ -1474,13 +1509,13 @@
 
     // 4. Lamp Shade (Abajur / Luminária de Canto)
     const shadeMat = new THREE.MeshStandardMaterial({
-      color: 0xfff0d0,
-      emissive: 0xffa028,
-      emissiveIntensity: 4.5,
+      color: 0xfff4e5,
+      emissive: new THREE.Color(state.lampColor),
+      emissiveIntensity: 2.0,
       roughness: 0.2,
       side: THREE.DoubleSide
     });
-    const shadeMesh = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.25, 32, 1, true), shadeMat);
+    const shadeMesh = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.25, 32, 1, true), shadeMat);
     shadeMesh.position.set(0, 1.32, 0.08);
     shadeMesh.rotation.x = Math.PI / 6; // Angled slightly towards the baseboard corner!
     lampGroup.add(shadeMesh);
@@ -1491,34 +1526,8 @@
     bulbMesh.position.set(0, 1.30, 0.08);
     lampGroup.add(bulbMesh);
 
-    // 6. Warm Floor Glow Pool Mesh under Lamp Base
-    const lightPoolGeo = new THREE.CircleGeometry(0.85, 32);
-    const lightPoolMat = new THREE.MeshBasicMaterial({
-      color: 0xffb84d,
-      transparent: true,
-      opacity: 0.35,
-      depthWrite: false
-    });
-    const lightPool = new THREE.Mesh(lightPoolGeo, lightPoolMat);
-    lightPool.rotation.x = -Math.PI / 2;
-    lightPool.position.set(0, 0.002, 0.08);
-    lampGroup.add(lightPool);
-
-    // 7. Volumetric Soft Warm Light Cone Mesh projecting from Shade
-    const coneGlowGeo = new THREE.ConeGeometry(0.75, 1.4, 32, 1, true);
-    const coneGlowMat = new THREE.MeshBasicMaterial({
-      color: 0xffcb74,
-      transparent: true,
-      opacity: 0.18,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    });
-    const coneGlow = new THREE.Mesh(coneGlowGeo, coneGlowMat);
-    coneGlow.position.set(0, 0.65, 0.08);
-    lampGroup.add(coneGlow);
-
-    // 8. Intense Warm PointLight (Radiating Warm Gold Light from Lamp Shade)
-    const lampPointLight = new THREE.PointLight(0xffa834, 14.0, 8.5, 1.3);
+    // 6. THREE.JS PHYSICAL PBR LIGHT SOURCES (Decay = 2.0 Physical Inverse Square Law)
+    const lampPointLight = new THREE.PointLight(new THREE.Color(state.lampColor), 15.0, 8.0, 2.0);
     lampPointLight.position.set(0, 1.28, 0.08);
     lampPointLight.castShadow = true;
     lampPointLight.shadow.mapSize.width = 2048;
@@ -1526,8 +1535,7 @@
     lampPointLight.shadow.bias = -0.0002;
     lampGroup.add(lampPointLight);
 
-    // 9. Focused Warm SpotLight aiming directly at baseboard corner junction
-    const lampSpotLight = new THREE.SpotLight(0xffc266, 20.0, 9.0, Math.PI / 2.0, 0.4, 1.2);
+    const lampSpotLight = new THREE.SpotLight(new THREE.Color(state.lampColor), 25.0, 10.0, Math.PI / 2.2, 0.4, 2.0);
     lampSpotLight.position.set(0, 1.28, 0.08);
     lampSpotLight.castShadow = true;
     lampGroup.add(lampSpotLight);
@@ -1539,21 +1547,35 @@
 
     roomGroup.add(lampGroup);
 
-    // Update Lighting Balance for Cozy Warm Lamp Room Atmosphere vs Bright Studio
+    // Update Lighting Balance & Custom Lamp Color / Intensity
     function updateLightingBalance() {
+      const col = new THREE.Color(state.lampColor);
+      const intensityFactor = (state.lampIntensity / 100);
+
+      // Copy exact color to Three.js light instances
+      lampPointLight.color.copy(col);
+      lampSpotLight.color.copy(col);
+      shadeMat.emissive.copy(col);
+
+      if (state.realisticRender) {
+        scene.environment = pbrStudioTexture;
+      }
+
       if (state.environment === 'room') {
-        // Dim global white daylighting so the warm floor lamp is the DOMINANT light source!
-        ambientLight.intensity = 0.35;
-        ambientLight.color.setHex(0xffedd8);
-        mainLight.intensity = 0.5;
-        fillLight.intensity = 0.2;
-        rimLight.intensity = 0.3;
+        // Balanced ambient light so PBR textures (wood grain, white gloss, MDF) stay 100% visible and vivid!
+        ambientLight.intensity = 0.6;
+        ambientLight.color.setHex(0xffffff);
+        mainLight.intensity = 1.0;
+        fillLight.intensity = 0.4;
+        rimLight.intensity = 0.5;
 
         lampGroup.visible = true;
-        lampPointLight.intensity = 14.0;
-        lampSpotLight.intensity = 20.0;
+
+        lampPointLight.intensity = 15.0 * intensityFactor;
+        lampSpotLight.intensity = 25.0 * intensityFactor;
+        shadeMat.emissiveIntensity = 2.0 * intensityFactor;
       } else {
-        // Bright neutral studio presentation mode
+        // BRIGHT NEUTRAL STUDIO PRESENTATION MODE
         ambientLight.intensity = 0.95;
         ambientLight.color.setHex(0xffffff);
         mainLight.intensity = 2.2;
@@ -1566,16 +1588,38 @@
       }
     }
 
+    // Temperature Preset Buttons Click Handler
+    document.querySelectorAll('.btn-temp').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const hex = btn.getAttribute('data-temp');
+        state.lampColor = hex;
+        document.getElementById('inp-lamp-color').value = hex;
+        updateLightingBalance();
+        showToast(`Cor da Luz alterada para ${btn.innerText}`);
+      });
+    });
+
+    document.getElementById('inp-lamp-color').addEventListener('input', (e) => {
+      state.lampColor = e.target.value;
+      updateLightingBalance();
+    });
+
+    document.getElementById('slider-lamp-intensity').addEventListener('input', (e) => {
+      state.lampIntensity = parseInt(e.target.value);
+      document.getElementById('lbl-lamp-intensity').innerText = `${state.lampIntensity}%`;
+      updateLightingBalance();
+    });
+
     // Toggle Realistic Renderer
     document.getElementById('btn-toggle-render').addEventListener('click', () => {
       state.realisticRender = !state.realisticRender;
       const btn = document.getElementById('btn-toggle-render');
       if (state.realisticRender) {
         scene.environment = pbrStudioTexture;
-        renderer.toneMappingExposure = 1.1;
+        renderer.toneMappingExposure = 1.2;
         btn.classList.add('render-active');
         btn.innerHTML = '<i class="ri-sparkles-line"></i> Render Realista (Blender PBR)';
-        showToast('Render Realista PBR com Iluminação de Abajur ATIVADO!');
+        showToast('Render Realista PBR ATIVADO!');
       } else {
         scene.environment = null;
         renderer.toneMappingExposure = 1.0;
