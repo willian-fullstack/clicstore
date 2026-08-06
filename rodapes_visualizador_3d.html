@@ -1570,19 +1570,20 @@
 
     roomGroup.add(lampGroup);
 
-    // --- ARCHITECTURAL 3D DIMENSION LINES (DOUBLE-HEADED FILLED ARROWS & ULTRA-CLEAN COTAS) ---
+    // --- ARCHITECTURAL 3D DIMENSION LINES (DYNAMIC SIZE SORTING GUARANTEES 100% CORRECT LABELS) ---
     const dimGroup = new THREE.Group();
     scene.add(dimGroup);
 
     const dimLineMat = new THREE.LineBasicMaterial({
       color: 0xc59d4a,
-      linewidth: 2,
+      linewidth: 1.5,
       depthTest: false,
       transparent: true,
       opacity: 0.95
     });
 
-    const arrowGeo = new THREE.ConeGeometry(0.012, 0.04, 12);
+    // Sleek, delicate arrowhead cones (3mm base radius, 12mm length)
+    const arrowGeo = new THREE.ConeGeometry(0.003, 0.012, 12);
     const arrowMat = new THREE.MeshBasicMaterial({ color: 0xc59d4a, depthTest: false, transparent: true, opacity: 0.95 });
 
     function drawDimensionSegment(p1, p2, offset) {
@@ -1590,11 +1591,11 @@
       const start = p1.clone().add(offset);
       const end = p2.clone().add(offset);
 
-      // Linhas de extensão (Extension lines)
+      // Extension lines
       points.push(p1.x, p1.y, p1.z, start.x, start.y, start.z);
       points.push(p2.x, p2.y, p2.z, end.x, end.y, end.z);
 
-      // Linha principal da cota (Main dimension line)
+      // Main dimension line
       points.push(start.x, start.y, start.z, end.x, end.y, end.z);
 
       const geo = new THREE.BufferGeometry();
@@ -1637,21 +1638,50 @@
       if (!selected) return null;
 
       const bbox = new THREE.Box3().setFromObject(selected.object);
+      const size = new THREE.Vector3();
+      bbox.getSize(size);
 
-      // 1. Altura Vertical Line (▲ / ▼ filled double arrowheads)
-      const hP1 = new THREE.Vector3(bbox.min.x, bbox.min.y, bbox.max.z);
-      const hP2 = new THREE.Vector3(bbox.min.x, bbox.max.y, bbox.max.z);
-      const hDim = drawDimensionSegment(hP1, hP2, new THREE.Vector3(-0.06, 0, 0.04));
+      // Dynamically sort bounding box dimensions:
+      // Smallest (e.g. 0.009m) = ESPESSURA (9 mm)
+      // Medium (e.g. 0.10m) = ALTURA (10 cm)
+      // Largest (e.g. 0.90m) = COMPRIMENTO (90 cm)
+      const axes = [
+        { name: 'x', val: size.x },
+        { name: 'y', val: size.y },
+        { name: 'z', val: size.z }
+      ].sort((a, b) => a.val - b.val);
 
-      // 2. Comprimento Horizontal Line (▲ / ▼ filled double arrowheads)
-      const cP1 = new THREE.Vector3(bbox.min.x, bbox.min.y, bbox.max.z);
-      const cP2 = new THREE.Vector3(bbox.max.x, bbox.min.y, bbox.max.z);
-      const cDim = drawDimensionSegment(cP1, cP2, new THREE.Vector3(0, -0.04, 0.08));
+      const thicknessAxis = axes[0].name; // Smallest = 9mm
+      const heightAxis = axes[1].name;    // Middle = 10cm
+      const lengthAxis = axes[2].name;    // Largest = 90cm
 
-      // 3. Espessura Depth Line (▲ / ▼ filled double arrowheads)
-      const tP1 = new THREE.Vector3(bbox.max.x, bbox.min.y, bbox.min.z);
-      const tP2 = new THREE.Vector3(bbox.max.x, bbox.min.y, bbox.max.z);
-      const tDim = drawDimensionSegment(tP1, tP2, new THREE.Vector3(0.06, 0, 0));
+      // Helper to generate 3D segment endpoints along a specified world axis
+      function makeAxisSegment(axisName, offsetVector) {
+        let p1 = new THREE.Vector3();
+        let p2 = new THREE.Vector3();
+
+        if (axisName === 'x') {
+          p1.set(bbox.min.x, bbox.min.y, bbox.max.z);
+          p2.set(bbox.max.x, bbox.min.y, bbox.max.z);
+        } else if (axisName === 'y') {
+          p1.set(bbox.min.x, bbox.min.y, bbox.max.z);
+          p2.set(bbox.min.x, bbox.max.y, bbox.max.z);
+        } else {
+          p1.set(bbox.min.x - 0.03, bbox.min.y, bbox.min.z);
+          p2.set(bbox.min.x - 0.03, bbox.min.y, bbox.max.z);
+        }
+
+        return drawDimensionSegment(p1, p2, offsetVector);
+      }
+
+      // Draw COMPRIMENTO strictly along the LARGEST dimension line
+      const cDim = makeAxisSegment(lengthAxis, new THREE.Vector3(0, -0.03, 0.05));
+
+      // Draw ESPESSURA strictly along the SMALLEST dimension line
+      const tDim = makeAxisSegment(thicknessAxis, new THREE.Vector3(0, 0, 0));
+
+      // Draw ALTURA strictly along the MIDDLE dimension line
+      const hDim = makeAxisSegment(heightAxis, new THREE.Vector3(-0.04, 0, 0.02));
 
       // 4. Lamp Dimension Line (When Lamp is Enabled & Visible!)
       let lampMidPoint = null;
@@ -1661,7 +1691,7 @@
 
         const lP1 = new THREE.Vector3(lampPos.x, 0, lampPos.z);
         const lP2 = new THREE.Vector3(lampPos.x, 1.40, lampPos.z);
-        const lDim = drawDimensionSegment(lP1, lP2, new THREE.Vector3(0.20, 0, 0.05));
+        const lDim = drawDimensionSegment(lP1, lP2, new THREE.Vector3(0.18, 0, 0.03));
         lampMidPoint = lDim.midPoint;
       }
 
@@ -2138,8 +2168,8 @@
 
       if (dimPoints) {
         projectToBadge(dimPoints.hPoint, hBadge);
-        projectToBadge(dimPoints.cPoint, lBadge);
-        projectToBadge(dimPoints.tPoint, tBadge);
+        projectToBadge(dimPoints.cPoint, lBadge); // COMPRIMENTO (90 cm) -> LARGEST DIMENSION LINE!
+        projectToBadge(dimPoints.tPoint, tBadge); // ESPESSURA (9 mm) -> SMALLEST DIMENSION LINE!
 
         if (lampBadge) {
           if (dimPoints.lampPoint) {
