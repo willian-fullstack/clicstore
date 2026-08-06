@@ -1212,7 +1212,7 @@
 
         <div class="section-tag" style="margin-top: 8px;">Cor da Parede do Ambiente</div>
         <div class="color-input-wrapper">
-          <input type="color" id="inp-wall-color" value="#dedede">
+          <input type="color" id="inp-wall-color" value="#b8af0a">
           <div>
             <div style="font-size:13px; font-weight:700; color:var(--text-main);">Tinta da Parede</div>
             <div style="font-size:11px; color:var(--text-muted);">Cor do ambiente</div>
@@ -1297,7 +1297,7 @@
       userRotY: 180, // DEFAULT: 180° Y
       userRotZ: 0,   // DEFAULT: 0° Z
       environment: 'studio',
-      wallColor: '#dedede',
+      wallColor: '#b8a898', // Soft warm neutral greige wall color for realistic lamp shadows!
       cornerMode: 'single', // single or miter (Canto 90° Meia Esquadria)
       multiModelMode: true, // Default: show all 8 side-by-side as in Blender!
       realisticRender: true // DEFAULT: Photorealistic Blender PBR environment ON!
@@ -1329,7 +1329,7 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.1;
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -1452,7 +1452,7 @@
     const lampGroup = new THREE.Group();
 
     // 1. Lamp Base
-    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.9, roughness: 0.2 });
+    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.9, roughness: 0.2 });
     const lampBrassMat = new THREE.MeshStandardMaterial({ color: 0xc59d4a, metalness: 0.9, roughness: 0.2 });
     
     const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.02, 32), lampBaseMat);
@@ -1474,13 +1474,13 @@
 
     // 4. Lamp Shade (Abajur / Luminária de Canto)
     const shadeMat = new THREE.MeshStandardMaterial({
-      color: 0xfff5e6,
-      emissive: 0xffb84d,
-      emissiveIntensity: 2.5,
-      roughness: 0.3,
+      color: 0xfff0d0,
+      emissive: 0xffa028,
+      emissiveIntensity: 4.5,
+      roughness: 0.2,
       side: THREE.DoubleSide
     });
-    const shadeMesh = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.25, 32, 1, true), shadeMat);
+    const shadeMesh = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.25, 32, 1, true), shadeMat);
     shadeMesh.position.set(0, 1.32, 0.08);
     shadeMesh.rotation.x = Math.PI / 6; // Angled slightly towards the baseboard corner!
     lampGroup.add(shadeMesh);
@@ -1491,8 +1491,34 @@
     bulbMesh.position.set(0, 1.30, 0.08);
     lampGroup.add(bulbMesh);
 
-    // 6. Warm PointLight (Radiating Warm Gold Light from Lamp Shade)
-    const lampPointLight = new THREE.PointLight(0xffdfa3, 6.0, 7.5, 1.4);
+    // 6. Warm Floor Glow Pool Mesh under Lamp Base
+    const lightPoolGeo = new THREE.CircleGeometry(0.85, 32);
+    const lightPoolMat = new THREE.MeshBasicMaterial({
+      color: 0xffb84d,
+      transparent: true,
+      opacity: 0.35,
+      depthWrite: false
+    });
+    const lightPool = new THREE.Mesh(lightPoolGeo, lightPoolMat);
+    lightPool.rotation.x = -Math.PI / 2;
+    lightPool.position.set(0, 0.002, 0.08);
+    lampGroup.add(lightPool);
+
+    // 7. Volumetric Soft Warm Light Cone Mesh projecting from Shade
+    const coneGlowGeo = new THREE.ConeGeometry(0.75, 1.4, 32, 1, true);
+    const coneGlowMat = new THREE.MeshBasicMaterial({
+      color: 0xffcb74,
+      transparent: true,
+      opacity: 0.18,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const coneGlow = new THREE.Mesh(coneGlowGeo, coneGlowMat);
+    coneGlow.position.set(0, 0.65, 0.08);
+    lampGroup.add(coneGlow);
+
+    // 8. Intense Warm PointLight (Radiating Warm Gold Light from Lamp Shade)
+    const lampPointLight = new THREE.PointLight(0xffa834, 14.0, 8.5, 1.3);
     lampPointLight.position.set(0, 1.28, 0.08);
     lampPointLight.castShadow = true;
     lampPointLight.shadow.mapSize.width = 2048;
@@ -1500,8 +1526,8 @@
     lampPointLight.shadow.bias = -0.0002;
     lampGroup.add(lampPointLight);
 
-    // 7. SpotLight aiming directly at baseboard corner junction
-    const lampSpotLight = new THREE.SpotLight(0xffe6b3, 9.0, 8.0, Math.PI / 2.2, 0.4, 1.2);
+    // 9. Focused Warm SpotLight aiming directly at baseboard corner junction
+    const lampSpotLight = new THREE.SpotLight(0xffc266, 20.0, 9.0, Math.PI / 2.0, 0.4, 1.2);
     lampSpotLight.position.set(0, 1.28, 0.08);
     lampSpotLight.castShadow = true;
     lampGroup.add(lampSpotLight);
@@ -1513,29 +1539,51 @@
 
     roomGroup.add(lampGroup);
 
+    // Update Lighting Balance for Cozy Warm Lamp Room Atmosphere vs Bright Studio
+    function updateLightingBalance() {
+      if (state.environment === 'room') {
+        // Dim global white daylighting so the warm floor lamp is the DOMINANT light source!
+        ambientLight.intensity = 0.35;
+        ambientLight.color.setHex(0xffedd8);
+        mainLight.intensity = 0.5;
+        fillLight.intensity = 0.2;
+        rimLight.intensity = 0.3;
+
+        lampGroup.visible = true;
+        lampPointLight.intensity = 14.0;
+        lampSpotLight.intensity = 20.0;
+      } else {
+        // Bright neutral studio presentation mode
+        ambientLight.intensity = 0.95;
+        ambientLight.color.setHex(0xffffff);
+        mainLight.intensity = 2.2;
+        fillLight.intensity = 0.9;
+        rimLight.intensity = 1.4;
+
+        lampGroup.visible = false;
+        lampPointLight.intensity = 0;
+        lampSpotLight.intensity = 0;
+      }
+    }
+
     // Toggle Realistic Renderer
     document.getElementById('btn-toggle-render').addEventListener('click', () => {
       state.realisticRender = !state.realisticRender;
       const btn = document.getElementById('btn-toggle-render');
       if (state.realisticRender) {
         scene.environment = pbrStudioTexture;
-        renderer.toneMappingExposure = 1.35;
-        lampGroup.visible = true;
-        lampPointLight.intensity = 6.0;
-        lampSpotLight.intensity = 9.0;
+        renderer.toneMappingExposure = 1.1;
         btn.classList.add('render-active');
         btn.innerHTML = '<i class="ri-sparkles-line"></i> Render Realista (Blender PBR)';
-        showToast('Render Realista PBR com Luminária de Canto ATIVADO!');
+        showToast('Render Realista PBR com Iluminação de Abajur ATIVADO!');
       } else {
         scene.environment = null;
         renderer.toneMappingExposure = 1.0;
-        lampGroup.visible = false;
-        lampPointLight.intensity = 0;
-        lampSpotLight.intensity = 0;
         btn.classList.remove('render-active');
         btn.innerHTML = '<i class="ri-lightbulb-line"></i> Render Padrão';
         showToast('Render Padrão ATIVADO!');
       }
+      updateLightingBalance();
     });
 
     // --- MAIN 3D BASEBOARD GROUP ---
@@ -1750,6 +1798,8 @@
     // Render Scene Layout Mode (Single vs Multi Side-by-Side)
     function renderSceneMode() {
       if (state.loadedModels.length === 0) return;
+
+      updateLightingBalance();
 
       // Clear corner group
       while(cornerBarGroup.children.length > 0) {
