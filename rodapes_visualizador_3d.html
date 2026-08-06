@@ -787,33 +787,34 @@
       color: #111111;
     }
 
-    /* 3D Measurement Overlay Callouts */
+    /* ARCHITECTURAL 3D DIMENSION BADGES (COTAGEM TÉCNICA CLICSTORE) */
     .measurement-badge {
       position: absolute;
-      background: rgba(17, 17, 17, 0.94);
-      border: 1px solid var(--abs-dourado);
-      color: var(--abs-creme);
-      padding: 4px 12px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid var(--abs-dourado);
+      color: var(--text-main);
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
       display: flex;
       align-items: center;
       gap: 6px;
       white-space: nowrap;
       z-index: 5;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
-    .measurement-badge::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      background: var(--abs-dourado);
-      border-radius: 50%;
+    .measurement-badge .dim-title {
+      color: var(--tag-color);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-size: 10px;
     }
 
     /* Upload Dropzone Modal */
@@ -943,19 +944,18 @@
   <!-- WebGL Canvas Container -->
   <div id="webgl-container"></div>
 
-  <!-- 3D Callout Overlays -->
+  <!-- 3D Callout Overlays (ARCHITECTURAL COTAS) -->
   <div id="measure-height" class="measurement-badge" style="opacity: 0;">
-    <i class="ri-height-line" style="color:var(--abs-dourado-claro);"></i> Altura: <span id="val-height">10.0 cm</span>
+    <span class="dim-title">Altura (h):</span> <span id="val-height">10.0 cm</span>
   </div>
   <div id="measure-thickness" class="measurement-badge" style="opacity: 0;">
-    <i class="ri-ruler-line" style="color:var(--abs-dourado-claro);"></i> Espessura: <span id="val-thickness">9 mm</span>
+    <span class="dim-title">Espessura (e):</span> <span id="val-thickness">9 mm</span>
   </div>
   <div id="measure-length" class="measurement-badge" style="opacity: 0;">
-    <i class="ri-expand-horizontal-line" style="color:var(--abs-dourado-claro);"></i> Barra: <span id="val-length">90 cm</span>
+    <span class="dim-title">Comprimento (c):</span> <span id="val-length">90 cm</span>
   </div>
-  <!-- 3D Callout Overlay for the Floor Lamp when Enabled -->
   <div id="measure-lamp" class="measurement-badge" style="opacity: 0;">
-    <i class="ri-lightbulb-line" style="color:var(--abs-dourado-claro);"></i> Luminária: <span id="val-lamp">H: 1.40 m · Cúpula: 36 cm</span>
+    <span class="dim-title">Altura Abajur (h):</span> <span id="val-lamp">1.40 m</span>
   </div>
 
   <!-- Top Header Navigation -->
@@ -1033,14 +1033,14 @@
 
       <!-- TAB 2: DIMENSÕES E MEDIDAS -->
       <div class="tab-pane" style="display:none;" id="tab-dimensions">
-        <div class="section-tag">02 · Visualização de Cotas</div>
+        <div class="section-tag">02 · Cotagem Arquitetônica 3D</div>
 
         <div class="switch-container">
           <div class="switch-info">
             <div class="switch-icon"><i class="ri-ruler-line"></i></div>
             <div>
-              <div class="switch-title">Exibir Cotas na Tela</div>
-              <div class="switch-desc">Linhas e crachás de medição 3D</div>
+              <div class="switch-title">Exibir Cotas Arquitetônicas 3D</div>
+              <div class="switch-desc">Linhas técnicas e flechas de dimensão</div>
             </div>
           </div>
           <label class="switch">
@@ -1136,7 +1136,7 @@
         <div class="dimensions-card">
           <div class="dim-row">
             <div class="dim-label">
-              <i class="ri-height-line"></i> Altura Real
+              <i class="ri-height-line"></i> Altura (h)
             </div>
             <span class="dim-value" id="info-h">10.0 cm</span>
           </div>
@@ -1145,7 +1145,7 @@
 
           <div class="dim-row">
             <div class="dim-label">
-              <i class="ri-ruler-2-line"></i> Espessura Real
+              <i class="ri-ruler-2-line"></i> Espessura (e)
             </div>
             <span class="dim-value" id="info-t">9 mm</span>
           </div>
@@ -1154,7 +1154,7 @@
 
           <div class="dim-row">
             <div class="dim-label">
-              <i class="ri-expand-horizontal-line"></i> Comprimento
+              <i class="ri-expand-horizontal-line"></i> Comprimento (c)
             </div>
             <span class="dim-value" id="info-l">90.0 cm</span>
           </div>
@@ -1164,7 +1164,7 @@
         <div id="lamp-dim-card" class="dimensions-card" style="margin-top: 8px; display: none;">
           <div class="dim-row">
             <div class="dim-label">
-              <i class="ri-lightbulb-line"></i> Altura da Luminária
+              <i class="ri-lightbulb-line"></i> Altura Abajur (h)
             </div>
             <span class="dim-value">1.40 m</span>
           </div>
@@ -1173,7 +1173,7 @@
 
           <div class="dim-row">
             <div class="dim-label">
-              <i class="ri-ruler-2-line"></i> Diâmetro da Cúpula
+              <i class="ri-ruler-2-line"></i> Diâmetro Cúpula (Ø)
             </div>
             <span class="dim-value">36 cm</span>
           </div>
@@ -1569,6 +1569,102 @@
     lampSpotLight.target = spotTarget;
 
     roomGroup.add(lampGroup);
+
+    // --- ARCHITECTURAL 3D DIMENSION LINES (COTAGEM TÉCNICA 3D ESTILO DESENHO TÉCNICO) ---
+    const dimGroup = new THREE.Group();
+    scene.add(dimGroup);
+
+    const dimLineMat = new THREE.LineBasicMaterial({
+      color: 0xc59d4a,
+      linewidth: 2,
+      depthTest: false,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    function drawDimensionSegment(p1, p2, offset, tickSize = 0.025) {
+      const points = [];
+      const start = p1.clone().add(offset);
+      const end = p2.clone().add(offset);
+
+      // Linhas de extensão (Extension lines)
+      points.push(p1.x, p1.y, p1.z, start.x, start.y, start.z);
+      points.push(p2.x, p2.y, p2.z, end.x, end.y, end.z);
+
+      // Linha principal da cota (Dimension line)
+      points.push(start.x, start.y, start.z, end.x, end.y, end.z);
+
+      // Ticks em 45° nas extremidades (Architectural tick marks)
+      const dir = end.clone().sub(start).normalize();
+      const perp = new THREE.Vector3(0, 1, 0);
+      if (Math.abs(dir.y) > 0.9) perp.set(1, 0, 0);
+      const tickVec = perp.cross(dir).normalize().multiplyScalar(tickSize);
+
+      points.push(start.x - tickVec.x, start.y - tickVec.y, start.z - tickVec.z, start.x + tickVec.x, start.y + tickVec.y, start.z + tickVec.z);
+      points.push(end.x - tickVec.x, end.y - tickVec.y, end.z - tickVec.z, end.x + tickVec.x, end.y + tickVec.y, end.z + tickVec.z);
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+      const lineSegs = new THREE.LineSegments(geo, dimLineMat);
+      lineSegs.renderOrder = 999;
+
+      const midPoint = start.clone().add(end).multiplyScalar(0.5);
+      return { mesh: lineSegs, midPoint: midPoint };
+    }
+
+    function render3DDimensionLines() {
+      // Clear previous lines
+      while(dimGroup.children.length > 0) {
+        dimGroup.remove(dimGroup.children[0]);
+      }
+
+      if (!state.showMeasures || state.multiModelMode || state.loadedModels.length === 0) {
+        return null;
+      }
+
+      const selected = state.loadedModels[state.activeModelIndex];
+      if (!selected) return null;
+
+      const bbox = new THREE.Box3().setFromObject(selected.object);
+
+      // 1. Altura (h) Vertical Line
+      const hP1 = new THREE.Vector3(bbox.min.x, bbox.min.y, bbox.max.z);
+      const hP2 = new THREE.Vector3(bbox.min.x, bbox.max.y, bbox.max.z);
+      const hDim = drawDimensionSegment(hP1, hP2, new THREE.Vector3(-0.06, 0, 0.04));
+      dimGroup.add(hDim.mesh);
+
+      // 2. Comprimento (c) Horizontal Line
+      const cP1 = new THREE.Vector3(bbox.min.x, bbox.min.y, bbox.max.z);
+      const cP2 = new THREE.Vector3(bbox.max.x, bbox.min.y, bbox.max.z);
+      const cDim = drawDimensionSegment(cP1, cP2, new THREE.Vector3(0, -0.04, 0.08));
+      dimGroup.add(cDim.mesh);
+
+      // 3. Espessura (e) Depth Line
+      const tP1 = new THREE.Vector3(bbox.max.x, bbox.min.y, bbox.min.z);
+      const tP2 = new THREE.Vector3(bbox.max.x, bbox.min.y, bbox.max.z);
+      const tDim = drawDimensionSegment(tP1, tP2, new THREE.Vector3(0.06, 0, 0));
+      dimGroup.add(tDim.mesh);
+
+      // 4. Lamp Dimension Line (When Lamp is Enabled & Visible!)
+      let lampMidPoint = null;
+      if (state.realisticRender && state.environment === 'room' && lampGroup.visible) {
+        const lampPos = new THREE.Vector3();
+        lampGroup.getWorldPosition(lampPos);
+
+        const lP1 = new THREE.Vector3(lampPos.x, 0, lampPos.z);
+        const lP2 = new THREE.Vector3(lampPos.x, 1.40, lampPos.z);
+        const lDim = drawDimensionSegment(lP1, lP2, new THREE.Vector3(0.20, 0, 0.05));
+        dimGroup.add(lDim.mesh);
+        lampMidPoint = lDim.midPoint;
+      }
+
+      return {
+        hPoint: hDim.midPoint,
+        cPoint: cDim.midPoint,
+        tPoint: tDim.midPoint,
+        lampPoint: lampMidPoint
+      };
+    }
 
     // Update Lighting Balance & Custom Lamp Color / Intensity
     function updateLightingBalance() {
@@ -2014,7 +2110,7 @@
       updateMeasurements();
     }
 
-    // --- 3D MEASUREMENT CALLOUTS ---
+    // --- 3D MEASUREMENT CALLOUTS (ARCHITECTURAL COTAS) ---
     function updateMeasurements() {
       const hBadge = document.getElementById('measure-height');
       const tBadge = document.getElementById('measure-thickness');
@@ -2026,39 +2122,30 @@
         tBadge.style.opacity = 0;
         lBadge.style.opacity = 0;
         if (lampBadge) lampBadge.style.opacity = 0;
+        while(dimGroup.children.length > 0) dimGroup.remove(dimGroup.children[0]);
         return;
       }
 
-      const activeObj = state.loadedModels[state.activeModelIndex];
-      if (!activeObj) return;
+      // Render 3D Architectural Cotas lines & get midpoints
+      const dimPoints = render3DDimensionLines();
 
-      const c = activeObj.center;
-      const s = activeObj.size;
+      if (dimPoints) {
+        projectToBadge(dimPoints.hPoint, hBadge);
+        projectToBadge(dimPoints.cPoint, lBadge);
+        projectToBadge(dimPoints.tPoint, tBadge);
 
-      // Callout points attached to world bounding box of selected object
-      const pHeight = new THREE.Vector3(c.x, c.y + s.y/2 + 0.04, c.z);
-      const pThickness = new THREE.Vector3(c.x, c.y, c.z + s.z/2 + 0.02);
-      const pLength = new THREE.Vector3(c.x + s.x/2, c.y, c.z);
-
-      projectToBadge(pHeight, hBadge);
-      projectToBadge(pThickness, tBadge);
-      projectToBadge(pLength, lBadge);
-
-      // Lamp callout badge 3D projection (ONLY DISPLAYED WHEN LAMP IS ENABLED & VISIBLE!)
-      if (lampBadge) {
-        if (state.realisticRender && state.environment === 'room' && lampGroup.visible) {
-          const lampWorldPos = new THREE.Vector3();
-          lampGroup.getWorldPosition(lampWorldPos);
-          // Position callout floating gracefully at the top of the lamp shade (Y = 1.45m)
-          const pLamp = new THREE.Vector3(lampWorldPos.x, 1.45, lampWorldPos.z + 0.12);
-          projectToBadge(pLamp, lampBadge);
-        } else {
-          lampBadge.style.opacity = 0;
+        if (lampBadge) {
+          if (dimPoints.lampPoint) {
+            projectToBadge(dimPoints.lampPoint, lampBadge);
+          } else {
+            lampBadge.style.opacity = 0;
+          }
         }
       }
     }
 
     function projectToBadge(vector3D, element) {
+      if (!vector3D) return;
       const tempVec = vector3D.clone();
       tempVec.project(camera);
 
