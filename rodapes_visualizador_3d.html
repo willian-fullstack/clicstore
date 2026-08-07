@@ -2252,8 +2252,13 @@
               cloned.aoMapIntensity = 1.5; // Deepen contact shadows from baked AO!
             }
 
-            // 2. Boost HDRI environment reflections so wood grain catches light realistically
-            cloned.envMapIntensity = 1.8;
+            // 2. Ajuste fino dos reflexos HDRI (Se ficar em 1.8 e sem roughnessMap, vira um espelho!)
+            cloned.envMapIntensity = 0.8;
+
+            // Se o Blender exportou a madeira sem mapa de roughness e muito lisa (< 0.5), forçamos ela a ser mais fosca/crespa
+            if (!mat.roughnessMap && mat.roughness < 0.6) {
+              cloned.roughness = 0.85; 
+            }
 
             // 3. Enable physically correct normals from baked normalMap if present
             if (mat.normalMap) {
@@ -2265,7 +2270,12 @@
             // Nós usamos a própria textura de cor (map) como mapa de afundamento (bumpMap) no Three.js!
             else if (mat.map) {
               cloned.bumpMap = mat.map;
-              cloned.bumpScale = 0.02; // Controla o quão fundo fica o "crespo" (0.01 a 0.05 é ideal)
+              cloned.bumpScale = 0.035; // Aumentei o crespo para ficar mais evidente!
+              
+              // Truque extra: usamos o map como roughnessMap também para as partes escuras refletirem diferente das claras
+              if (!mat.roughnessMap) {
+                cloned.roughnessMap = mat.map;
+              }
             }
 
             return cloned;
