@@ -2244,33 +2244,34 @@
 
           const upgradeMat = (mat) => {
             if (!mat) return mat;
-            const cloned = mat.clone();
+            
+            // 1. Converter para MeshPhysicalMaterial para o máximo realismo PBR (igual Blender Cycles)
+            const cloned = new THREE.MeshPhysicalMaterial().copy(mat);
 
-            // 1. Enable aoMap if the GLB already has one baked in!
+            // 2. Ajuste do acabamento da madeira (Satin / Semi-brilho)
+            // Rugosidade em 0.9 era fosco demais, escondia as sombras. 0.4 a 0.5 permite ver o brilho batendo nos veios!
+            cloned.roughness = 0.4;
+            cloned.envMapIntensity = 1.0; 
+            cloned.roughnessMap = null; // Remove mapas ruins que o Blender possa ter gerado
+
+            // 3. Sombras de Contato
             if (mat.aoMap) {
               cloned.aoMap = mat.aoMap;
-              cloned.aoMapIntensity = 1.5; // Deepen contact shadows from baked AO!
+              cloned.aoMapIntensity = 1.5;
             }
 
-            // 2. Ajuste fino dos reflexos HDRI (Se ficar muito alto, ofusca o relevo da madeira)
-            cloned.envMapIntensity = 0.5; 
-            cloned.roughness = 0.9; // Força a madeira a ser bem fosca (sem efeito espelho!)
-            
-            // Remove qualquer roughnessMap gerado acidentalmente (se for escuro, vira espelho)
-            cloned.roughnessMap = null;
-
-            // 3. Se houver Normal Map (relevo) vindo do Blender, FORÇAR a intensidade dele!
+            // 4. Forçar Relevo (Normal ou Bump)
             if (mat.normalMap) {
               cloned.normalMap = mat.normalMap;
-              cloned.normalScale = new THREE.Vector2(4.0, 4.0); // Aumentado drasticamente para aparecer os veios!
+              cloned.normalScale = new THREE.Vector2(4.0, 4.0);
             } 
-            
-            // 4. Se não houver Normal Map, forçar a textura de cor a agir como mapa de afundamento (bump)
-            if (mat.map) {
+            if (mat.map && !mat.normalMap) {
+              // Se não tem normal map, usa a foto da madeira como mapa de relevo
               cloned.bumpMap = mat.map;
-              cloned.bumpScale = 0.08; // Valor alto para o afundamento ficar BEM visível
+              cloned.bumpScale = 0.2; // Bem forte para ficar crespo!
             }
-
+            
+            cloned.needsUpdate = true;
             return cloned;
           };
 
