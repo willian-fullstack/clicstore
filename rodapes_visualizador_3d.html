@@ -1428,7 +1428,6 @@
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
-    import { SSRPass } from 'three/addons/postprocessing/SSRPass.js';
 
     // --- GLOBAL STATE ---
     const state = {
@@ -1476,7 +1475,7 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.VSMShadowMap; // VSM for ultra-soft studio shadows!
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1524,8 +1523,6 @@
     ssaoPass.maxDistance = 0.04;     // Only shadow within 4cm radius — crisp & realistic!
     ssaoPass.output = SSAOPass.OUTPUT.Default;
     composer.addPass(ssaoPass);
-
-    // SSR removed because it forces wet-mirror reflections on matte surfaces in vanilla three.js
 
     // Unreal Bloom — makes lamp emissive glow beautifully (like Blender's Cycles volumetric!)
     const bloomPass = new UnrealBloomPass(
@@ -1577,8 +1574,6 @@
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
     mainLight.shadow.bias = -0.0001;
-    mainLight.shadow.radius = 8; // Soft edges for VSM
-    mainLight.shadow.blurSamples = 25; // High blur samples for studio realism!
     scene.add(mainLight);
 
     const fillLight = new THREE.DirectionalLight(0x90b0ff, 0.9);
@@ -1619,12 +1614,7 @@
     roomGroup.visible = false;
     scene.add(roomGroup);
 
-    const wallMat = new THREE.MeshStandardMaterial({ 
-      color: new THREE.Color(state.wallColor), 
-      roughness: 1.0, // Fosco total
-      envMapIntensity: 0.0, // Parede não reflete ambiente como metal
-      side: THREE.DoubleSide 
-    });
+    const wallMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(state.wallColor), roughness: 0.9, side: THREE.DoubleSide });
     
     // Back Wall at Z = 0 (Baseboard sits 100% flush against Z = 0)
     const backWall = new THREE.Mesh(new THREE.PlaneGeometry(20, 8), wallMat);
@@ -1805,27 +1795,6 @@
       return { tex, roughness: 0.40, metalness: 0.05, bgThumb: '#a0a5aa' };
     }
 
-    // 7. MDF Crespo Bump Map (Procedural noise texture for rough baseboards)
-    function createMDFBumpTexture() {
-      const cvs = document.createElement('canvas');
-      cvs.width = 256; cvs.height = 256;
-      const ctx = cvs.getContext('2d');
-      const imgData = ctx.createImageData(256, 256);
-      for(let i = 0; i < imgData.data.length; i += 4) {
-        const val = 128 + (Math.random() - 0.5) * 60; 
-        imgData.data[i] = val;
-        imgData.data[i+1] = val;
-        imgData.data[i+2] = val;
-        imgData.data[i+3] = 255;
-      }
-      ctx.putImageData(imgData, 0, 0);
-      const tex = new THREE.CanvasTexture(cvs);
-      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(10, 10); // Tile the noise
-      return tex;
-    }
-    const mdfBumpTex = createMDFBumpTexture();
-
     // Room Floor — MeshPhysicalMaterial with clearcoat for lacquered/polished PBR look!
     const defaultFloorData = createParquetTexture();
     const roomFloorMat = new THREE.MeshPhysicalMaterial({
@@ -1967,15 +1936,11 @@
     lampPointLight.shadow.mapSize.width = 2048;
     lampPointLight.shadow.mapSize.height = 2048;
     lampPointLight.shadow.bias = -0.0002;
-    lampPointLight.shadow.radius = 8;
-    lampPointLight.shadow.blurSamples = 25;
     lampGroup.add(lampPointLight);
 
     const lampSpotLight = new THREE.SpotLight(new THREE.Color(state.lampColor), 35.0, 10.0, Math.PI / 2.0, 0.5, 2.0);
     lampSpotLight.position.set(0, 1.25, 0.2);
     lampSpotLight.castShadow = true;
-    lampSpotLight.shadow.radius = 8;
-    lampSpotLight.shadow.blurSamples = 25;
     lampGroup.add(lampSpotLight);
 
     // Dedicated Spotlight Target pointing DIRECTLY AT THE BASEBOARD CENTER!
@@ -2163,25 +2128,24 @@
         if (state.environment === 'room') {
           // REALISTIC INTERIOR ROOM ILLUMINATION:
           scene.environment = pbrStudioTexture;
-          // Lowered base exposure to prevent blowout (HDRI already contributes a lot)
-          renderer.toneMappingExposure = 0.35 + 0.25 * intensityFactor; 
+          renderer.toneMappingExposure = 0.50 + 0.40 * intensityFactor; // Exposure increases dynamically!
 
           // Balanced Ambient and Main Lights
-          ambientLight.intensity = 0.05 + 0.15 * intensityFactor;
+          ambientLight.intensity = 0.08 + 0.22 * intensityFactor;
           ambientLight.color.setHex(0xffffff);
 
-          mainLight.intensity = 0.05 + 0.30 * intensityFactor;
+          mainLight.intensity = 0.10 + 0.50 * intensityFactor;
           mainLight.position.set(2, 4, 3);
-          fillLight.intensity = 0.02 + 0.15 * intensityFactor;
-          rimLight.intensity = 0.02 + 0.15 * intensityFactor;
+          fillLight.intensity = 0.05 + 0.25 * intensityFactor;
+          rimLight.intensity = 0.05 + 0.25 * intensityFactor;
 
           lampGroup.visible = true;
 
-          // Drastically reduced lamp intensities. ACESFilmic + UnrealBloom blows out easily at >20 intensities!
-          lampPointLight.intensity = 8.0 * intensityFactor;
-          lampSpotLight.intensity = 12.0 * intensityFactor;
-          lampStemLight.intensity = 3.0 * intensityFactor;
-          shadeMat.emissiveIntensity = 2.0 * intensityFactor;
+          // Lamp lights beaming DIRECTLY ONTO THE BASEBOARD & WALL HARMONIOUSLY!
+          lampPointLight.intensity = 60.0 * intensityFactor;
+          lampSpotLight.intensity = 80.0 * intensityFactor;
+          lampStemLight.intensity = 15.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 4.0 * intensityFactor;
 
         } else {
           // Studio environment mode (Bright PBR HDRI studio)
@@ -2288,20 +2252,20 @@
               cloned.aoMapIntensity = 1.5; // Deepen contact shadows from baked AO!
             }
 
-            // 2. Reduce HDRI reflections and make it matte for MDF
-            cloned.envMapIntensity = 0.15; // MDF is not shiny!
-            cloned.roughness = 0.85; // Fosco/crespo
-
-            // 3. Apply fine noise bump map for "crespo" (rough/grainy) texture
-            if (!cloned.bumpMap && !mat.name.toLowerCase().includes('metal')) {
-              cloned.bumpMap = mdfBumpTex;
-              cloned.bumpScale = 0.003; // Very subtle physical grain
-            }
+            // 2. Boost HDRI environment reflections so wood grain catches light realistically
+            cloned.envMapIntensity = 1.8;
 
             // 3. Enable physically correct normals from baked normalMap if present
             if (mat.normalMap) {
               cloned.normalMap = mat.normalMap;
               cloned.normalScale = new THREE.Vector2(1.2, 1.2);
+            } 
+            // 4. BUMP MAP FALLBACK: O Blender NÃO exporta "Bump Nodes" automaticamente para GLB (apenas Normal Maps).
+            // Para consertar isso e dar aquele efeito "crespo" ou de relevo na madeira sem você precisar fazer bake de normais:
+            // Nós usamos a própria textura de cor (map) como mapa de afundamento (bumpMap) no Three.js!
+            else if (mat.map) {
+              cloned.bumpMap = mat.map;
+              cloned.bumpScale = 0.02; // Controla o quão fundo fica o "crespo" (0.01 a 0.05 é ideal)
             }
 
             return cloned;
