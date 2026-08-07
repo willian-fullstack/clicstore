@@ -1073,7 +1073,14 @@
       
       <!-- TAB 1: LISTA DE RODAPÉS DO BLENDER -->
       <div class="tab-pane" id="tab-models">
-        <div class="section-tag">01 · Coleção de Quadros</div>
+        <div class="section-tag">01 · Tamanho do Quadro</div>
+        <div style="margin-bottom: 20px;">
+          <select id="size-selector" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--panel-border); outline: none; font-weight: 600; cursor: pointer;">
+            <!-- Opções inseridas via JS -->
+          </select>
+        </div>
+
+        <div class="section-tag">02 · Coleção de Quadros (Cores)</div>
         
         <div class="model-list" id="model-list-container">
           <!-- Dynamically populated from quadro.glb -->
@@ -2338,25 +2345,63 @@
       });
     }
 
-    // --- PARAMETRIC 3D FRAME GENERATOR ---
-    function createParametricFrame(meta) {
-      const frameGroup = new THREE.Group();
-      frameGroup.name = meta.name;
+    // --- PRODUCT SIZES DEFINITION ---
+      const productSizes = [
+        {
+          id: 'p21x30',
+          title: 'Quadro 21x30 cm',
+          posterLine1: 'A4',
+          posterLine2: '21x30',
+          w: 0.21,
+          h: 0.30,
+          wOuter: 0.25,
+          hOuter: 0.34,
+          frontDepth: 0.007,
+          backDepth: 0.005,
+          frontHoleWidth: 0.20,
+          frontHoleHeight: 0.29,
+          thicknessText: '1.2 cm'
+        },
+        {
+          id: 'p30x45',
+          title: 'Quadro 30x45 cm',
+          posterLine1: 'A3',
+          posterLine2: '30x45',
+          w: 0.30,
+          h: 0.45,
+          wOuter: 0.34,
+          hOuter: 0.49,
+          frontDepth: 0.012,
+          backDepth: 0.008,
+          frontHoleWidth: 0.29, // 1cm menor que w
+          frontHoleHeight: 0.44, // 1cm menor que h
+          thicknessText: '2.0 cm'
+        }
+      ];
+      
+      let activeSizeIndex = 0; // default to first
 
-      const w = 0.21;
-      const h = 0.30;
-      
-      // Medidas exatas do anúncio (25x34 externo, 1.2cm de espessura)
-      const wOuter = 0.25; // 25cm
-      const hOuter = 0.34; // 34cm
-      
-      // Espessuras (Total 1.2cm = 12mm)
-      const frontDepth = 0.007;  // 7mm de espessura na parte da frente
-      const backDepth = 0.005;   // 5mm de profundidade na cava (trás)
-      
-      // Buraco frontal (o "lábio" que segura o vidro). 0.5cm menor de cada lado que a cava
-      const frontHoleWidth = 0.20; 
-      const frontHoleHeight = 0.29;
+      // --- PARAMETRIC 3D FRAME GENERATOR ---
+      function createParametricFrame(meta) {
+        const frameGroup = new THREE.Group();
+        frameGroup.name = meta.name;
+        
+        const activeSize = productSizes[activeSizeIndex];
+
+        const w = activeSize.w;
+        const h = activeSize.h;
+        
+        // Medidas exatas
+        const wOuter = activeSize.wOuter; 
+        const hOuter = activeSize.hOuter;
+        
+        // Espessuras
+        const frontDepth = activeSize.frontDepth;  
+        const backDepth = activeSize.backDepth;   
+        
+        // Buraco frontal (o "lábio" que segura o vidro).
+        const frontHoleWidth = activeSize.frontHoleWidth; 
+        const frontHoleHeight = activeSize.frontHoleHeight;
 
       let matBorder;
       
@@ -2537,19 +2582,44 @@
       meshBackPlane.userData.explodeTarget = meshBackPlane.position.clone().add(new THREE.Vector3(0, 0, -0.15));
       frameGroup.add(meshBackPlane);
 
-      // 3. POSTER (Photo - 0.3mm)
-      const posterGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.0003);
+      // 3. POSTER (Photo - 1.0mm)
+      const posterGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.001);
       const canvas = document.createElement('canvas');
-      canvas.width = 1024; canvas.height = 1448; // A4 aspect ratio
+      canvas.width = 1024; 
+      canvas.height = Math.round(1024 * (h / w)); // Mantém a proporção real do quadro
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#f3ebe3';
-      ctx.fillRect(0,0, 1024, 1448);
-      ctx.fillStyle = '#c59d4a';
-      ctx.font = "80px NoirPro, sans-serif";
+      
+      // Fundo cinza claro
+      ctx.fillStyle = '#e8e8e8';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Textos principais
+      ctx.fillStyle = '#0a0a0a';
       ctx.textAlign = "center";
-      ctx.fillText("CLIC STORE", 512, 724);
-      ctx.font = "40px sans-serif";
-      ctx.fillText("A4 (21x30)", 512, 800);
+      ctx.textBaseline = "middle";
+      
+      // Linha 1: "A3"
+      ctx.font = "bold 450px sans-serif";
+      ctx.fillText(activeSize.posterLine1, canvas.width / 2, canvas.height / 2 - 200);
+      
+      // Linha 2: "30x42"
+      ctx.font = "bold 240px sans-serif";
+      ctx.fillText(activeSize.posterLine2, canvas.width / 2, canvas.height / 2 + 150);
+      
+      // Linha 3: "com acetato"
+      ctx.font = "bold 110px sans-serif";
+      ctx.fillText("com acetato", canvas.width / 2, canvas.height / 2 + 350);
+
+      // Barra vermelha na base
+      const barHeight = 160;
+      ctx.fillStyle = '#e30613';
+      ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+
+      // Logo clicstore em branco
+      ctx.fillStyle = '#ffffff';
+      ctx.font = "italic bold 105px sans-serif";
+      ctx.fillText("clicstore", canvas.width / 2, canvas.height - (barHeight / 2));
+      
       const defaultTex = new THREE.CanvasTexture(canvas);
       defaultTex.colorSpace = THREE.SRGBColorSpace;
 
@@ -2559,25 +2629,40 @@
           name: 'poster_material' 
       });
       const meshPoster = new THREE.Mesh(posterGeom, matPoster);
-      meshPoster.position.z = -0.00045; // Atrás do vidro
+      meshPoster.position.z = -0.0008; // Atrás do vidro
       meshPoster.name = "poster";
       meshPoster.userData.basePosition = meshPoster.position.clone();
       meshPoster.userData.explodeTarget = meshPoster.position.clone().add(new THREE.Vector3(0, 0, -0.05));
       frameGroup.add(meshPoster);
 
-      // 4. ACETATO (Glass front - 0.3mm)
-      const glassGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.0003);
-      const matGlass = new THREE.MeshPhysicalMaterial({
-          color: 0xffffff,
-          metalness: 0.1,
-          roughness: 0.05,
-          envMapIntensity: 2.0,
-          transmission: 1.0, 
-          ior: 1.5,
+      // 4. ACETATO (Glass front - 1.0mm)
+      const glassGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.001);
+      
+      // Face Frontal e Traseira: 100% cristalina, apenas reflexo aditivo (nunca embaça)
+      const matGlassFront = new THREE.MeshStandardMaterial({
+          color: 0x000000,
+          metalness: 0.8,
+          roughness: 0.0,
+          envMapIntensity: 2.5,
           transparent: true,
-          name: 'vidro_material'
+          opacity: 0.4,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
       });
-      const meshGlass = new THREE.Mesh(glassGeom, matGlass);
+      
+      // Faces Laterais: Semi-Sólidas para destacar a espessura de 1mm
+      const matGlassSides = new THREE.MeshPhysicalMaterial({
+          color: 0xeeeeee,
+          metalness: 0.1,
+          roughness: 0.1,
+          envMapIntensity: 1.0,
+          transparent: true,
+          opacity: 0.85, // Borda forte e visível
+          depthWrite: true
+      });
+
+      const glassMaterials = [matGlassSides, matGlassSides, matGlassSides, matGlassSides, matGlassFront, matGlassFront];
+      const meshGlass = new THREE.Mesh(glassGeom, glassMaterials);
       meshGlass.position.z = -0.00015; // Rente à face de trás do Lábio Frontal (Z=0)
       meshGlass.userData.basePosition = meshGlass.position.clone();
       meshGlass.userData.explodeTarget = meshGlass.position.clone().add(new THREE.Vector3(0, 0, 0.05));
@@ -2691,9 +2776,11 @@
                 });
             }
         });
+        populateSizeList();
         generateAllFrames();
     }, undefined, (err) => {
         console.error("Aviso: rodape.glb não encontrado.", err);
+        populateSizeList();
         generateAllFrames();
     });
 
@@ -2729,6 +2816,30 @@
         });
 
         container.appendChild(card);
+      });
+    }
+
+    // Populate Sizes List
+    function populateSizeList() {
+      const selector = document.getElementById('size-selector');
+      if (!selector) return; // safety check
+      selector.innerHTML = '';
+      
+      productSizes.forEach((size, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.innerText = size.title;
+        if(idx === activeSizeIndex) opt.selected = true;
+        selector.appendChild(opt);
+      });
+
+      // Avoid adding multiple listeners if called multiple times
+      const newSelector = selector.cloneNode(true);
+      selector.parentNode.replaceChild(newSelector, selector);
+      
+      newSelector.addEventListener('change', (e) => {
+        activeSizeIndex = parseInt(e.target.value);
+        generateAllFrames();
       });
     }
 
