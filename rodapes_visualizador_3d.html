@@ -2245,8 +2245,8 @@
           const upgradeMat = (mat) => {
             if (!mat) return mat;
             
-            // 1. Converter para MeshPhysicalMaterial para o máximo realismo PBR (igual Blender Cycles)
-            const cloned = new THREE.MeshPhysicalMaterial().copy(mat);
+            // 1. Clonar o material original de forma segura (MeshStandardMaterial já é PBR)
+            const cloned = mat.clone();
 
             // 2. Ajuste do acabamento da madeira (Satin / Semi-brilho)
             // Rugosidade em 0.9 era fosco demais, escondia as sombras. 0.4 a 0.5 permite ver o brilho batendo nos veios!
