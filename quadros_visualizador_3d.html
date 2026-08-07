@@ -1,0 +1,3121 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="preto">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClicStore Studio — Visualizador 3D de Quadros e Porta Retratos</title>
+  
+  <!-- Google Fonts (Cormorant Garamond & Plus Jakarta Sans) & Remix Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+  <style>
+    @font-face {
+      font-family: 'NoirPro';
+      src: url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff2') format('woff2'),
+           url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'NoirPro';
+      src: url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff2') format('woff2'),
+           url('./noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff') format('woff');
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    /* --- CLICSTORE OFFICIAL VISUAL IDENTITY DESIGN SYSTEM TOKENS --- */
+    :root {
+      --abs-preto: #111111;
+      --abs-preto-fosco: #1a1a1a;
+      --abs-dourado: #C59D4A;
+      --abs-dourado-claro: #E0BD7A;
+      --abs-creme: #F3EBE3;
+      --abs-offwhite: #E7D8C3;
+
+      --preto: var(--abs-preto);
+      --preto-fosco: var(--abs-preto-fosco);
+      --dourado: var(--abs-dourado);
+      --dourado-claro: var(--abs-dourado-claro);
+      --creme: var(--abs-creme);
+      --offwhite: var(--abs-offwhite);
+      --linha: rgba(197, 157, 74, 0.35);
+
+      --bg-dark: var(--preto);
+      --panel-bg: rgba(26, 26, 26, 0.92);
+      --panel-border: var(--linha);
+      --accent: var(--dourado);
+      --accent-hover: var(--dourado-claro);
+      --accent-glow: rgba(197, 157, 74, 0.35);
+      --text-main: var(--creme);
+      --text-muted: var(--offwhite);
+      --tag-color: var(--abs-dourado-claro);
+      --card-bg: rgba(17, 17, 17, 0.70);
+      --card-hover: rgba(197, 157, 74, 0.18);
+      --radius: 12px;
+    }
+
+    /* CONTRAST-OPTIMIZED THEME SWITCHING (5 Official ClicStore Themes) */
+    html[data-theme="creme"] {
+      --preto: var(--abs-creme);
+      --preto-fosco: var(--abs-offwhite);
+      --creme: #111111;
+      --offwhite: #2a2a2a;
+      --dourado-claro: #8b6823;
+      --dourado: #111111;
+      --tag-color: #725213;
+      --linha: rgba(17, 17, 17, 0.25);
+      --panel-bg: rgba(243, 235, 227, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.25);
+      --card-bg: rgba(231, 216, 195, 0.65);
+      --card-hover: rgba(197, 157, 74, 0.35);
+      --text-main: #111111;
+      --text-muted: #333333;
+    }
+
+    html[data-theme="offwhite"] {
+      --preto: var(--abs-offwhite);
+      --preto-fosco: var(--abs-creme);
+      --creme: #111111;
+      --offwhite: #2a2a2a;
+      --dourado-claro: #8b6823;
+      --dourado: #111111;
+      --tag-color: #725213;
+      --linha: rgba(17, 17, 17, 0.25);
+      --panel-bg: rgba(231, 216, 195, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.25);
+      --card-bg: rgba(243, 235, 227, 0.65);
+      --card-hover: rgba(197, 157, 74, 0.35);
+      --text-main: #111111;
+      --text-muted: #333333;
+    }
+
+    html[data-theme="dourado"] {
+      --preto: var(--abs-dourado);
+      --preto-fosco: var(--abs-dourado-claro);
+      --creme: #111111;
+      --offwhite: #222222;
+      --dourado-claro: #111111;
+      --dourado: #111111;
+      --tag-color: #111111; /* HIGH CONTRAST DARK TEXT IN GOLD THEME! */
+      --linha: rgba(17, 17, 17, 0.35);
+      --panel-bg: rgba(197, 157, 74, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.35);
+      --card-bg: rgba(243, 235, 227, 0.55);
+      --card-hover: rgba(17, 17, 17, 0.2);
+      --text-main: #111111;
+      --text-muted: #2a2a2a;
+    }
+
+    html[data-theme="dourado-claro"] {
+      --preto: var(--abs-dourado-claro);
+      --preto-fosco: var(--abs-dourado);
+      --creme: #111111;
+      --offwhite: #222222;
+      --dourado-claro: #111111;
+      --dourado: #111111;
+      --tag-color: #111111; /* HIGH CONTRAST DARK TEXT IN SOFT GOLD THEME! */
+      --linha: rgba(17, 17, 17, 0.35);
+      --panel-bg: rgba(224, 189, 122, 0.94);
+      --panel-border: rgba(17, 17, 17, 0.35);
+      --card-bg: rgba(243, 235, 227, 0.55);
+      --card-hover: rgba(17, 17, 17, 0.2);
+      --text-main: #111111;
+      --text-muted: #2a2a2a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'NoirPro', 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--preto);
+      color: var(--text-main);
+    }
+
+    h1, h2, h3, .serif, em {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* Gold Progress Rail */
+    #rail {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--abs-dourado), var(--abs-dourado-claro));
+      z-index: 999;
+    }
+
+    #webgl-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--abs-preto);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: opacity 0.5s ease;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(197, 157, 74, 0.2);
+      border-top-color: var(--abs-dourado);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Top Navigation Header */
+    .top-header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .brand-badge {
+      pointer-events: auto;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .mock-logo {
+      font-family: 'NoirPro', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 18px;
+      color: var(--text-main);
+    }
+
+    .mock-logo .clic {
+      font-weight: 600;
+      -webkit-text-stroke: 0.03em currentColor;
+    }
+
+    .mock-logo .store {
+      font-weight: normal;
+      opacity: 0.85;
+    }
+
+    .studio-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: var(--abs-dourado);
+      color: var(--abs-preto);
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      margin-left: 4px;
+      font-family: 'NoirPro', sans-serif;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--text-main);
+    }
+
+    .brand-title em {
+      color: var(--tag-color);
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .brand-subtitle {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Theme Switcher Dots */
+    .theme-picker-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .theme-label {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--tag-color);
+      margin-right: 2px;
+    }
+
+    .theme-picker-header button {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .theme-picker-header button:hover {
+      transform: scale(1.25);
+      box-shadow: 0 0 8px var(--abs-dourado);
+    }
+
+    .btn-action {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-action:hover {
+      background: rgba(197, 157, 74, 0.25);
+      border-color: var(--abs-dourado);
+      transform: translateY(-2px);
+    }
+
+    .btn-action.primary {
+      background: linear-gradient(135deg, var(--abs-dourado), var(--abs-dourado-claro));
+      color: #111111;
+      border: none;
+      font-weight: 700;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .btn-action.primary:hover {
+      background: linear-gradient(135deg, var(--abs-dourado-claro), var(--abs-dourado));
+      box-shadow: 0 6px 25px rgba(197, 157, 74, 0.6);
+    }
+
+    .btn-action.render-active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Left Control Sidebar */
+    .sidebar {
+      position: absolute;
+      top: 85px;
+      left: 20px;
+      bottom: 20px;
+      width: 400px;
+      z-index: 10;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      background: rgba(0,0,0,0.15);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 6px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn i {
+      font-size: 16px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(197, 157, 74, 0.15);
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--tag-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      border: 1px solid var(--linha);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 5px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: var(--linha);
+      border-radius: 3px;
+    }
+
+    .tab-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    /* Section Tag (HIGH-CONTRAST BRAND BOOK PATTERN) */
+    .section-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--tag-color);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .section-tag::before {
+      content: "";
+      width: 16px;
+      height: 2px;
+      background: var(--tag-color);
+    }
+
+    /* List of Blender Models */
+    .model-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .model-item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .model-item-card:hover {
+      background: var(--card-hover);
+      border-color: var(--tag-color);
+      transform: translateX(4px);
+    }
+
+    .model-item-card.active {
+      border-color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.22);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .model-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .model-color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid var(--linha);
+    }
+
+    .model-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .model-type-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(197, 157, 74, 0.2);
+      font-weight: 700;
+      color: var(--text-main);
+      border: 1px solid var(--linha);
+    }
+
+    .model-item-card.active .model-type-tag {
+      background: var(--abs-dourado);
+      color: #111111;
+      border: none;
+    }
+
+    /* Grid Options */
+    .grid-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .option-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 14px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .option-card:hover {
+      background: var(--card-hover);
+      border-color: var(--tag-color);
+      transform: translateY(-2px);
+    }
+
+    .option-card.active {
+      border-color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.22);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .option-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Switch toggle box styling */
+    .switch-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .switch-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .switch-icon {
+      font-size: 18px;
+      color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.2);
+      padding: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--linha);
+    }
+
+    .switch-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .switch-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.25);
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid var(--linha);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--abs-dourado);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+      background-color: #111111;
+    }
+
+    /* Dimensions Card */
+    .dimensions-card {
+      background: var(--card-bg);
+      border: 1px solid var(--linha);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
+      width: 100%;
+    }
+
+    .dim-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dim-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .dim-label i {
+      color: var(--tag-color);
+      font-size: 16px;
+    }
+
+    .dim-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+      background: rgba(197, 157, 74, 0.2);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--linha);
+    }
+
+    .dim-divider {
+      height: 1px;
+      background: var(--linha);
+      width: 100%;
+      opacity: 0.5;
+    }
+
+    /* Slider Input Styling */
+    .rot-slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--card-bg);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .rot-slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    input[type="range"].rot-slider {
+      width: 100%;
+      height: 6px;
+      background: rgba(197, 157, 74, 0.25);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"].rot-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--abs-dourado);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Floor Texture Selector Cards */
+    .floor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .floor-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .floor-card:hover {
+      background: var(--card-hover);
+      border-color: var(--tag-color);
+      transform: translateY(-2px);
+    }
+
+    .floor-card.active {
+      border-color: var(--tag-color);
+      background: rgba(197, 157, 74, 0.25);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .floor-thumb {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--linha);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .floor-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    /* Bottom Quick Toolbar */
+    .bottom-toolbar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 30px;
+      padding: 6px 12px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .tool-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      background: rgba(197, 157, 74, 0.2);
+      color: var(--tag-color);
+      transform: scale(1.1);
+    }
+
+    .tool-btn.active {
+      background: var(--abs-dourado);
+      color: #111111;
+    }
+
+    /* ULTRA-CLEAN MINIMALIST COTAS TYPOGRAPHY (NO HEAVY BOXES) */
+    .measurement-badge {
+      position: absolute;
+      background: transparent;
+      border: none;
+      color: var(--abs-dourado-claro);
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      z-index: 5;
+      transition: opacity 0.2s ease;
+    }
+
+    .measurement-badge .dim-title {
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size: 10px;
+      opacity: 0.95;
+    }
+
+    /* Upload Dropzone Modal */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+    }
+
+    .dropzone {
+      border: 2px dashed var(--linha);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone:hover {
+      border-color: var(--abs-dourado);
+      background: rgba(197, 157, 74, 0.08);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: absolute;
+      top: 90px;
+      right: 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--abs-dourado);
+      color: var(--text-main);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    /* Color picker wrapper */
+    .color-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      width: 100%;
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      background: none;
+      flex-shrink: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border: 1px solid var(--linha);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: calc(100% - 40px);
+        height: 48%;
+        top: auto;
+        bottom: 75px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ClicStore Gold Progress Rail -->
+  <div id="rail"></div>
+
+  <!-- Loading Screen -->
+  <div class="loading-overlay" id="loading-screen">
+    <div class="spinner"></div>
+    <div style="font-weight: 700; font-size: 15px; color:var(--abs-dourado-claro);">Carregando ClicStore Studio (quadro.glb)...</div>
+    <div style="font-size: 12px; color: var(--abs-offwhite);">Gerando estúdio de iluminação PBR estilo Blender Cycles...</div>
+  </div>
+
+  <!-- WebGL Canvas Container -->
+  <div id="webgl-container"></div>
+
+  <!-- 3D Callout Overlays (CLEAN MINIMALIST COTAS) -->
+        
+  
+  <!-- 3D Measurement Overlay Badges -->
+  <div id="measure-height" class="measurement-badge" style="opacity: 0;">
+    <span class="dim-title">ALTURA</span> <span id="val-height">34.0 cm</span>
+  </div>
+  <div id="measure-thickness" class="measurement-badge" style="opacity: 0;">
+    <span class="dim-title">ESPESSURA</span> <span id="val-thickness">12 mm</span>
+  </div>
+  <div id="measure-length" class="measurement-badge" style="opacity: 0;">
+    <span class="dim-title">LARGURA</span> <span id="val-length">25.0 cm</span>
+  </div>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="brand-badge">
+      <div class="mock-logo">
+        <span class="clic">CLIC</span><span class="store">STORE</span><span class="studio-badge">STUDIO</span>
+      </div>
+      <div style="display:flex; flex-direction:column; border-left:1px solid var(--linha); padding-left:12px;">
+        <div class="brand-title">Catálogo 3D <em>Premium</em></div>
+        <div class="brand-subtitle">Visualizador Oficial da Marca</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- RENDERIZADOR REALISTA BLENDER PBR TOGGLE -->
+      <button class="btn-action primary render-active" id="btn-toggle-render" title="Alternar entre Render Realista PBR (Blender) e Estúdio Simples">
+        <i class="ri-sparkles-line"></i> Render Realista (Blender PBR)
+      </button>
+
+      <!-- Live ClicStore 5-Theme Switcher -->
+      <div class="theme-picker-header">
+        <span class="theme-label">TEMA:</span>
+        <button class="btn-theme-dot" data-theme-id="preto" style="background:var(--abs-preto)" title="Absolute Black"></button>
+        <button class="btn-theme-dot" data-theme-id="dourado" style="background:var(--abs-dourado)" title="Classic Gold"></button>
+        <button class="btn-theme-dot" data-theme-id="dourado-claro" style="background:var(--abs-dourado-claro)" title="Soft Gold"></button>
+        <button class="btn-theme-dot" data-theme-id="creme" style="background:var(--abs-creme)" title="Cream White"></button>
+        <button class="btn-theme-dot" data-theme-id="offwhite" style="background:var(--abs-offwhite)" title="Warm Off-White"></button>
+      </div>
+
+      <button class="btn-action primary" id="btn-toggle-side">
+        <i class="ri-grid-fill"></i> Exibir Todos Lado a Lado
+      </button>
+
+      <button class="btn-action" id="btn-open-upload">
+        <i class="ri-upload-cloud-line"></i> Outro Arquivo .GLB
+      </button>
+
+      <button class="btn-action primary" id="btn-take-photo">
+        <i class="ri-camera-lens-line"></i> Tirar Foto HD
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar Control Panel -->
+  <aside class="sidebar">
+    <nav class="sidebar-tabs">
+      <button class="tab-btn active" data-tab="models">
+        <i class="ri-box-3-line"></i> Quadros (4)
+      </button>
+
+      <button class="tab-btn" data-tab="dimensions">
+        <i class="ri-ruler-2-line"></i> Medidas
+      </button>
+
+      <button class="tab-btn" data-tab="materials">
+        <i class="ri-palette-line"></i> Tinta Custom
+      </button>
+
+      <button class="tab-btn" data-tab="scene">
+        <i class="ri-sun-line"></i> Cenário & Piso
+      </button>
+    </nav>
+
+    <div class="sidebar-content">
+      
+      <!-- TAB 1: LISTA DE RODAPÉS DO BLENDER -->
+      <div class="tab-pane" id="tab-models">
+        <div class="section-tag">01 · Coleção de Quadros</div>
+        
+        <div class="model-list" id="model-list-container">
+          <!-- Dynamically populated from quadro.glb -->
+        </div>
+      </div>
+
+      <!-- TAB 2: DIMENSÕES E MEDIDAS -->
+      <div class="tab-pane" style="display:none;" id="tab-dimensions">
+        <div class="section-tag">02 · Cotagem Arquitetônica 3D</div>
+
+        <div class="switch-container">
+          <div class="switch-info">
+            <div class="switch-icon"><i class="ri-ruler-line"></i></div>
+            <div>
+              <div class="switch-title">Exibir Cotas Arquitetônicas 3D</div>
+              <div class="switch-desc">Linhas técnicas e flechas de dimensão</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-measures" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- CONTROLE DE ROTAÇÃO MANUAL 3D -->
+        <div class="section-tag" style="margin-top: 8px;">Girar Peça Manualmente 3D</div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="rot-slider-row">
+            <div class="rot-slider-header">
+              <span>Giro Eixo X (Cima / Baixo)</span>
+              <span id="lbl-rot-x">0°</span>
+            </div>
+            <input type="range" id="slider-rot-x" min="0" max="360" step="90" value="0" class="rot-slider">
+          </div>
+
+          <div class="rot-slider-row">
+            <div class="rot-slider-header">
+              <span>Giro Eixo Y (Frente / Trás)</span>
+              <span id="lbl-rot-y">0°</span>
+            </div>
+            <input type="range" id="slider-rot-y" min="0" max="360" step="90" value="0" class="rot-slider">
+          </div>
+
+          <div class="rot-slider-row">
+            <div class="rot-slider-header">
+              <span>Giro Eixo Z (Lado / Lado)</span>
+              <span id="lbl-rot-z">0°</span>
+            </div>
+            <input type="range" id="slider-rot-z" min="0" max="360" step="90" value="0" class="rot-slider">
+          </div>
+
+          <div style="display:flex; gap:6px;">
+            <button class="btn-action" id="btn-step-x" style="flex:1; padding:8px; font-size:11px; justify-content:center;">+90° X</button>
+            <button class="btn-action" id="btn-step-y" style="flex:1; padding:8px; font-size:11px; justify-content:center;">+90° Y</button>
+            <button class="btn-action" id="btn-step-z" style="flex:1; padding:8px; font-size:11px; justify-content:center;">+90° Z</button>
+            <button class="btn-action" id="btn-reset-rot" style="padding:8px; font-size:11px; justify-content:center;" title="Resetar Rotação Padrão"><i class="ri-refresh-line"></i></button>
+          </div>
+        </div>
+
+        <div class="section-tag" style="margin-top: 8px;">Dimensões Reais da Peça</div>
+
+        <div class="dimensions-card">
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-height-line"></i> Altura
+            </div>
+            <span class="dim-value" id="info-h">10.0 cm</span>
+          </div>
+
+          <div class="dim-divider"></div>
+
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-ruler-2-line"></i> Espessura
+            </div>
+            <span class="dim-value" id="info-t">9 mm</span>
+          </div>
+
+          <div class="dim-divider"></div>
+
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-expand-horizontal-line"></i> Comprimento
+            </div>
+            <span class="dim-value" id="info-l">90.0 cm</span>
+          </div>
+        </div>
+
+        <!-- DIMENSÕES DA LUMINÁRIA DE CANTO (QUANDO HABILITADA) -->
+        <div id="lamp-dim-card" class="dimensions-card" style="margin-top: 8px; display: none;">
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-lightbulb-line"></i> Altura Abajur
+            </div>
+            <span class="dim-value">1.40 m</span>
+          </div>
+
+          <div class="dim-divider"></div>
+
+          <div class="dim-row">
+            <div class="dim-label">
+              <i class="ri-ruler-2-line"></i> Diâmetro Cúpula
+            </div>
+            <span class="dim-value">36 cm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: CORES E ACABAMENTOS -->
+      <div class="tab-pane" style="display:none;" id="tab-materials">
+        <div class="section-tag">03 · Personalização de Cor</div>
+        
+        <div class="color-input-wrapper">
+          <input type="color" id="inp-custom-color" value="#ffffff">
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-main);">Seletor de Cor Customizada</div>
+            <div style="font-size:11px; color:var(--text-muted);">Sobrepor pintura no modelo 3D</div>
+          </div>
+        </div>
+
+        <button class="btn-action" id="btn-reset-mat" style="margin-top:4px; width:100%; justify-content:center;">
+          <i class="ri-refresh-line"></i> Restaurar Material Original do Blender
+        </button>
+      </div>
+
+      <!-- TAB 4: CENÁRIO & PISO -->
+      <div class="tab-pane" style="display:none;" id="tab-scene">
+        <div class="section-tag">04 · Ambiente Virtual</div>
+        <div class="grid-options">
+          <div class="option-card active" data-env="studio">
+            <div class="option-preview-box" style="background: #1a1a1a; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-lightbulb-line" style="font-size:20px; color:var(--tag-color);"></i>
+            </div>
+            <span class="option-label">Estúdio Neutro</span>
+          </div>
+
+          <div class="option-card" data-env="room">
+            <div class="option-preview-box" style="background: linear-gradient(to bottom, #777 50%, #333 50%); display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-home-4-line" style="font-size:20px; color:var(--tag-color);"></i>
+            </div>
+            <span class="option-label">Parede + Piso Real</span>
+          </div>
+        </div>
+
+        <!-- SELETOR EM TEMPO REAL DE TEXTURAS DE PISO -->
+        <div class="section-tag" style="margin-top: 8px;">Textura do Piso (Tempo Real)</div>
+
+        <div class="floor-grid">
+          <div class="floor-card active" data-floor-type="parquet">
+            <div class="floor-thumb" id="thumb-parquet" style="background:#b8895e;"></div>
+            <span class="floor-label">Parquet Espinha</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="oak">
+            <div class="floor-thumb" id="thumb-oak" style="background:#d4a373;"></div>
+            <span class="floor-label">Laminado Carvalho</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="wenge">
+            <div class="floor-thumb" id="thumb-wenge" style="background:#382013;"></div>
+            <span class="floor-label">Vinílico Wengé</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="carrara">
+            <div class="floor-thumb" id="thumb-carrara" style="background:#eef2f5;"></div>
+            <span class="floor-label">Mármore Carrara</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="marquina">
+            <div class="floor-thumb" id="thumb-marquina" style="background:#1a1a1a;"></div>
+            <span class="floor-label">Mármore Preto</span>
+          </div>
+
+          <div class="floor-card" data-floor-type="concrete">
+            <div class="floor-thumb" id="thumb-concrete" style="background:#a0a5aa;"></div>
+            <span class="floor-label">Cimento Queimado</span>
+          </div>
+        </div>
+
+        <button class="btn-action" id="btn-upload-floor" style="margin-top:4px; width:100%; justify-content:center;">
+          <i class="ri-image-add-line"></i> Carregar Foto de Piso (.JPG/.PNG)
+        </button>
+        <input type="file" id="inp-floor-file" accept="image/*" style="display:none;">
+
+        <div class="section-tag" style="margin-top: 8px;">Orientação do Quadro</div>
+        <div class="grid-options">
+          <div class="option-card active" data-orientation="portrait">
+            <div class="option-preview-box" style="background: #1a1a1a; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-article-line" style="font-size:20px; color:var(--tag-color);"></i>
+            </div>
+            <span class="option-label">Retrato (Em pé)</span>
+          </div>
+
+          <div class="option-card" data-orientation="landscape">
+            <div class="option-preview-box" style="background: #1a1a1a; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--linha);">
+              <i class="ri-layout-3-line" style="font-size:20px; color:var(--tag-color);"></i>
+            </div>
+            <span class="option-label">Paisagem (Deitado)</span>
+          </div>
+        </div>
+
+        <div class="section-tag" style="margin-top: 8px;">Imagem / Pôster do Quadro</div>
+        <button class="btn-action" id="btn-upload-poster" style="width:100%; justify-content:center;">
+          <i class="ri-image-add-line"></i> Carregar Foto ou Arte (.JPG/.PNG)
+        </button>
+        <input type="file" id="inp-poster-file" accept="image/*" style="display:none;">
+
+        <!-- CONTROLE DA LUMINÁRIA DE CANTO (ABAJUR) -->
+        <div class="section-tag" style="margin-top: 8px;">Luminária de Canto (Abajur PBR)</div>
+
+        <div class="color-input-wrapper">
+          <input type="color" id="inp-lamp-color" value="#ffe4b5">
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-main);">Cor da Luz do Abajur</div>
+            <div style="font-size:11px; color:var(--text-muted);">Temperatura de iluminação realista</div>
+          </div>
+        </div>
+
+        <!-- Quick Temperature Presets -->
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;">
+          <button class="btn-action btn-temp" data-temp="#ffe4b5" style="padding:6px 4px; font-size:10px; justify-content:center;" title="2700K Quente">2700K</button>
+          <button class="btn-action btn-temp" data-temp="#fff4e5" style="padding:6px 4px; font-size:10px; justify-content:center;" title="3000K Soft">3000K</button>
+          <button class="btn-action btn-temp" data-temp="#ffffff" style="padding:6px 4px; font-size:10px; justify-content:center;" title="4000K Neutra">4000K</button>
+          <button class="btn-action btn-temp" data-temp="#e8f4ff" style="padding:6px 4px; font-size:10px; justify-content:center;" title="6000K Fria">6000K</button>
+        </div>
+
+        <div class="rot-slider-row">
+          <div class="rot-slider-header">
+            <span>Intensidade da Luz</span>
+            <span id="lbl-lamp-intensity">1%</span>
+          </div>
+          <input type="range" id="slider-lamp-intensity" min="0" max="100" value="1" class="rot-slider">
+        </div>
+
+        <div class="section-tag" style="margin-top: 16px;">Acabamento da Madeira</div>
+        
+        <div class="rot-slider-row">
+          <div class="rot-slider-header">
+            <span>Reflexo (Brilho/Verniz)</span>
+            <span id="lbl-mat-reflexo">82%</span>
+          </div>
+          <input type="range" id="slider-mat-reflexo" min="0" max="100" value="82" class="rot-slider">
+        </div>
+
+        <div class="rot-slider-row">
+          <div class="rot-slider-header">
+            <span>Relevo (Crespo/Bump)</span>
+            <span id="lbl-mat-relevo">300%</span>
+          </div>
+          <input type="range" id="slider-mat-relevo" min="0" max="300" value="300" class="rot-slider">
+        </div>
+
+
+        <div class="section-tag" style="margin-top: 8px;">Cor da Parede do Ambiente</div>
+        <div class="color-input-wrapper">
+          <input type="color" id="inp-wall-color" value="#888888">
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-main);">Tinta da Parede</div>
+            <div style="font-size:11px; color:var(--text-muted);">Cor do ambiente</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- Bottom Quick Toolbar for Camera Presets -->
+  <div class="bottom-toolbar">
+    <button class="tool-btn active" title="Visão Perspectiva 3D" id="cam-iso">
+      <i class="ri-box-3-line"></i>
+    </button>
+    <button class="tool-btn" title="Corte Lateral (Espessura)" id="cam-side">
+      <i class="ri-side-bar-line"></i>
+    </button>
+    <button class="tool-btn" title="Vista Frontal (Altura)" id="cam-front">
+      <i class="ri-layout-top-line"></i>
+    </button>
+    <button class="tool-btn" title="Close do Friso / Detalhe" id="cam-zoom">
+      <i class="ri-zoom-in-line"></i>
+    </button>
+    <button class="tool-btn" title="Resetar Câmera" id="cam-reset">
+      <i class="ri-refresh-line"></i>
+    </button>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="upload-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="ri-image-add-line"></i> Inserir Pôster/Arte</h3>
+        <button class="btn-icon" id="btn-close-modal"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">
+          Arraste e solte a imagem (JPG ou PNG) da sua arte para testá-la no quadro 3D.
+        </p>
+
+        <div class="upload-dropzone" id="dropzone">
+          <i class="ri-upload-cloud-2-line"></i>
+          <div>Arraste seu arquivo de Imagem aqui</div>
+          <div style="font-size:12px; color:var(--text-muted); font-weight:400; margin-top:4px;">ou clique para buscar no computador</div>
+        </div>
+
+        <input type="file" id="file-input" accept="image/*" style="display:none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Message -->
+  <div class="toast" id="toast-msg">
+    <i class="ri-checkbox-circle-fill" style="font-size:18px; color:var(--abs-dourado);"></i>
+    <span id="toast-text">Foto HD gerada com sucesso!</span>
+  </div>
+
+  <!-- THREE.JS, ORBIT CONTROLS, GLTF LOADER, AND ROOMENVIRONMENT REALISTIC RENDERER -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
+
+    // --- GLOBAL STATE ---
+    const state = {
+      loadedModels: [],
+      activeModelIndex: 0,
+      showMeasures: true,
+      cutLeft45: false,
+      cutRight45: false,
+      cutDepthMm: 9,          // Default 9mm cut depth
+      cutDirection: 'back',   // Default 'back' cut slope direction
+      userRotX: 0, // DEFAULT: 0° X (Quadros nascem em pé)
+      userRotY: 0, // DEFAULT: 0° Y
+      userRotZ: 0, // DEFAULT: 0° Z
+      environment: 'studio',
+      wallColor: '#888888',
+      floorType: 'parquet',   // parquet, oak, wenge, carrara, marquina, concrete
+      orientation: 'portrait', // portrait or landscape
+      multiModelMode: true, // Default: show all 8 side-by-side as in Blender!
+      realisticRender: true, // DEFAULT: Photorealistic Blender PBR environment ON!
+      lampColor: '#ffe4b5',   // Realistic 2700K Warm White default
+      lampIntensity: 1        // 1% default intensity
+    };
+
+    // Metadata for the 4 Blender objects
+    const modelMetaMap = [
+      { name: "Carvalho (Madeira)", color: "#cba376", tag: "Madeira" },
+      { name: "Preto (Fosco)", color: "#111111", tag: "Sólido" },
+      { name: "Branco (Fosco)", color: "#ffffff", tag: "Sólido" },
+      { name: "Tabaco (Madeira Escura)", color: "#382013", tag: "Madeira" }
+    ];
+
+    // --- THREE.JS SYSTEM SETUP ---
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 100);
+    camera.position.set(1.1, 1.2, 3.4);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.02;
+    controls.target.set(1.1, 0.4, 0);
+
+    // --- PBR ENVIRONMENT (RoomEnvironment PMREM — reliable, no CORS issues) ---
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    const roomEnvironment = new RoomEnvironment(renderer);
+    let pbrStudioTexture = pmremGenerator.fromScene(roomEnvironment).texture;
+
+    // (The Venice Sunset HDRI was removed because it tinted the products orange. 
+    // We now solely rely on the pristine, neutral RoomEnvironment for perfect color fidelity).
+
+    // --- POST-PROCESSING PIPELINE (SSAO + Bloom — Blender Cycles quality in browser!) ---
+    // EffectComposer chains: RenderPass → SSAOPass → UnrealBloomPass → OutputPass
+    const composer = new EffectComposer(renderer);
+
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    // SSAO — Screen Space Ambient Occlusion (contact shadows between baseboard & wall/floor)
+    const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+    ssaoPass.kernelRadius = 0.25;    // Tight contact shadow radius
+    ssaoPass.minDistance = 0.001;
+    ssaoPass.maxDistance = 0.04;     // Only shadow within 4cm radius — crisp & realistic!
+    ssaoPass.output = SSAOPass.OUTPUT.Default;
+    composer.addPass(ssaoPass);
+
+    // Unreal Bloom — makes lamp emissive glow beautifully (like Blender's Cycles volumetric!)
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.35,   // Bloom strength (subtle, not oversaturated)
+      0.55,   // Bloom radius
+      3.5     // Bloom threshold: AUMENTADO PARA 3.5! (Evita que o chão/paredes claros brilhem com a luz forte da sala. Apenas o abajur vai brilhar)
+    );
+    composer.addPass(bloomPass);
+
+    // OutputPass — correct sRGB output
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
+
+    // State to toggle post-processing on/off
+    state.usePostProcessing = true;
+
+    // Dynamic Theme Functionality for ClicStore Brand Identity
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'creme' || theme === 'offwhite') {
+        scene.background = new THREE.Color(0xf3ebe3);
+        floorMat.color.set(0xe7d8c3);
+        gridHelper.material.color.set(0xc59d4a);
+      } else if (theme === 'dourado' || theme === 'dourado-claro') {
+        scene.background = new THREE.Color(0x382013);
+        floorMat.color.set(0x28170d);
+        gridHelper.material.color.set(0xe0bd7a);
+      } else {
+        scene.background = new THREE.Color(0x111111);
+        floorMat.color.set(0x1a1a1a);
+        gridHelper.material.color.set(0xc59d4a);
+      }
+    }
+
+    document.querySelectorAll('.btn-theme-dot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyTheme(btn.getAttribute('data-theme-id'));
+      });
+    });
+
+    // --- LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
+    scene.add(ambientLight);
+
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    mainLight.position.set(3, 6, 4);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    mainLight.shadow.bias = -0.0001;
+    scene.add(mainLight);
+
+    const fillLight = new THREE.DirectionalLight(0x90b0ff, 0.9);
+    fillLight.position.set(-4, 3, -2);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xfff0dd, 1.4);
+    rimLight.position.set(0, 4, -4);
+    scene.add(rimLight);
+
+    // --- ENVIRONMENT ---
+    const studioGroup = new THREE.Group();
+    scene.add(studioGroup);
+
+    // Ground Floor — MeshPhysicalMaterial with reflections (like polished concrete in studios!)
+    const floorGeo = new THREE.PlaneGeometry(20, 20);
+    const floorMat = new THREE.MeshPhysicalMaterial({
+      color: 0x1a1a1a,
+      roughness: 0.15,       // Low roughness = visible reflections!
+      metalness: 0.0,
+      reflectivity: 0.8,    // Strong reflective floor
+      clearcoat: 1.0,       // Lacquer / polished finish
+      clearcoatRoughness: 0.12,
+      envMapIntensity: 1.5  // Strong HDRI reflections on floor
+    });
+    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.receiveShadow = true;
+    studioGroup.add(floorMesh);
+
+    // Grid Helper
+    const gridHelper = new THREE.GridHelper(10, 20, 0xc59d4a, 0x2d2618);
+    gridHelper.position.y = 0.001;
+    studioGroup.add(gridHelper);
+
+    // Room Group (Corner Wall Setup 90°)
+    const roomGroup = new THREE.Group();
+    roomGroup.visible = false;
+    scene.add(roomGroup);
+
+    const wallMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(state.wallColor), roughness: 0.9, side: THREE.DoubleSide });
+    
+    // Back Wall at Z = 0 (Baseboard sits 100% flush against Z = 0)
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(20, 8), wallMat);
+    backWall.position.set(0, 4, 0);
+    backWall.receiveShadow = true;
+    roomGroup.add(backWall);
+
+    // Side Corner Wall at X = -0.45 (Runs along Z axis from Z=0)
+    const sideWall = new THREE.Mesh(new THREE.PlaneGeometry(20, 8), wallMat);
+    sideWall.rotation.y = Math.PI / 2;
+    sideWall.position.set(-0.45, 4, 10);
+    sideWall.receiveShadow = true;
+    roomGroup.add(sideWall);
+
+    // --- PROCEDURAL HIGH-DEFINITION FLOOR TEXTURE GENERATORS ---
+
+    // 1. Parquet Espinha de Peixe (Herringbone Wood)
+    function createParquetTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#b8895e';
+      ctx.fillRect(0,0,512,512);
+      ctx.fillStyle = '#9b6d45';
+      for(let i=0; i<512; i+=64) {
+        for(let j=0; j<512; j+=64) {
+          if((i+j)%128===0) ctx.fillRect(i,j,64,64);
+        }
+      }
+      ctx.strokeStyle = 'rgba(60,40,20,0.3)';
+      ctx.lineWidth = 2;
+      for(let i=0; i<=512; i+=64) {
+        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,512); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(512,i); ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(8,8);
+      return { tex, roughness: 0.35, metalness: 0.05, bgThumb: '#b8895e' };
+    }
+
+    // 2. Laminado Carvalho Claro (Straight Oak Wood Planks)
+    function createOakTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#d4a373';
+      ctx.fillRect(0,0,512,512);
+      for(let y=0; y<512; y+=128) {
+        ctx.fillStyle = (y%256===0)? '#c79260' : '#e0b080';
+        ctx.fillRect(0, y, 512, 126);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(0, y+126, 512, 2);
+      }
+      // Grain lines
+      ctx.strokeStyle = 'rgba(100,60,30,0.15)';
+      ctx.lineWidth = 1;
+      for(let i=0; i<512; i+=8) {
+        ctx.beginPath();
+        ctx.moveTo(0, i + Math.sin(i*0.1)*4);
+        ctx.lineTo(512, i + Math.sin(i*0.1)*4);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6,6);
+      return { tex, roughness: 0.30, metalness: 0.05, bgThumb: '#d4a373' };
+    }
+
+    // 3. Vinílico Wengé Escuro (Dark Walnut Wood Planks)
+    function createWengeTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#2b1a11';
+      ctx.fillRect(0,0,512,512);
+      for(let y=0; y<512; y+=128) {
+        ctx.fillStyle = (y%256===0)? '#1f120b' : '#382217';
+        ctx.fillRect(0, y, 512, 126);
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(0, y+126, 512, 2);
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6,6);
+      return { tex, roughness: 0.25, metalness: 0.08, bgThumb: '#382013' };
+    }
+
+    // 4. Mármore Carrara Branco (White Carrara Marble with Grey Veins)
+    function createCarraraTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#f4f6f8';
+      ctx.fillRect(0,0,512,512);
+      // Soft marble veins
+      ctx.strokeStyle = 'rgba(160,175,190,0.35)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(30,0); ctx.bezierCurveTo(150,120, 80,300, 300,512);
+      ctx.moveTo(200,0); ctx.bezierCurveTo(350,180, 220,380, 512,420);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(120,135,150,0.2)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0,100); ctx.bezierCurveTo(200,80, 400,300, 512,250);
+      ctx.stroke();
+
+      // Grout lines for 60x60 tiles
+      ctx.strokeStyle = 'rgba(200,205,210,0.6)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0,0,512,512);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(5,5);
+      return { tex, roughness: 0.12, metalness: 0.15, bgThumb: '#eef2f5' };
+    }
+
+    // 5. Mármore Preto Marquina (Black Marble with White/Gold Veins)
+    function createMarquinaTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#141414';
+      ctx.fillRect(0,0,512,512);
+      // White & Gold veins
+      ctx.strokeStyle = 'rgba(240,240,240,0.65)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0,40); ctx.bezierCurveTo(180,140, 220,320, 512,480);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(197,157,74,0.55)'; // Gold vein!
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(120,0); ctx.bezierCurveTo(280,180, 380,260, 450,512);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(35,35,35,0.8)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0,0,512,512);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(5,5);
+      return { tex, roughness: 0.10, metalness: 0.20, bgThumb: '#1a1a1a' };
+    }
+
+    // 6. Porcelanato Cimento Queimado (Polished Light Microcement)
+    function createConcreteTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#a0a5aa';
+      ctx.fillRect(0,0,512,512);
+      // Concrete clouding
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      for(let i=0; i<40; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random()*512, Math.random()*512, 30+Math.random()*60, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.05)';
+      for(let i=0; i<40; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random()*512, Math.random()*512, 30+Math.random()*60, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = 'rgba(120,125,130,0.5)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0,0,512,512);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6,6);
+      return { tex, roughness: 0.40, metalness: 0.05, bgThumb: '#a0a5aa' };
+    }
+
+    // Room Floor — MeshPhysicalMaterial with clearcoat for lacquered/polished PBR look!
+    const defaultFloorData = createParquetTexture();
+    const roomFloorMat = new THREE.MeshPhysicalMaterial({
+      map: defaultFloorData.tex,
+      roughness: defaultFloorData.roughness,
+      metalness: defaultFloorData.metalness,
+      clearcoat: 0.85,              // Lacquer finish!
+      clearcoatRoughness: 0.08,     // Glossy satin finish
+      envMapIntensity: 1.2,         // Strong HDRI reflections
+      reflectivity: 0.6
+    });
+
+    const roomFloorMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), roomFloorMat);
+    roomFloorMesh.rotation.x = -Math.PI / 2;
+    roomFloorMesh.position.set(0, 0, 10);
+    roomFloorMesh.receiveShadow = true;
+    roomGroup.add(roomFloorMesh);
+
+    // Dynamic Floor Texture Switcher Function
+    function applyFloorTexture(type, customImgElement = null) {
+      state.floorType = type;
+      let floorData;
+
+      if (type === 'parquet') floorData = createParquetTexture();
+      else if (type === 'oak') floorData = createOakTexture();
+      else if (type === 'wenge') floorData = createWengeTexture();
+      else if (type === 'carrara') floorData = createCarraraTexture();
+      else if (type === 'marquina') floorData = createMarquinaTexture();
+      else if (type === 'concrete') floorData = createConcreteTexture();
+      else if (type === 'custom' && customImgElement) {
+        const tex = new THREE.CanvasTexture(customImgElement);
+        tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(6,6);
+        floorData = { tex: tex, roughness: 0.3, metalness: 0.05 };
+      }
+
+      if (floorData) {
+        roomFloorMat.map = floorData.tex;
+        roomFloorMat.roughness = floorData.roughness;
+        roomFloorMat.metalness = floorData.metalness;
+        // Adjust clearcoat for each floor type to feel photorealistic!
+        if (type === 'carrara' || type === 'marquina') {
+          roomFloorMat.clearcoat = 1.0;           // Polished marble = very shiny
+          roomFloorMat.clearcoatRoughness = 0.04;
+          roomFloorMat.envMapIntensity = 1.8;
+        } else if (type === 'concrete') {
+          roomFloorMat.clearcoat = 0.2;           // Polished cimento queimado = semi-matte
+          roomFloorMat.clearcoatRoughness = 0.25;
+          roomFloorMat.envMapIntensity = 0.6;
+        } else {
+          roomFloorMat.clearcoat = 0.7;           // Wood / parquet = satin lacquer
+          roomFloorMat.clearcoatRoughness = 0.10;
+          roomFloorMat.envMapIntensity = 1.1;
+        }
+        roomFloorMat.needsUpdate = true;
+      }
+    }
+
+    // Bind Floor Selector UI Cards
+    document.querySelectorAll('[data-floor-type]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-floor-type]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        const type = card.getAttribute('data-floor-type');
+        applyFloorTexture(type);
+        showToast(`Piso alterado em tempo real!`);
+      });
+    });
+
+    // Custom Floor Image File Upload
+    const btnUploadFloor = document.getElementById('btn-upload-floor');
+    const inpFloorFile = document.getElementById('inp-floor-file');
+
+    btnUploadFloor.addEventListener('click', () => inpFloorFile.click());
+    inpFloorFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const tex = new THREE.Texture(img);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(10, 10);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.needsUpdate = true;
+
+            roomFloorMat.map = tex;
+            roomFloorMat.roughnessMap = null;
+            roomFloorMat.normalMap = null;
+            roomFloorMat.color.setHex(0xffffff);
+            roomFloorMat.needsUpdate = true;
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Custom Poster/Image Upload
+    document.getElementById('btn-upload-poster').addEventListener('click', () => {
+      document.getElementById('inp-poster-file').click();
+    });
+
+    document.getElementById('inp-poster-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const tex = new THREE.Texture(img);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.flipY = false;
+            tex.needsUpdate = true;
+
+            const selected = state.loadedModels[state.activeModelIndex];
+            if (selected) {
+              selected.object.traverse((c) => {
+                // Procurar por um material que se pareça com o poster/foto/acetato
+                if (c.isMesh && c.material) {
+                  // Heurística: Aplica a textura ao material que tem 'poster', 'foto', 'image', 'picture', 'canvas' no nome, ou se não achar, no primeiro mesh.
+                  let mat = c.material;
+                  if (Array.isArray(mat)) {
+                    mat.forEach(m => {
+                      if (m.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/)) {
+                        m.map = tex;
+                        m.needsUpdate = true;
+                      }
+                    });
+                  } else {
+                    if (mat.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/)) {
+                      mat.map = tex;
+                      mat.needsUpdate = true;
+                    } else if (c.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/)) {
+                      mat.map = tex;
+                      mat.needsUpdate = true;
+                    }
+                  }
+                }
+              });
+            }
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // --- REALISTIC 3D CORNER FLOOR LAMP (LUMINÁRIA DE CANTO DE PISO PBR) ---
+    const mdfDepth = 0.003;
+    const mdfW = 0.207;
+    const mdfH = 0.297;
+    
+    const geomMDF = new THREE.BoxGeometry(mdfW, mdfH, mdfDepth);
+    let matMDF;
+    if (window.matMdf) {
+        matMDF = window.matMdf.clone();
+    } else {
+        matMDF = new THREE.MeshStandardMaterial({ color: 0x907050, roughness: 0.9 });
+    }
+    const meshMDF = new THREE.Mesh(geomMDF, matMDF);
+
+    const lampGroup = new THREE.Group();
+
+    // 1. Lamp Base (Elegant Brushed Bronze Metal Plate)
+    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x3d352a, metalness: 0.85, roughness: 0.25 });
+    const lampBrassMat = new THREE.MeshStandardMaterial({ color: 0xc59d4a, metalness: 0.85, roughness: 0.25 });
+    
+    const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.02, 32), lampBaseMat);
+    baseMesh.position.y = 0.01;
+    baseMesh.castShadow = true;
+    baseMesh.receiveShadow = true;
+    lampGroup.add(baseMesh);
+
+    // 2. Vertical Brass Stem (Straight up to Y = 1.4m)
+    const stemMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 1.4, 16), lampBrassMat);
+    stemMesh.position.y = 0.71;
+    stemMesh.castShadow = true;
+    lampGroup.add(stemMesh);
+
+    // 3. Brass Joint Ring (Top of stem)
+    const jointMesh = new THREE.Mesh(new THREE.SphereGeometry(0.018, 16, 16), lampBrassMat);
+    jointMesh.position.y = 1.41;
+    lampGroup.add(jointMesh);
+
+    // 4. Elegant Straight Lamp Shade (Cúpula Retinha e Alinhada Centrada no Haste)
+    const shadeMat = new THREE.MeshStandardMaterial({
+      color: 0xfff4e5,
+      emissive: new THREE.Color(state.lampColor),
+      emissiveIntensity: 2.0,
+      roughness: 0.2,
+      side: THREE.DoubleSide
+    });
+    const shadeMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.18, 0.26, 32, 1, true), shadeMat);
+    shadeMesh.position.set(0, 1.30, 0); // PERFECTLY CENTERED ON POLE! NO TILT!
+    shadeMesh.castShadow = true;
+    lampGroup.add(shadeMesh);
+
+    // 5. Emissive Bulb Core (Inside shade)
+    const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.038, 16, 16), bulbMat);
+    bulbMesh.position.set(0, 1.28, 0);
+    lampGroup.add(bulbMesh);
+
+    // 6. THREE.JS PHYSICAL PBR LIGHT SOURCES
+    const lampPointLight = new THREE.PointLight(new THREE.Color(state.lampColor), 20.0, 10.0, 2.0);
+    lampPointLight.position.set(0.1, 1.25, 0.3); // Positioned slightly in front of shade so it casts light DIRECTLY ONTO baseboard face!
+    lampPointLight.castShadow = true;
+    lampPointLight.shadow.mapSize.width = 2048;
+    lampPointLight.shadow.mapSize.height = 2048;
+    lampPointLight.shadow.bias = -0.0002;
+    lampGroup.add(lampPointLight);
+
+    const lampSpotLight = new THREE.SpotLight(new THREE.Color(state.lampColor), 35.0, 10.0, Math.PI / 2.0, 0.5, 2.0);
+    lampSpotLight.position.set(0, 1.25, 0.2);
+    lampSpotLight.castShadow = true;
+    lampGroup.add(lampSpotLight);
+
+    // Dedicated Spotlight Target pointing DIRECTLY AT THE BASEBOARD CENTER!
+    const spotTarget = new THREE.Object3D();
+    spotTarget.position.set(0.40, 0.10, 0.0);
+    lampGroup.add(spotTarget);
+    lampSpotLight.target = spotTarget;
+
+    // Dedicated Stem & Base illumination light source
+    const lampStemLight = new THREE.PointLight(new THREE.Color(state.lampColor), 8.0, 4.0, 2.0);
+    lampStemLight.position.set(0, 0.50, 0);
+    lampGroup.add(lampStemLight);
+
+    roomGroup.add(lampGroup);
+
+    // --- ARCHITECTURAL 3D DIMENSION LINES (PROPERLY VISIBLE & CRISP 3D ARROWS) ---
+    const dimGroup = new THREE.Group();
+    scene.add(dimGroup);
+
+    const dimLineMat = new THREE.LineBasicMaterial({
+      color: 0xc59d4a,
+      linewidth: 1.5,
+      depthTest: false,
+      transparent: true,
+      opacity: 0.95
+    });
+
+    // Standard crisp arrow geometry for all lines
+    const arrowGeoStandard = new THREE.ConeGeometry(0.0025, 0.009, 12);
+    const arrowMat = new THREE.MeshBasicMaterial({ color: 0xc59d4a, depthTest: false, transparent: true, opacity: 0.95 });
+
+    function drawDimensionSegment(p1, p2, offset) {
+      const points = [];
+      const start = p1.clone().add(offset);
+      const end = p2.clone().add(offset);
+
+      // MAIN DIMENSION LINE ONLY (No extension lines connecting object to arrow!)
+      points.push(start.x, start.y, start.z, end.x, end.y, end.z);
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+      const lineSegs = new THREE.LineSegments(geo, dimLineMat);
+      lineSegs.renderOrder = 999;
+      dimGroup.add(lineSegs);
+
+      // Arrowhead 1 pointing outwards at 'start'
+      const arrow1 = new THREE.Mesh(arrowGeoStandard, arrowMat);
+      arrow1.position.copy(start);
+      const dir1 = p1.clone().sub(p2).normalize();
+      arrow1.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir1);
+      arrow1.renderOrder = 1000;
+      dimGroup.add(arrow1);
+
+      // Arrowhead 2 pointing outwards at 'end'
+      const arrow2 = new THREE.Mesh(arrowGeoStandard, arrowMat);
+      arrow2.position.copy(end);
+      const dir2 = p2.clone().sub(p1).normalize();
+      arrow2.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir2);
+      arrow2.renderOrder = 1000;
+      dimGroup.add(arrow2);
+
+      const midPoint = start.clone().add(end).multiplyScalar(0.5);
+      return { midPoint: midPoint };
+    }
+
+        function render3DDimensionLines() {
+      while(dimGroup.children.length > 0) {
+        dimGroup.remove(dimGroup.children[0]);
+      }
+
+      if (!state.showMeasures || state.multiModelMode || state.loadedModels.length === 0) {
+        window.dimPoints = null;
+        return;
+      }
+
+      const selected = state.loadedModels[state.activeModelIndex];
+      if (!selected) return;
+
+      const bbox = new THREE.Box3().setFromObject(selected.object);
+      const size = new THREE.Vector3();
+      bbox.getSize(size);
+
+      // Largura (X), Altura (Y), Espessura (Z)
+      const w = size.x;
+      const h = size.y;
+      const d = size.z;
+
+      const zeroOffset = new THREE.Vector3(0, 0, 0);
+
+      // Draw Width Line (Bottom)
+      const lP1 = new THREE.Vector3(bbox.min.x, bbox.min.y - 0.05, bbox.max.z);
+      const lP2 = new THREE.Vector3(bbox.max.x, bbox.min.y - 0.05, bbox.max.z);
+      drawDimensionSegment(lP1, lP2, zeroOffset);
+
+      // Draw Height Line (Right side)
+      const hP1 = new THREE.Vector3(bbox.max.x + 0.05, bbox.min.y, bbox.max.z);
+      const hP2 = new THREE.Vector3(bbox.max.x + 0.05, bbox.max.y, bbox.max.z);
+      drawDimensionSegment(hP1, hP2, zeroOffset);
+
+      // Draw Thickness Line (Top left corner)
+      const tP1 = new THREE.Vector3(bbox.min.x, bbox.max.y + 0.02, bbox.min.z);
+      const tP2 = new THREE.Vector3(bbox.min.x, bbox.max.y + 0.02, bbox.max.z);
+      drawDimensionSegment(tP1, tP2, zeroOffset);
+
+      // Define where the HTML floating text badges should anchor
+      window.dimPoints = {
+        lPoint: new THREE.Vector3( (bbox.min.x + bbox.max.x)/2, bbox.min.y - 0.08, bbox.max.z ),
+        hPoint: new THREE.Vector3( bbox.max.x + 0.1, (bbox.min.y + bbox.max.y)/2, bbox.max.z ),
+        tPoint: new THREE.Vector3( bbox.min.x, bbox.max.y + 0.05, (bbox.min.z + bbox.max.z)/2 )
+      };
+
+      // Update the values of the HTML labels directly
+      if(document.getElementById('val-length')) document.getElementById('val-length').innerText = `${(w * 100).toFixed(1)} cm`;
+      if(document.getElementById('val-height')) document.getElementById('val-height').innerText = `${(h * 100).toFixed(1)} cm`;
+      if(document.getElementById('val-thickness')) document.getElementById('val-thickness').innerText = `${(d * 1000).toFixed(0)} mm`;
+    }
+
+    function updateLightingBalance() {
+      const col = new THREE.Color(state.lampColor);
+      const intensityFactor = (state.lampIntensity / 100);
+
+      // Copy exact color to Three.js light instances
+      lampPointLight.color.copy(col);
+      lampSpotLight.color.copy(col);
+      lampStemLight.color.copy(col);
+      shadeMat.emissive.copy(col);
+
+      // Base lighting should ALWAYS perfectly match the Standard Render to preserve color fidelity
+      const baseExposure = 1.2;
+      const baseAmbient = 0.95;
+      const baseMain = 2.2;
+      const baseFill = 0.9;
+      const baseRim = 1.4;
+
+      if (state.realisticRender) {
+        if (state.lampIntensity > 0) {
+          // Lamp is ON
+          const intensityFactor = state.lampIntensity / 100;
+          
+          scene.environment = pbrStudioTexture;
+          renderer.toneMappingExposure = baseExposure + 0.1 * intensityFactor; // Slight boost when lamp is on
+
+          // Em PBR, o scene.environment (RoomEnvironment) já funciona como uma gigantesca luz branca ambiente!
+          // Reduzimos o ambientLight manual para quase 0, para não dobrar a luz e "estourar" o branco da tela.
+          ambientLight.intensity = 0.1 + 0.1 * intensityFactor;
+          ambientLight.color.setHex(0xffffff);
+
+          mainLight.intensity = 1.0; 
+          mainLight.position.set(3, 6, 4);
+          fillLight.intensity = 0.2;
+          rimLight.intensity = 0.5;
+
+          lampGroup.visible = true;
+
+          // Lamp lights beaming
+          lampPointLight.intensity = 60.0 * intensityFactor;
+          lampSpotLight.intensity = 80.0 * intensityFactor;
+          lampStemLight.intensity = 15.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 10.0 * intensityFactor;
+
+        } else {
+          // Studio environment mode (Bright PBR HDRI studio)
+          scene.environment = pbrStudioTexture;
+          renderer.toneMappingExposure = baseExposure;
+
+          // Mesma lógica: O RoomEnvironment já clareia o cenário inteiro. 
+          ambientLight.intensity = 0.1;
+          ambientLight.color.setHex(0xffffff);
+          mainLight.intensity = 1.0;
+          mainLight.position.set(3, 6, 4);
+          fillLight.intensity = 0.2;
+          rimLight.intensity = 0.5;
+
+          lampGroup.visible = false;
+          lampPointLight.intensity = 0;
+          lampSpotLight.intensity = 0;
+          lampStemLight.intensity = 0;
+        }
+      } else {
+        // STANDARD RENDER MODE (RENDER PADRÃO):
+        scene.environment = null;
+        renderer.toneMappingExposure = baseExposure;
+
+        ambientLight.intensity = baseAmbient;
+        ambientLight.color.setHex(0xffffff);
+        mainLight.intensity = baseMain;
+        mainLight.position.set(3, 6, 4);
+        fillLight.intensity = baseFill;
+        rimLight.intensity = baseRim;
+
+        lampGroup.visible = false;
+        lampPointLight.intensity = 0;
+        lampSpotLight.intensity = 0;
+        lampStemLight.intensity = 0;
+      }
+    }
+
+    // Temperature Preset Buttons Click Handler
+    document.querySelectorAll('.btn-temp').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const hex = btn.getAttribute('data-temp');
+        state.lampColor = hex;
+        document.getElementById('inp-lamp-color').value = hex;
+        updateLightingBalance();
+        showToast(`Cor da Luz alterada para ${btn.innerText}`);
+      });
+    });
+
+    document.getElementById('inp-lamp-color').addEventListener('input', (e) => {
+      state.lampColor = e.target.value;
+      updateLightingBalance();
+    });
+
+    document.getElementById('slider-lamp-intensity').addEventListener('input', (e) => {
+      state.lampIntensity = parseInt(e.target.value);
+      document.getElementById('lbl-lamp-intensity').innerText = `${state.lampIntensity}%`;
+      updateLightingBalance();
+    });
+
+    // Material Adjustments (Real-time)
+    document.getElementById('slider-mat-reflexo').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      document.getElementById('lbl-mat-reflexo').innerText = `${val}%`;
+      
+      // 0% = Totalmente fosco (roughness 1.0, envMap 0.0)
+      // 100% = Totalmente polido (roughness 0.1, envMap 1.5)
+      const roughness = 1.0 - (val / 100 * 0.9);
+      const envMapIntensity = (val / 100) * 1.5;
+      
+      const updateMat = (c) => {
+        if (c.isMesh && c.material) {
+          if (Array.isArray(c.material)) {
+            c.material.forEach(m => { 
+              m.roughness = roughness; 
+              m.envMapIntensity = envMapIntensity;
+              m.needsUpdate = true; 
+            });
+          } else {
+            c.material.roughness = roughness;
+            c.material.envMapIntensity = envMapIntensity;
+            c.material.needsUpdate = true;
+          }
+        }
+      };
+      mainGroup.traverse(updateMat);
+      cornerBarGroup.traverse(updateMat);
+    });
+
+    document.getElementById('slider-mat-relevo').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      document.getElementById('lbl-mat-relevo').innerText = `${val}%`;
+      // Map 0-300% to bumpScale 0.0 - 3.0
+      const bumpScale = (val / 100);
+      
+      const updateMat = (c) => {
+        if (c.isMesh && c.material) {
+          if (Array.isArray(c.material)) {
+            c.material.forEach(m => { 
+              if (m.bumpMap) m.bumpScale = bumpScale; 
+              if (m.normalMap) m.normalScale = new THREE.Vector2(bumpScale * 2, bumpScale * 2);
+              m.needsUpdate = true; 
+            });
+          } else {
+            if (c.material.bumpMap) c.material.bumpScale = bumpScale;
+            if (c.material.normalMap) c.material.normalScale = new THREE.Vector2(bumpScale * 2, bumpScale * 2);
+            c.material.needsUpdate = true;
+          }
+        }
+      };
+      mainGroup.traverse(updateMat);
+      cornerBarGroup.traverse(updateMat);
+    });
+
+    // Toggle Realistic Renderer
+    document.getElementById('btn-toggle-render').addEventListener('click', () => {
+      state.realisticRender = !state.realisticRender;
+      const btn = document.getElementById('btn-toggle-render');
+      if (state.realisticRender) {
+        btn.classList.add('render-active');
+        btn.innerHTML = '<i class="ri-sparkles-line"></i> Render Realista (Blender PBR)';
+        showToast('Render Realista PBR ATIVADO!');
+      } else {
+        btn.classList.remove('render-active');
+        btn.innerHTML = '<i class="ri-lightbulb-line"></i> Render Padrão';
+        showToast('Render Padrão ATIVADO!');
+      }
+      updateLightingBalance();
+    });
+
+    // --- MAIN 3D BASEBOARD GROUP ---
+    const mainGroup = new THREE.Group();
+    scene.add(mainGroup);
+
+    // Second Corner Bar Group for 90° Miter Corner Mode
+    const cornerBarGroup = new THREE.Group();
+    scene.add(cornerBarGroup);
+
+    // Helper function to store original materials AND upgrade them with PBR realism techniques
+    // (HDRI envMap reflections + aoMap contact shadows — same as the Three.js forum showcase examples!)
+    function storeOriginalMaterials(rootObj) {
+      rootObj.traverse((c) => {
+        if (c.isMesh) {
+          c.castShadow = true;
+          c.receiveShadow = true;
+
+          // Ensure UV2 (aoMap channel) is available — copy UV0 to UV2 if needed
+          if (c.geometry && c.geometry.attributes.uv && !c.geometry.attributes.uv2) {
+            c.geometry.setAttribute('uv2', c.geometry.attributes.uv.clone());
+          }
+
+          const upgradeMat = (mat) => {
+            if (!mat) return mat;
+            
+            // 1. Clonar o material original de forma segura (MeshStandardMaterial já é PBR)
+            const cloned = mat.clone();
+
+            // 2. Ajuste do acabamento da madeira (Configuração salva: Reflexo 82%)
+            cloned.roughness = 0.262; // 1.0 - (0.82 * 0.9)
+            cloned.envMapIntensity = 1.23; // 0.82 * 1.5
+            cloned.roughnessMap = null; // Remove mapas ruins que o Blender possa ter gerado
+
+            // 3. Sombras de Contato (AO)
+            if (mat.aoMap) {
+              cloned.aoMap = mat.aoMap;
+              cloned.aoMapIntensity = 1.5;
+            }
+
+            // 4. Forçar Relevo (Configuração salva: Relevo 300%)
+            cloned.normalMap = null; 
+            
+            if (mat.map) {
+              cloned.bumpMap = mat.map;
+              cloned.bumpScale = 3.0; // 300%
+            }
+            
+            cloned.needsUpdate = true;
+            return cloned;
+          };
+
+          if (!c.userData.originalMaterial) {
+            if (Array.isArray(c.material)) {
+              c.userData.originalMaterial = c.material.map(m => upgradeMat(m));
+              c.material = c.userData.originalMaterial.map(m => m.clone());
+            } else {
+              c.userData.originalMaterial = upgradeMat(c.material);
+              c.material = c.userData.originalMaterial.clone();
+            }
+          }
+        }
+      });
+    }
+
+    // --- PARAMETRIC 3D FRAME GENERATOR ---
+    function createParametricFrame(meta) {
+      const frameGroup = new THREE.Group();
+      frameGroup.name = meta.name;
+
+      const w = 0.21;
+      const h = 0.30;
+      
+      // Medidas exatas do anúncio (25x34 externo, 1.2cm de espessura)
+      const wOuter = 0.25; // 25cm
+      const hOuter = 0.34; // 34cm
+      
+      // Espessuras (Total 1.2cm = 12mm)
+      const frontDepth = 0.007;  // 7mm de espessura na parte da frente
+      const backDepth = 0.005;   // 5mm de profundidade na cava (trás)
+      
+      // Buraco frontal (o "lábio" que segura o vidro). 0.5cm menor de cada lado que a cava
+      const frontHoleWidth = 0.20; 
+      const frontHoleHeight = 0.29;
+
+      let matBorder;
+      
+      if (meta.name.includes("Carvalho") && window.matCarvalho) {
+          matBorder = window.matCarvalho.clone();
+          matBorder.color = new THREE.Color(0xffffff); // Tira o tint
+      } else if (meta.name.includes("Tabaco") && window.matTabaco) {
+          matBorder = window.matTabaco.clone();
+          matBorder.color = new THREE.Color(0xffffff);
+      } else {
+          // Fallback liso se a textura não carregou
+          matBorder = new THREE.MeshStandardMaterial({
+              color: new THREE.Color(meta.color),
+              roughness: 0.262,
+              envMapIntensity: 1.23,
+          });
+      }
+
+      // --- MATERIAIS PARA CORTES 45 GRAUS ---
+      // Clone do material para as laterais (onde a textura da madeira roda 90 graus)
+      let matBorderRotated = matBorder.clone();
+      if (matBorderRotated.map) {
+          matBorderRotated.map = matBorderRotated.map.clone();
+          matBorderRotated.map.rotation = Math.PI / 2;
+          matBorderRotated.map.center.set(0.5, 0.5);
+          matBorderRotated.map.needsUpdate = true;
+      }
+      if (matBorderRotated.normalMap) {
+          matBorderRotated.normalMap = matBorderRotated.normalMap.clone();
+          matBorderRotated.normalMap.rotation = Math.PI / 2;
+          matBorderRotated.normalMap.center.set(0.5, 0.5);
+          matBorderRotated.normalMap.needsUpdate = true;
+      }
+
+      // Utilitário para desenhar um corte de 45 graus (trapézio)
+      const createTrapezoid = (outW, outH, inW, inH, side) => {
+          const shape = new THREE.Shape();
+          if (side === 'top') {
+              shape.moveTo(-outW/2, outH/2);
+              shape.lineTo(outW/2, outH/2);
+              shape.lineTo(inW/2, inH/2);
+              shape.lineTo(-inW/2, inH/2);
+          } else if (side === 'bottom') {
+              shape.moveTo(outW/2, -outH/2);
+              shape.lineTo(-outW/2, -outH/2);
+              shape.lineTo(-inW/2, -inH/2);
+              shape.lineTo(inW/2, -inH/2);
+          } else if (side === 'left') {
+              shape.moveTo(-outW/2, outH/2);
+              shape.lineTo(-inW/2, inH/2);
+              shape.lineTo(-inW/2, -inH/2);
+              shape.lineTo(-outW/2, -outH/2);
+          } else if (side === 'right') {
+              shape.moveTo(outW/2, outH/2);
+              shape.lineTo(outW/2, -outH/2);
+              shape.lineTo(inW/2, -inH/2);
+              shape.lineTo(inW/2, inH/2);
+          }
+          return shape;
+      };
+
+      const sides = ['top', 'bottom', 'left', 'right'];
+
+      sides.forEach(side => {
+          // A textura original do GLB tem veios na vertical.
+          // Laterais (left/right) seguem a vertical, então não rodam.
+          // Topo/Base (top/bottom) seguem a horizontal, então rodam 90 graus.
+          const matFront = (side === 'left' || side === 'right') ? matBorder : matBorderRotated;
+          
+          // Para as bordas extrudadas (espessura/Z-depth), o Three.js mapeia o UV de forma que 
+          // U é o perímetro e V é a profundidade. Para que os veios corram ao longo do perímetro,
+          // a textura aplicada aos lados precisa sempre ter veios horizontais!
+          const matSide = matBorderRotated; 
+
+          const materiaisFrame = [matFront, matSide]; // O ThreeJS ExtrudeGeometry usa o index 0 para frente/tras e index 1 para os lados
+
+          // Camada 1: Frente (Face lisa e lábio)
+          const shapeFront = createTrapezoid(wOuter, hOuter, frontHoleWidth, frontHoleHeight, side);
+          const geomFront = new THREE.ExtrudeGeometry(shapeFront, { depth: frontDepth, bevelEnabled: false });
+          const meshFront = new THREE.Mesh(geomFront, materiaisFrame);
+          meshFront.castShadow = true;
+          meshFront.receiveShadow = true;
+          meshFront.position.z = 0;
+          frameGroup.add(meshFront);
+
+          // Camada 2: Trás (Cava que segura o vidro e mdf, tamanho exato WxH)
+          const shapeBack = createTrapezoid(wOuter, hOuter, w, h, side);
+          const geomBack = new THREE.ExtrudeGeometry(shapeBack, { depth: backDepth, bevelEnabled: false });
+          const meshBack = new THREE.Mesh(geomBack, materiaisFrame);
+          meshBack.castShadow = true;
+          meshBack.receiveShadow = true;
+          meshBack.position.z = -backDepth;
+          frameGroup.add(meshBack);
+      });
+
+      // Ajusta todo o frame para centralizar o Z real (BoundingBox de -6mm a +6mm)
+      const totalDepth = frontDepth + backDepth;
+      frameGroup.position.z = - (totalDepth / 2 - backDepth);
+
+      // 2. FUNDO (Back cover - MDF 3mm)
+      const mdfGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.003);
+      let matBack;
+      if (window.matMdf) {
+          matBack = window.matMdf.clone();
+      } else {
+          matBack = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
+      }
+      const meshBack = new THREE.Mesh(mdfGeom, matBack);
+      meshBack.position.z = -0.0021; // Encostado atrás do poster
+      meshBack.rotation.y = Math.PI; 
+      frameGroup.add(meshBack);
+
+      // 3. POSTER (Photo - 0.3mm)
+      const posterGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.0003);
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024; canvas.height = 1448; // A4 aspect ratio
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#f3ebe3';
+      ctx.fillRect(0,0, 1024, 1448);
+      ctx.fillStyle = '#c59d4a';
+      ctx.font = "80px NoirPro, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("CLIC STORE", 512, 724);
+      ctx.font = "40px sans-serif";
+      ctx.fillText("A4 (21x30)", 512, 800);
+      const defaultTex = new THREE.CanvasTexture(canvas);
+      defaultTex.colorSpace = THREE.SRGBColorSpace;
+
+      const matPoster = new THREE.MeshStandardMaterial({ 
+          map: defaultTex,
+          roughness: 0.6,
+          name: 'poster_material' 
+      });
+      const meshPoster = new THREE.Mesh(posterGeom, matPoster);
+      meshPoster.position.z = -0.00045; // Atrás do vidro
+      meshPoster.name = "poster";
+      frameGroup.add(meshPoster);
+
+      // 4. ACETATO (Glass front - 0.3mm)
+      const glassGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.0003);
+      const matGlass = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.15,
+          roughness: 0.0, 
+          envMapIntensity: 3.0, 
+          metalness: 0.1,
+          name: 'vidro_material'
+      });
+      const meshGlass = new THREE.Mesh(glassGeom, matGlass);
+      meshGlass.position.z = -0.00015; // Rente à face de trás do Lábio Frontal (Z=0)
+      frameGroup.add(meshGlass);
+      
+      // Store original materials
+      frameGroup.traverse((c) => {
+          if (c.isMesh) {
+              c.userData.originalMaterial = Array.isArray(c.material) ? c.material.map(m => m.clone()) : c.material.clone();
+              c.userData.originalPositions = Float32Array.from(c.geometry.attributes.position.array);
+          }
+      });
+
+      return frameGroup;
+    }
+
+    function generateAllFrames() {
+      document.getElementById('loading-screen').style.opacity = '1';
+      
+      while(mainGroup.children.length > 0) {
+        mainGroup.remove(mainGroup.children[0]);
+      }
+      state.loadedModels = [];
+
+      modelMetaMap.forEach((meta, idx) => {
+        const frameObj = createParametricFrame(meta);
+        
+        // Spread them side-by-side initially
+        const originalPos = new THREE.Vector3(idx * 0.35 - 0.5, 0, 0);
+        
+        const bbox = new THREE.Box3().setFromObject(frameObj);
+        const center = new THREE.Vector3();
+        bbox.getCenter(center);
+        const size = new THREE.Vector3();
+        bbox.getSize(size);
+
+        mainGroup.add(frameObj);
+
+        state.loadedModels.push({
+          index: idx,
+          name: meta.name,
+          color: meta.color,
+          tag: meta.tag,
+          object: frameObj,
+          originalPosition: originalPos,
+          center: center,
+          size: size,
+          bbox: bbox
+        });
+      });
+
+      populateModelList();
+      renderSceneMode();
+
+      document.getElementById('loading-screen').style.opacity = '0';
+      document.getElementById('loading-screen').style.pointerEvents = 'none';
+    }
+
+    // Load rodape.glb in background to extract its native PBR image textures!
+    // Load rodape.glb in background to extract its native PBR image textures!
+    const loader = new GLTFLoader();
+    loader.load('./rodape.glb', (gltf) => {
+        gltf.scene.traverse((c) => {
+            if (c.isMesh && c.material) {
+                const mats = Array.isArray(c.material) ? c.material : [c.material];
+                mats.forEach(m => {
+                    const matName = (m.name || "").toLowerCase();
+                    const meshName = (c.name || "").toLowerCase();
+                    
+                    if ((matName.includes("carvalho") || meshName.includes("carvalho")) && !window.matCarvalho && m.map) {
+                        window.matCarvalho = m.clone();
+                        if(window.matCarvalho.map) {
+                            window.matCarvalho.map = window.matCarvalho.map.clone();
+                            window.matCarvalho.map.matrixAutoUpdate = true;
+                            window.matCarvalho.map.wrapS = THREE.RepeatWrapping;
+                            window.matCarvalho.map.wrapT = THREE.RepeatWrapping;
+                            window.matCarvalho.map.repeat.set(1.5, 1.5);
+                            window.matCarvalho.map.offset.set(0.5, 0.5);
+                        }
+                    }
+                    if ((matName.includes("tabaco") || meshName.includes("tabaco")) && !window.matTabaco && m.map) {
+                        window.matTabaco = m.clone();
+                        if(window.matTabaco.map) {
+                            window.matTabaco.map = window.matTabaco.map.clone();
+                            window.matTabaco.map.matrixAutoUpdate = true;
+                            window.matTabaco.map.wrapS = THREE.RepeatWrapping;
+                            window.matTabaco.map.wrapT = THREE.RepeatWrapping;
+                            window.matTabaco.map.repeat.set(1.5, 1.5);
+                            window.matTabaco.map.offset.set(0.5, 0.5);
+                        }
+                    }
+                    if ((matName.includes("mdf") || meshName.includes("mdf")) && !window.matMdf && m.map) {
+                        window.matMdf = m.clone();
+                        if(window.matMdf.map) {
+                            window.matMdf.map = window.matMdf.map.clone();
+                            window.matMdf.map.matrixAutoUpdate = true;
+                            window.matMdf.map.wrapS = THREE.RepeatWrapping;
+                            window.matMdf.map.wrapT = THREE.RepeatWrapping;
+                            window.matMdf.map.repeat.set(1, 1);
+                            window.matMdf.map.offset.set(0.5, 0.5);
+                        }
+                        if(window.matMdf.normalMap) {
+                            window.matMdf.normalMap = window.matMdf.normalMap.clone();
+                            window.matMdf.normalMap.matrixAutoUpdate = true;
+                            window.matMdf.normalMap.wrapS = THREE.RepeatWrapping;
+                            window.matMdf.normalMap.wrapT = THREE.RepeatWrapping;
+                            window.matMdf.normalMap.repeat.set(1, 1);
+                            window.matMdf.normalMap.offset.set(0.5, 0.5);
+                        }
+                    }
+                });
+            }
+        });
+        generateAllFrames();
+    }, undefined, (err) => {
+        console.error("Aviso: rodape.glb não encontrado.", err);
+        generateAllFrames();
+    });
+
+    // Populate Sidebar Cards
+    function populateModelList() {
+      const container = document.getElementById('model-list-container');
+      container.innerHTML = '';
+
+      state.loadedModels.forEach((m, idx) => {
+        const card = document.createElement('div');
+        card.className = `model-item-card ${idx === state.activeModelIndex ? 'active' : ''}`;
+        card.setAttribute('data-model-idx', idx);
+
+        card.innerHTML = `
+          <div class="model-info">
+            <div class="model-color-dot" style="background:${m.color};"></div>
+            <div class="model-name">${m.name}</div>
+          </div>
+          <div class="model-type-tag">${m.tag}</div>
+        `;
+
+        card.addEventListener('click', () => {
+          state.activeModelIndex = idx;
+          state.multiModelMode = false;
+          document.querySelectorAll('.model-item-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+
+          const btn = document.getElementById('btn-toggle-side');
+          btn.classList.remove('primary');
+          btn.innerHTML = '<i class="ri-grid-fill"></i> Exibir Todos Lado a Lado';
+
+          renderSceneMode();
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+        // Render Scene Layout Mode (Single vs Multi Side-by-Side)
+    function renderSceneMode() {
+      if (state.loadedModels.length === 0) return;
+      updateLightingBalance();
+
+      if (state.multiModelMode) {
+        state.loadedModels.forEach((m) => {
+          m.object.position.copy(m.originalPosition);
+          m.object.visible = true;
+        });
+        controls.target.set(0, 1.5, 0);
+        camera.position.set(0, 1.5, 3.4);
+      } else {
+        state.loadedModels.forEach((m, idx) => {
+          m.object.position.copy(m.originalPosition);
+          m.object.visible = (idx === state.activeModelIndex);
+        });
+
+        const selected = state.loadedModels[state.activeModelIndex];
+        if (selected) {
+          const rx = THREE.MathUtils.degToRad(state.userRotX);
+          const ry = THREE.MathUtils.degToRad(state.userRotY);
+          let rz = THREE.MathUtils.degToRad(state.userRotZ);
+          
+          if (state.orientation === 'landscape') {
+            rz -= Math.PI / 2;
+          }
+
+          selected.object.rotation.set(rx, ry, rz);
+
+          const bbox = new THREE.Box3().setFromObject(selected.object);
+
+          const deltaX = - (bbox.min.x + bbox.max.x) / 2;
+          const deltaY = 1.5 - (bbox.min.y + bbox.max.y) / 2; 
+          const deltaZ = - bbox.min.z + 0.001; 
+
+          selected.object.position.x += deltaX;
+          selected.object.position.y += deltaY;
+          selected.object.position.z += deltaZ;
+
+          const newBbox = new THREE.Box3().setFromObject(selected.object);
+          const newCenter = new THREE.Vector3();
+          newBbox.getCenter(newCenter);
+          const newSize = new THREE.Vector3();
+          newBbox.getSize(newSize);
+
+          selected.center = newCenter;
+          selected.size = newSize;
+
+          controls.target.set(0, 1.5, 0);
+          sideWall.position.set(-2, 4, 10);
+          lampGroup.position.set(-1.5, 0, 0.45);
+
+          // Dimensions info
+          let width = newSize.x;
+          let height = newSize.y;
+          
+          if (width > 0.01) {
+            document.querySelector('.dim-value').innerHTML = `${(width*100).toFixed(1)} cm <span style="font-size:10px; color:#888;">L</span> x ${(height*100).toFixed(1)} cm <span style="font-size:10px; color:#888;">A</span>`;
+          }
+          
+          const h = (newSize.z > 0.5 ? newSize.y : newSize.z);
+          const t = Math.min(newSize.x, newSize.y, newSize.z);
+          const l = Math.max(newSize.x, newSize.y, newSize.z);
+          
+          if(document.getElementById('info-h')) document.getElementById('info-h').innerText = `${(height * 100).toFixed(1)} cm`;
+          if(document.getElementById('info-t')) document.getElementById('info-t').innerText = `${(t * 1000).toFixed(0)} mm`;
+          if(document.getElementById('info-l')) document.getElementById('info-l').innerText = `${(width * 100).toFixed(1)} cm`;
+          
+          camera.position.set(0, 1.5, 1.2);
+        }
+      }
+      
+      const measures = document.getElementById('measures-layer');
+      if (measures) measures.style.display = 'none'; // hide old HTML badges
+    }
+
+function updateMeasurements() {
+      const hBadge = document.getElementById('measure-height');
+      const tBadge = document.getElementById('measure-thickness');
+      const lBadge = document.getElementById('measure-length');
+
+      render3DDimensionLines();
+
+      if (!state.showMeasures || state.multiModelMode || state.loadedModels.length === 0 || !window.dimPoints) {
+        hBadge.style.opacity = 0;
+        tBadge.style.opacity = 0;
+        lBadge.style.opacity = 0;
+        return;
+      }
+
+      projectToBadge(window.dimPoints.hPoint, hBadge);
+      projectToBadge(window.dimPoints.tPoint, tBadge);
+      projectToBadge(window.dimPoints.lPoint, lBadge);
+    }
+
+    function projectToBadge(vector3D, element) {
+      if (!vector3D) return;
+      const tempVec = vector3D.clone();
+      tempVec.project(camera);
+
+      if (tempVec.z > 1) {
+        element.style.opacity = 0;
+        return;
+      }
+
+      const x = (tempVec.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-(tempVec.y * 0.5) + 0.5) * window.innerHeight;
+
+      element.style.left = `${x}px`;
+      element.style.top = `${y}px`;
+      element.style.opacity = 1;
+    }
+
+
+    // --- ANIMATION LOOP ---
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      // Use EffectComposer so SSAO + Bloom post-processing are applied every frame!
+      composer.render();
+      if (state.showMeasures) updateMeasurements();
+    }
+    animate();
+
+    // --- UI EVENT HANDLERS ---
+
+    // Tab Switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+        
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(`tab-${tabId}`).style.display = 'flex';
+      });
+    });
+
+    // Toggle Multi/Single View
+    document.getElementById('btn-toggle-side').addEventListener('click', () => {
+      state.multiModelMode = !state.multiModelMode;
+      const btn = document.getElementById('btn-toggle-side');
+      if (state.multiModelMode) {
+        btn.classList.add('primary');
+        btn.innerHTML = '<i class="ri-user-3-line"></i> Modo Peça Única';
+      } else {
+        btn.classList.remove('primary');
+        btn.innerHTML = '<i class="ri-grid-fill"></i> Exibir Todos Lado a Lado';
+      }
+      renderSceneMode();
+    });
+
+    // Manual Rotation Sliders
+    const sRotX = document.getElementById('slider-rot-x');
+    const sRotY = document.getElementById('slider-rot-y');
+    const sRotZ = document.getElementById('slider-rot-z');
+    const lRotX = document.getElementById('lbl-rot-x');
+    const lRotY = document.getElementById('lbl-rot-y');
+    const lRotZ = document.getElementById('lbl-rot-z');
+
+    function updateRotationFromSliders() {
+      state.userRotX = parseInt(sRotX.value);
+      state.userRotY = parseInt(sRotY.value);
+      state.userRotZ = parseInt(sRotZ.value);
+
+      lRotX.innerText = `${state.userRotX}°`;
+      lRotY.innerText = `${state.userRotY}°`;
+      lRotZ.innerText = `${state.userRotZ}°`;
+
+      renderSceneMode();
+    }
+
+    sRotX.addEventListener('input', updateRotationFromSliders);
+    sRotY.addEventListener('input', updateRotationFromSliders);
+    sRotZ.addEventListener('input', updateRotationFromSliders);
+
+    // Quick Step Rotation Buttons
+    document.getElementById('btn-step-x').addEventListener('click', () => {
+      sRotX.value = (parseInt(sRotX.value) + 90) % 360;
+      updateRotationFromSliders();
+    });
+
+    document.getElementById('btn-step-y').addEventListener('click', () => {
+      sRotY.value = (parseInt(sRotY.value) + 90) % 360;
+      updateRotationFromSliders();
+    });
+
+    document.getElementById('btn-step-z').addEventListener('click', () => {
+      sRotZ.value = (parseInt(sRotZ.value) + 90) % 360;
+      updateRotationFromSliders();
+    });
+
+    document.getElementById('btn-reset-rot').addEventListener('click', () => {
+      sRotX.value = 0;
+      sRotY.value = 0;
+      sRotZ.value = 0;
+      updateRotationFromSliders();
+    });
+
+    // Helper to paint material safely without Z-fighting or touching MDF-crespo
+    function paintSubMaterial(mat, hex) {
+      const matName = (mat && mat.name) ? mat.name.toLowerCase() : '';
+
+      // NEVER PAINT RAW MDF TEXTURE (mdf-crespo)!
+      if (matName.includes('mdf')) {
+        return mat;
+      }
+
+      const painted = mat.clone();
+      painted.color.set(hex);
+      painted.map = null; // Clean solid paint
+      painted.polygonOffset = true;
+      painted.polygonOffsetFactor = -1;
+      painted.polygonOffsetUnits = -1;
+      return painted;
+    }
+
+    // Custom Tint Color Handler
+    document.getElementById('inp-custom-color').addEventListener('input', (e) => {
+      const hex = e.target.value;
+      if (state.loadedModels.length > 0) {
+        const sel = state.loadedModels[state.activeModelIndex];
+        sel.object.traverse((c) => {
+          if (c.isMesh) {
+            const origMat = c.userData.originalMaterial || c.material;
+
+            if (Array.isArray(origMat)) {
+              c.material = origMat.map(m => paintSubMaterial(m, hex));
+            } else {
+              c.material = paintSubMaterial(origMat, hex);
+            }
+          }
+        });
+      }
+    });
+
+    // Reset Material to Blender Original
+    document.getElementById('btn-reset-mat').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const sel = state.loadedModels[state.activeModelIndex];
+        sel.object.traverse((c) => {
+          if (c.isMesh && c.userData.originalMaterial) {
+            if (Array.isArray(c.userData.originalMaterial)) {
+              c.material = c.userData.originalMaterial.map(m => m.clone());
+            } else {
+              c.material = c.userData.originalMaterial.clone();
+            }
+          }
+        });
+        showToast('Material original do Blender restaurado!');
+      }
+    });
+
+    // Floor Texture Selection
+    document.querySelectorAll('.floor-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.floor-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.floorType = card.getAttribute('data-floor-type');
+        applyFloorTexture(state.floorType);
+      });
+    });
+
+    // Orientation Toggle
+    document.querySelectorAll('.option-card[data-orientation]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.option-card[data-orientation]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.orientation = card.getAttribute('data-orientation');
+        renderSceneMode();
+      });
+    });
+
+    // Environment Toggle
+    document.querySelectorAll('[data-env]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-env]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.environment = card.getAttribute('data-env');
+        
+        if (state.environment === 'room') {
+          studioGroup.visible = false;
+          roomGroup.visible = true;
+
+          // AUTO-ENABLE 45° MITER CUTS ON BOTH ENDS BY DEFAULT WHEN ROOM ENVIRONMENT IS SELECTED!
+          state.cutLeft45 = true;
+          state.cutRight45 = true;
+          document.getElementById('toggle-cut-left').checked = true;
+          document.getElementById('toggle-cut-right').checked = true;
+        } else {
+          studioGroup.visible = true;
+          roomGroup.visible = false;
+        }
+
+        renderSceneMode();
+      });
+    });
+
+    // Corner Installation Mode Toggle (Single vs Miter Corner 90°)
+    document.querySelectorAll('[data-corner]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-corner]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.cornerMode = card.getAttribute('data-corner');
+        
+        // Auto activate room environment & 45° miter cuts on both ends when corner installation is selected
+        if (state.cornerMode === 'miter') {
+          state.environment = 'room';
+          state.cutLeft45 = true;
+          state.cutRight45 = true;
+          document.getElementById('toggle-cut-left').checked = true;
+          document.getElementById('toggle-cut-right').checked = true;
+
+          document.querySelectorAll('[data-env]').forEach(c => c.classList.remove('active'));
+          document.querySelector('[data-env="room"]').classList.add('active');
+          studioGroup.visible = false;
+          roomGroup.visible = true;
+        }
+
+        renderSceneMode();
+      });
+    });
+
+    document.getElementById('inp-wall-color').addEventListener('input', (e) => {
+      state.wallColor = e.target.value;
+      wallMat.color.set(state.wallColor);
+    });
+
+    // Toggle Measures
+    document.getElementById('toggle-measures').addEventListener('change', (e) => {
+      state.showMeasures = e.target.checked;
+      
+    });
+
+    // Camera Presets
+    document.getElementById('cam-iso').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(0.4, h / 2 + 0.1, 1.2);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-side').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(1.4, h / 2, 0);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-front').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(0, h / 2, 1.4);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-zoom').addEventListener('click', () => {
+      if (state.loadedModels.length > 0) {
+        const activeObj = state.loadedModels[state.activeModelIndex];
+        const h = activeObj.size.y;
+        camera.position.set(0.2, h / 2 + 0.05, 0.35);
+        controls.target.set(0, h / 2, 0);
+      }
+    });
+
+    document.getElementById('cam-reset').addEventListener('click', () => {
+      renderSceneMode();
+    });
+
+    // Take HD Photo Snapshot
+    document.getElementById('btn-take-photo').addEventListener('click', () => {
+      const tempMeasures = state.showMeasures;
+      state.showMeasures = false;
+      
+
+      // Force render one extra frame so the composer post-processing is flushed before capture
+      composer.render();
+      const dataURL = renderer.domElement.toDataURL('image/png');
+
+      const link = document.createElement('a');
+      link.download = `quadro-clicstore-studio-render.png`;
+      link.href = dataURL;
+      link.click();
+
+      state.showMeasures = tempMeasures;
+      
+
+      showToast('Foto HD gerada com sucesso!');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      document.getElementById('toast-text').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    // Custom Upload Modal logic
+    const modal = document.getElementById('upload-modal');
+    document.getElementById('btn-open-upload').addEventListener('click', () => modal.classList.add('active'));
+    document.getElementById('btn-close-modal').addEventListener('click', () => modal.classList.remove('active'));
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInp = document.getElementById('file-input');
+    dropzone.addEventListener('click', () => fileInp.click());
+
+    fileInp.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    dropzone.addEventListener('dragover', (e) => e.preventDefault());
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.type.match('image.*')) {
+        showToast('Por favor, arraste apenas imagens (.jpg ou .png).');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = () => {
+          const tex = new THREE.Texture(img);
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.flipY = false;
+          tex.needsUpdate = true;
+          const selected = state.loadedModels[state.activeModelIndex];
+          if (selected) {
+            selected.object.traverse((c) => {
+              if (c.isMesh && c.material) {
+                if (c.material.name === 'poster_material') {
+                  c.material.map = tex;
+                  c.material.needsUpdate = true;
+                }
+              }
+            });
+          }
+          modal.classList.remove('active');
+          showToast('Sua arte foi carregada no quadro!');
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Resize — update renderer, composer and all passes
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+      ssaoPass.setSize(window.innerWidth, window.innerHeight);
+      bloomPass.setSize(window.innerWidth, window.innerHeight);
+    });
+
+  </script>
+</body>
+</html>
