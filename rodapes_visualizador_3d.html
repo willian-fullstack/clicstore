@@ -1428,6 +1428,7 @@
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
+    import { SSRPass } from 'three/addons/postprocessing/SSRPass.js';
 
     // --- GLOBAL STATE ---
     const state = {
@@ -1475,7 +1476,7 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.VSMShadowMap; // VSM for ultra-soft studio shadows!
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1523,6 +1524,21 @@
     ssaoPass.maxDistance = 0.04;     // Only shadow within 4cm radius — crisp & realistic!
     ssaoPass.output = SSAOPass.OUTPUT.Default;
     composer.addPass(ssaoPass);
+
+    // SSR — Screen Space Reflections (Real-time mirror reflections on the floor!)
+    const ssrPass = new SSRPass({
+      renderer,
+      scene,
+      camera,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      groundReflector: null,
+      selects: null
+    });
+    ssrPass.thickness = 0.015;
+    ssrPass.maxDistance = 0.5; // Short distance for ground reflections
+    ssrPass.opacity = 0.8;
+    composer.addPass(ssrPass);
 
     // Unreal Bloom — makes lamp emissive glow beautifully (like Blender's Cycles volumetric!)
     const bloomPass = new UnrealBloomPass(
@@ -1574,6 +1590,8 @@
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
     mainLight.shadow.bias = -0.0001;
+    mainLight.shadow.radius = 8; // Soft edges for VSM
+    mainLight.shadow.blurSamples = 25; // High blur samples for studio realism!
     scene.add(mainLight);
 
     const fillLight = new THREE.DirectionalLight(0x90b0ff, 0.9);
@@ -1936,11 +1954,15 @@
     lampPointLight.shadow.mapSize.width = 2048;
     lampPointLight.shadow.mapSize.height = 2048;
     lampPointLight.shadow.bias = -0.0002;
+    lampPointLight.shadow.radius = 8;
+    lampPointLight.shadow.blurSamples = 25;
     lampGroup.add(lampPointLight);
 
     const lampSpotLight = new THREE.SpotLight(new THREE.Color(state.lampColor), 35.0, 10.0, Math.PI / 2.0, 0.5, 2.0);
     lampSpotLight.position.set(0, 1.25, 0.2);
     lampSpotLight.castShadow = true;
+    lampSpotLight.shadow.radius = 8;
+    lampSpotLight.shadow.blurSamples = 25;
     lampGroup.add(lampSpotLight);
 
     // Dedicated Spotlight Target pointing DIRECTLY AT THE BASEBOARD CENTER!
@@ -3010,6 +3032,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       composer.setSize(window.innerWidth, window.innerHeight);
       ssaoPass.setSize(window.innerWidth, window.innerHeight);
+      ssrPass.setSize(window.innerWidth, window.innerHeight);
       bloomPass.setSize(window.innerWidth, window.innerHeight);
     });
 
