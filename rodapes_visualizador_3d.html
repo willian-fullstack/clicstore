@@ -1422,6 +1422,12 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
 
     // --- GLOBAL STATE ---
     const state = {
@@ -1472,6 +1478,7 @@
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -1480,11 +1487,58 @@
     controls.maxPolarAngle = Math.PI / 2 + 0.02;
     controls.target.set(1.1, 0.4, 0);
 
-    // --- BLENDER REALISTIC PBR ENVIRONMENT GENERATOR (RoomEnvironment HDRI) ---
+    // --- PBR ENVIRONMENT (RoomEnvironment PMREM — reliable, no CORS issues) ---
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
     const roomEnvironment = new RoomEnvironment(renderer);
-    const pbrStudioTexture = pmremGenerator.fromScene(roomEnvironment).texture;
+    let pbrStudioTexture = pmremGenerator.fromScene(roomEnvironment).texture;
+
+    // Optionally upgrade to real HDRI if accessible (Venice Sunset from Three.js CDN)
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load(
+      'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+      (hdriTex) => {
+        hdriTex.mapping = THREE.EquirectangularReflectionMapping;
+        pbrStudioTexture = pmremGenerator.fromEquirectangular(hdriTex).texture;
+        hdriTex.dispose();
+        scene.environment = pbrStudioTexture;
+        updateLightingBalance();
+        showToast('🌟 HDRI real carregado — reflexos fotográficos ativos!');
+      },
+      undefined,
+      () => { /* Silently use RoomEnvironment fallback if HDRI is blocked */ }
+    );
+
+    // --- POST-PROCESSING PIPELINE (SSAO + Bloom — Blender Cycles quality in browser!) ---
+    // EffectComposer chains: RenderPass → SSAOPass → UnrealBloomPass → OutputPass
+    const composer = new EffectComposer(renderer);
+
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    // SSAO — Screen Space Ambient Occlusion (contact shadows between baseboard & wall/floor)
+    const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+    ssaoPass.kernelRadius = 0.25;    // Tight contact shadow radius
+    ssaoPass.minDistance = 0.001;
+    ssaoPass.maxDistance = 0.04;     // Only shadow within 4cm radius — crisp & realistic!
+    ssaoPass.output = SSAOPass.OUTPUT.Default;
+    composer.addPass(ssaoPass);
+
+    // Unreal Bloom — makes lamp emissive glow beautifully (like Blender's Cycles volumetric!)
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.35,   // Bloom strength (subtle, not oversaturated)
+      0.55,   // Bloom radius
+      0.82    // Bloom threshold (only affects very bright emissives like the bulb)
+    );
+    composer.addPass(bloomPass);
+
+    // OutputPass — correct sRGB output
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
+
+    // State to toggle post-processing on/off
+    state.usePostProcessing = true;
 
     // Dynamic Theme Functionality for ClicStore Brand Identity
     function applyTheme(theme) {
@@ -1530,20 +1584,21 @@
     rimLight.position.set(0, 4, -4);
     scene.add(rimLight);
 
-    // FRONT FILL LIGHT — aponta da direção da câmera DIRETO para a face frontal do rodapé!
-    // Isso resolve definitivamente o problema de face frontal escura!
-    const frontLight = new THREE.DirectionalLight(0xfff8ee, 2.0);
-    frontLight.position.set(0.5, 1.0, 5); // Vem de Z+ (câmera) e ilumina a FACE FRONTAL!
-    frontLight.castShadow = false;
-    scene.add(frontLight);
-
     // --- ENVIRONMENT ---
     const studioGroup = new THREE.Group();
     scene.add(studioGroup);
 
-    // Ground Floor
+    // Ground Floor — MeshPhysicalMaterial with reflections (like polished concrete in studios!)
     const floorGeo = new THREE.PlaneGeometry(20, 20);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8, metalness: 0.1 });
+    const floorMat = new THREE.MeshPhysicalMaterial({
+      color: 0x1a1a1a,
+      roughness: 0.15,       // Low roughness = visible reflections!
+      metalness: 0.0,
+      reflectivity: 0.8,    // Strong reflective floor
+      clearcoat: 1.0,       // Lacquer / polished finish
+      clearcoatRoughness: 0.12,
+      envMapIntensity: 1.5  // Strong HDRI reflections on floor
+    });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.rotation.x = -Math.PI / 2;
     floorMesh.receiveShadow = true;
@@ -1740,12 +1795,16 @@
       return { tex, roughness: 0.40, metalness: 0.05, bgThumb: '#a0a5aa' };
     }
 
-    // Room Floor Material Setup
+    // Room Floor — MeshPhysicalMaterial with clearcoat for lacquered/polished PBR look!
     const defaultFloorData = createParquetTexture();
-    const roomFloorMat = new THREE.MeshStandardMaterial({
+    const roomFloorMat = new THREE.MeshPhysicalMaterial({
       map: defaultFloorData.tex,
       roughness: defaultFloorData.roughness,
-      metalness: defaultFloorData.metalness
+      metalness: defaultFloorData.metalness,
+      clearcoat: 0.85,              // Lacquer finish!
+      clearcoatRoughness: 0.08,     // Glossy satin finish
+      envMapIntensity: 1.2,         // Strong HDRI reflections
+      reflectivity: 0.6
     });
 
     const roomFloorMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), roomFloorMat);
@@ -1776,6 +1835,20 @@
         roomFloorMat.map = floorData.tex;
         roomFloorMat.roughness = floorData.roughness;
         roomFloorMat.metalness = floorData.metalness;
+        // Adjust clearcoat for each floor type to feel photorealistic!
+        if (type === 'carrara' || type === 'marquina') {
+          roomFloorMat.clearcoat = 1.0;           // Polished marble = very shiny
+          roomFloorMat.clearcoatRoughness = 0.04;
+          roomFloorMat.envMapIntensity = 1.8;
+        } else if (type === 'concrete') {
+          roomFloorMat.clearcoat = 0.2;           // Polished cimento queimado = semi-matte
+          roomFloorMat.clearcoatRoughness = 0.25;
+          roomFloorMat.envMapIntensity = 0.6;
+        } else {
+          roomFloorMat.clearcoat = 0.7;           // Wood / parquet = satin lacquer
+          roomFloorMat.clearcoatRoughness = 0.10;
+          roomFloorMat.envMapIntensity = 1.1;
+        }
         roomFloorMat.needsUpdate = true;
       }
     }
@@ -2053,81 +2126,38 @@
 
       if (state.realisticRender) {
         if (state.environment === 'room') {
-          // ============================================================
-          // MODO ROOM: IBL DESATIVADO - SOMENTE LUZES DIRETAS CONTROLAM
-          // ============================================================
-          // CRITICAL FIX: sem scene.environment, os materiais GLB respondem
-          // 100% às luzes diretas e o slider funciona perfeitamente!
-          scene.environment = null;
-          renderer.toneMappingExposure = 0.85 + 0.40 * intensityFactor;
+          // REALISTIC INTERIOR ROOM ILLUMINATION:
+          scene.environment = pbrStudioTexture;
+          renderer.toneMappingExposure = 0.50 + 0.40 * intensityFactor; // Exposure increases dynamically!
 
+          // Balanced Ambient and Main Lights
+          ambientLight.intensity = 0.08 + 0.22 * intensityFactor;
+          ambientLight.color.setHex(0xffffff);
 
-          // Zerar envMapIntensity em TODOS materiais carregados do GLB
-          // para garantir que o HDRI não interfira na resposta às luzes diretas
-          mainGroup.traverse((c) => {
-            if (c.isMesh && c.material) {
-              const mats = Array.isArray(c.material) ? c.material : [c.material];
-              mats.forEach(m => { m.envMapIntensity = 0; });
-            }
-          });
-          cornerBarGroup.traverse((c) => {
-            if (c.isMesh && c.material) {
-              const mats = Array.isArray(c.material) ? c.material : [c.material];
-              mats.forEach(m => { m.envMapIntensity = 0; });
-            }
-          });
-
-          // Luz ambiente mínima: quarto não pode ter luz magica de fundo
-          ambientLight.intensity = 0.05 + 0.15 * intensityFactor;
-          ambientLight.color.setHex(0xffeedd);
-
-          // LUZ FRONTAL (KEY FIX): vem de Z+ direto na face frontal do rodapé
-          // Essa é a luz principal que ilumina a face virada pra câmera!
-          frontLight.position.set(0.5, 0.8, 6.0);
-          frontLight.color.copy(col);
-          frontLight.intensity = 0.30 + 2.50 * intensityFactor; // 0.30 a 2.80!
-
-          // LUZ PRINCIPAL: de cima-frente para iluminar o topo do rodapé
-          mainLight.position.set(1.0, 4.0, 5.0);
-          mainLight.intensity = 0.10 + 1.20 * intensityFactor;
-
-          // LUZ LATERAL esquerda: preenche sombras do canto
-          fillLight.position.set(-5, 2, 3);
-          fillLight.intensity = 0.05 + 0.40 * intensityFactor;
-          fillLight.color.copy(col);
-
-          // Rim atrás: silhueta do rodapé
-          rimLight.intensity = 0.02 + 0.08 * intensityFactor;
+          mainLight.intensity = 0.10 + 0.50 * intensityFactor;
+          mainLight.position.set(2, 4, 3);
+          fillLight.intensity = 0.05 + 0.25 * intensityFactor;
+          rimLight.intensity = 0.05 + 0.25 * intensityFactor;
 
           lampGroup.visible = true;
-          lampPointLight.intensity = 40.0 * intensityFactor;
-          lampSpotLight.intensity = 60.0 * intensityFactor;
-          lampStemLight.intensity = 10.0 * intensityFactor;
-          shadeMat.emissiveIntensity = 3.0 * intensityFactor;
+
+          // Lamp lights beaming DIRECTLY ONTO THE BASEBOARD & WALL HARMONIOUSLY!
+          lampPointLight.intensity = 60.0 * intensityFactor;
+          lampSpotLight.intensity = 80.0 * intensityFactor;
+          lampStemLight.intensity = 15.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 4.0 * intensityFactor;
 
         } else {
-          // MODO ESTÚDIO: IBL ativado para belo HDRI de estúdio
+          // Studio environment mode (Bright PBR HDRI studio)
           scene.environment = pbrStudioTexture;
           renderer.toneMappingExposure = 1.2;
-
-          // Restaurar envMapIntensity padrão nos materiais
-          mainGroup.traverse((c) => {
-            if (c.isMesh && c.material) {
-              const mats = Array.isArray(c.material) ? c.material : [c.material];
-              mats.forEach(m => { m.envMapIntensity = 1.0; });
-            }
-          });
 
           ambientLight.intensity = 0.95;
           ambientLight.color.setHex(0xffffff);
           mainLight.intensity = 2.2;
           mainLight.position.set(3, 6, 4);
-          fillLight.position.set(-4, 3, -2);
-          fillLight.color.setHex(0x90b0ff);
           fillLight.intensity = 0.9;
           rimLight.intensity = 1.4;
-          frontLight.intensity = 1.0;
-          frontLight.color.setHex(0xfff8ee);
 
           lampGroup.visible = false;
           lampPointLight.intensity = 0;
@@ -2135,27 +2165,16 @@
           lampStemLight.intensity = 0;
         }
       } else {
-        // RENDER PADRÃO: IBL desativado, luzes simples estúdio
+        // STANDARD RENDER MODE (RENDER PADRÃO):
         scene.environment = null;
         renderer.toneMappingExposure = 1.2;
-
-        mainGroup.traverse((c) => {
-          if (c.isMesh && c.material) {
-            const mats = Array.isArray(c.material) ? c.material : [c.material];
-            mats.forEach(m => { m.envMapIntensity = 0; });
-          }
-        });
 
         ambientLight.intensity = 0.95;
         ambientLight.color.setHex(0xffffff);
         mainLight.intensity = 2.2;
         mainLight.position.set(3, 6, 4);
-        fillLight.position.set(-4, 3, -2);
-        fillLight.color.setHex(0x90b0ff);
         fillLight.intensity = 0.9;
         rimLight.intensity = 1.4;
-        frontLight.intensity = 1.0;
-        frontLight.color.setHex(0xffffff);
 
         lampGroup.visible = false;
         lampPointLight.intensity = 0;
@@ -2210,17 +2229,48 @@
     const cornerBarGroup = new THREE.Group();
     scene.add(cornerBarGroup);
 
-    // Helper function to clone original materials safely
+    // Helper function to store original materials AND upgrade them with PBR realism techniques
+    // (HDRI envMap reflections + aoMap contact shadows — same as the Three.js forum showcase examples!)
     function storeOriginalMaterials(rootObj) {
       rootObj.traverse((c) => {
         if (c.isMesh) {
           c.castShadow = true;
           c.receiveShadow = true;
+
+          // Ensure UV2 (aoMap channel) is available — copy UV0 to UV2 if needed
+          if (c.geometry && c.geometry.attributes.uv && !c.geometry.attributes.uv2) {
+            c.geometry.setAttribute('uv2', c.geometry.attributes.uv.clone());
+          }
+
+          const upgradeMat = (mat) => {
+            if (!mat) return mat;
+            const cloned = mat.clone();
+
+            // 1. Enable aoMap if the GLB already has one baked in!
+            if (mat.aoMap) {
+              cloned.aoMap = mat.aoMap;
+              cloned.aoMapIntensity = 1.5; // Deepen contact shadows from baked AO!
+            }
+
+            // 2. Boost HDRI environment reflections so wood grain catches light realistically
+            cloned.envMapIntensity = 1.8;
+
+            // 3. Enable physically correct normals from baked normalMap if present
+            if (mat.normalMap) {
+              cloned.normalMap = mat.normalMap;
+              cloned.normalScale = new THREE.Vector2(1.2, 1.2);
+            }
+
+            return cloned;
+          };
+
           if (!c.userData.originalMaterial) {
             if (Array.isArray(c.material)) {
-              c.userData.originalMaterial = c.material.map(m => m.clone());
+              c.userData.originalMaterial = c.material.map(m => upgradeMat(m));
+              c.material = c.userData.originalMaterial.map(m => m.clone());
             } else {
-              c.userData.originalMaterial = c.material.clone();
+              c.userData.originalMaterial = upgradeMat(c.material);
+              c.material = c.userData.originalMaterial.clone();
             }
           }
         }
@@ -2613,7 +2663,8 @@
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
-      renderer.render(scene, camera);
+      // Use EffectComposer so SSAO + Bloom post-processing are applied every frame!
+      composer.render();
       if (state.showMeasures) updateMeasurements();
     }
     animate();
@@ -2901,7 +2952,8 @@
       state.showMeasures = false;
       updateMeasurements();
 
-      renderer.render(scene, camera);
+      // Force render one extra frame so the composer post-processing is flushed before capture
+      composer.render();
       const dataURL = renderer.domElement.toDataURL('image/png');
 
       const link = document.createElement('a');
@@ -2951,11 +3003,14 @@
       reader.readAsArrayBuffer(file);
     }
 
-    // Resize
+    // Resize — update renderer, composer and all passes
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+      ssaoPass.setSize(window.innerWidth, window.innerHeight);
+      bloomPass.setSize(window.innerWidth, window.innerHeight);
     });
 
   </script>
