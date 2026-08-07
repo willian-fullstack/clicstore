@@ -2145,14 +2145,15 @@
           scene.environment = pbrStudioTexture;
           renderer.toneMappingExposure = baseExposure + 0.1 * intensityFactor; // Slight boost when lamp is on
 
-          // We keep the ambient light high to preserve color, but add a little extra from the lamp
-          ambientLight.intensity = baseAmbient + 0.1 * intensityFactor;
+          // Em PBR, o scene.environment (RoomEnvironment) já funciona como uma gigantesca luz branca ambiente!
+          // Reduzimos o ambientLight manual para quase 0, para não dobrar a luz e "estourar" o branco da tela.
+          ambientLight.intensity = 0.1 + 0.1 * intensityFactor;
           ambientLight.color.setHex(0xffffff);
 
-          mainLight.intensity = baseMain;
+          mainLight.intensity = 1.0; 
           mainLight.position.set(3, 6, 4);
-          fillLight.intensity = baseFill;
-          rimLight.intensity = baseRim;
+          fillLight.intensity = 0.2;
+          rimLight.intensity = 0.5;
 
           lampGroup.visible = true;
 
@@ -2167,12 +2168,13 @@
           scene.environment = pbrStudioTexture;
           renderer.toneMappingExposure = baseExposure;
 
-          ambientLight.intensity = baseAmbient;
+          // Mesma lógica: O RoomEnvironment já clareia o cenário inteiro. 
+          ambientLight.intensity = 0.1;
           ambientLight.color.setHex(0xffffff);
-          mainLight.intensity = baseMain;
+          mainLight.intensity = 1.0;
           mainLight.position.set(3, 6, 4);
-          fillLight.intensity = baseFill;
-          rimLight.intensity = baseRim;
+          fillLight.intensity = 0.2;
+          rimLight.intensity = 0.5;
 
           lampGroup.visible = false;
           lampPointLight.intensity = 0;
