@@ -2252,30 +2252,23 @@
               cloned.aoMapIntensity = 1.5; // Deepen contact shadows from baked AO!
             }
 
-            // 2. Ajuste fino dos reflexos HDRI (Se ficar em 1.8 e sem roughnessMap, vira um espelho!)
-            cloned.envMapIntensity = 0.8;
+            // 2. Ajuste fino dos reflexos HDRI (Se ficar muito alto, ofusca o relevo da madeira)
+            cloned.envMapIntensity = 0.5; 
+            cloned.roughness = 0.9; // Força a madeira a ser bem fosca (sem efeito espelho!)
+            
+            // Remove qualquer roughnessMap gerado acidentalmente (se for escuro, vira espelho)
+            cloned.roughnessMap = null;
 
-            // Se o Blender exportou a madeira sem mapa de roughness e muito lisa (< 0.5), forçamos ela a ser mais fosca/crespa
-            if (!mat.roughnessMap && mat.roughness < 0.6) {
-              cloned.roughness = 0.85; 
-            }
-
-            // 3. Enable physically correct normals from baked normalMap if present
+            // 3. Se houver Normal Map (relevo) vindo do Blender, FORÇAR a intensidade dele!
             if (mat.normalMap) {
               cloned.normalMap = mat.normalMap;
-              cloned.normalScale = new THREE.Vector2(1.2, 1.2);
+              cloned.normalScale = new THREE.Vector2(4.0, 4.0); // Aumentado drasticamente para aparecer os veios!
             } 
-            // 4. BUMP MAP FALLBACK: O Blender NÃO exporta "Bump Nodes" automaticamente para GLB (apenas Normal Maps).
-            // Para consertar isso e dar aquele efeito "crespo" ou de relevo na madeira sem você precisar fazer bake de normais:
-            // Nós usamos a própria textura de cor (map) como mapa de afundamento (bumpMap) no Three.js!
-            else if (mat.map) {
+            
+            // 4. Se não houver Normal Map, forçar a textura de cor a agir como mapa de afundamento (bump)
+            if (mat.map) {
               cloned.bumpMap = mat.map;
-              cloned.bumpScale = 0.035; // Aumentei o crespo para ficar mais evidente!
-              
-              // Truque extra: usamos o map como roughnessMap também para as partes escuras refletirem diferente das claras
-              if (!mat.roughnessMap) {
-                cloned.roughnessMap = mat.map;
-              }
+              cloned.bumpScale = 0.08; // Valor alto para o afundamento ficar BEM visível
             }
 
             return cloned;
