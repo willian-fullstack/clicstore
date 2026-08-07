@@ -2228,15 +2228,23 @@
     document.getElementById('slider-mat-reflexo').addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
       document.getElementById('lbl-mat-reflexo').innerText = `${val}%`;
-      // Map 0-100% to roughness 1.0 - 0.1 (0% reflexo = 1.0 roughness / fosco, 100% reflexo = 0.1 roughness / polido)
+      
+      // 0% = Totalmente fosco (roughness 1.0, envMap 0.0)
+      // 100% = Totalmente polido (roughness 0.1, envMap 1.5)
       const roughness = 1.0 - (val / 100 * 0.9);
+      const envMapIntensity = (val / 100) * 1.5;
       
       const updateMat = (c) => {
         if (c.isMesh && c.material) {
           if (Array.isArray(c.material)) {
-            c.material.forEach(m => { m.roughness = roughness; m.needsUpdate = true; });
+            c.material.forEach(m => { 
+              m.roughness = roughness; 
+              m.envMapIntensity = envMapIntensity;
+              m.needsUpdate = true; 
+            });
           } else {
             c.material.roughness = roughness;
+            c.material.envMapIntensity = envMapIntensity;
             c.material.needsUpdate = true;
           }
         }
