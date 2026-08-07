@@ -1535,7 +1535,7 @@
       new THREE.Vector2(window.innerWidth, window.innerHeight),
       0.35,   // Bloom strength (subtle, not oversaturated)
       0.55,   // Bloom radius
-      0.82    // Bloom threshold (only affects very bright emissives like the bulb)
+      3.5     // Bloom threshold: AUMENTADO PARA 3.5! (Evita que o chão/paredes claros brilhem com a luz forte da sala. Apenas o abajur vai brilhar)
     );
     composer.addPass(bloomPass);
 
@@ -2160,7 +2160,7 @@
           lampPointLight.intensity = 60.0 * intensityFactor;
           lampSpotLight.intensity = 80.0 * intensityFactor;
           lampStemLight.intensity = 15.0 * intensityFactor;
-          shadeMat.emissiveIntensity = 4.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 10.0 * intensityFactor;
 
         } else {
           // Studio environment mode (Bright PBR HDRI studio)
