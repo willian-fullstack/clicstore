@@ -1512,21 +1512,8 @@
     const roomEnvironment = new RoomEnvironment(renderer);
     let pbrStudioTexture = pmremGenerator.fromScene(roomEnvironment).texture;
 
-    // Optionally upgrade to real HDRI if accessible (Venice Sunset from Three.js CDN)
-    const rgbeLoader = new RGBELoader();
-    rgbeLoader.load(
-      'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
-      (hdriTex) => {
-        hdriTex.mapping = THREE.EquirectangularReflectionMapping;
-        pbrStudioTexture = pmremGenerator.fromEquirectangular(hdriTex).texture;
-        hdriTex.dispose();
-        scene.environment = pbrStudioTexture;
-        updateLightingBalance();
-        showToast('🌟 HDRI real carregado — reflexos fotográficos ativos!');
-      },
-      undefined,
-      () => { /* Silently use RoomEnvironment fallback if HDRI is blocked */ }
-    );
+    // (The Venice Sunset HDRI was removed because it tinted the products orange. 
+    // We now solely rely on the pristine, neutral RoomEnvironment for perfect color fidelity).
 
     // --- POST-PROCESSING PIPELINE (SSAO + Bloom — Blender Cycles quality in browser!) ---
     // EffectComposer chains: RenderPass → SSAOPass → UnrealBloomPass → OutputPass
@@ -2143,25 +2130,33 @@
       lampStemLight.color.copy(col);
       shadeMat.emissive.copy(col);
 
-      if (state.realisticRender) {
-        if (state.environment === 'room') {
-          // REALISTIC INTERIOR ROOM ILLUMINATION:
-          scene.environment = pbrStudioTexture;
-          // Aumentado a exposição base para nunca escurecer a cor real do rodapé!
-          renderer.toneMappingExposure = 1.0 + 0.2 * intensityFactor; 
+      // Base lighting should ALWAYS perfectly match the Standard Render to preserve color fidelity
+      const baseExposure = 1.2;
+      const baseAmbient = 0.95;
+      const baseMain = 2.2;
+      const baseFill = 0.9;
+      const baseRim = 1.4;
 
-          // Balanced Ambient and Main Lights (Mantendo o estúdio iluminado)
-          ambientLight.intensity = 0.6 + 0.35 * intensityFactor;
+      if (state.realisticRender) {
+        if (state.lampIntensity > 0) {
+          // Lamp is ON
+          const intensityFactor = state.lampIntensity / 100;
+          
+          scene.environment = pbrStudioTexture;
+          renderer.toneMappingExposure = baseExposure + 0.1 * intensityFactor; // Slight boost when lamp is on
+
+          // We keep the ambient light high to preserve color, but add a little extra from the lamp
+          ambientLight.intensity = baseAmbient + 0.1 * intensityFactor;
           ambientLight.color.setHex(0xffffff);
 
-          mainLight.intensity = 1.2 + 1.0 * intensityFactor;
-          mainLight.position.set(2, 4, 3);
-          fillLight.intensity = 0.5 + 0.4 * intensityFactor;
-          rimLight.intensity = 1.0 + 0.4 * intensityFactor;
+          mainLight.intensity = baseMain;
+          mainLight.position.set(3, 6, 4);
+          fillLight.intensity = baseFill;
+          rimLight.intensity = baseRim;
 
           lampGroup.visible = true;
 
-          // Lamp lights beaming DIRECTLY ONTO THE BASEBOARD & WALL HARMONIOUSLY!
+          // Lamp lights beaming
           lampPointLight.intensity = 60.0 * intensityFactor;
           lampSpotLight.intensity = 80.0 * intensityFactor;
           lampStemLight.intensity = 15.0 * intensityFactor;
@@ -2170,14 +2165,14 @@
         } else {
           // Studio environment mode (Bright PBR HDRI studio)
           scene.environment = pbrStudioTexture;
-          renderer.toneMappingExposure = 1.2;
+          renderer.toneMappingExposure = baseExposure;
 
-          ambientLight.intensity = 0.95;
+          ambientLight.intensity = baseAmbient;
           ambientLight.color.setHex(0xffffff);
-          mainLight.intensity = 2.2;
+          mainLight.intensity = baseMain;
           mainLight.position.set(3, 6, 4);
-          fillLight.intensity = 0.9;
-          rimLight.intensity = 1.4;
+          fillLight.intensity = baseFill;
+          rimLight.intensity = baseRim;
 
           lampGroup.visible = false;
           lampPointLight.intensity = 0;
@@ -2187,14 +2182,14 @@
       } else {
         // STANDARD RENDER MODE (RENDER PADRÃO):
         scene.environment = null;
-        renderer.toneMappingExposure = 1.2;
+        renderer.toneMappingExposure = baseExposure;
 
-        ambientLight.intensity = 0.95;
+        ambientLight.intensity = baseAmbient;
         ambientLight.color.setHex(0xffffff);
-        mainLight.intensity = 2.2;
+        mainLight.intensity = baseMain;
         mainLight.position.set(3, 6, 4);
-        fillLight.intensity = 0.9;
-        rimLight.intensity = 1.4;
+        fillLight.intensity = baseFill;
+        rimLight.intensity = baseRim;
 
         lampGroup.visible = false;
         lampPointLight.intensity = 0;
