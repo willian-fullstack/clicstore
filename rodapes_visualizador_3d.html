@@ -2254,21 +2254,20 @@
             cloned.envMapIntensity = 1.0; 
             cloned.roughnessMap = null; // Remove mapas ruins que o Blender possa ter gerado
 
-            // 3. Sombras de Contato
+            // 3. Sombras de Contato (AO)
             if (mat.aoMap) {
               cloned.aoMap = mat.aoMap;
               cloned.aoMapIntensity = 1.5;
             }
 
-            // 4. Forçar Relevo (Normal ou Bump)
-            if (mat.normalMap) {
-              cloned.normalMap = mat.normalMap;
-              cloned.normalScale = new THREE.Vector2(4.0, 4.0);
-            } 
-            if (mat.map && !mat.normalMap) {
-              // Se não tem normal map, usa a foto da madeira como mapa de relevo
+            // 4. Forçar Relevo (Ignoramos qualquer Normal Map vazio ou fraco do Blender)
+            cloned.normalMap = null; 
+            
+            if (mat.map) {
               cloned.bumpMap = mat.map;
-              cloned.bumpScale = 0.2; // Bem forte para ficar crespo!
+              // Uma escala gigante (2.0) para garantir que veremos o efeito. 
+              // Se ficar muito exagerado depois nós diminuímos.
+              cloned.bumpScale = 2.0; 
             }
             
             cloned.needsUpdate = true;
