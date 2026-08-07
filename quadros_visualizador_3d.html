@@ -1355,6 +1355,9 @@
     <button class="tool-btn" title="Close do Friso / Detalhe" id="cam-zoom">
       <i class="ri-zoom-in-line"></i>
     </button>
+    <button class="tool-btn" title="Visão Explodida (Separar Peças)" id="cam-explode">
+      <i class="ri-split-cells-horizontal"></i>
+    </button>
     <button class="tool-btn" title="Resetar Câmera" id="cam-reset">
       <i class="ri-refresh-line"></i>
     </button>
@@ -1415,6 +1418,7 @@
     const state = {
       loadedModels: [],
       activeModelIndex: 0,
+      isExploded: false,
       showMeasures: true,
       cutLeft45: false,
       cutRight45: false,
@@ -1874,32 +1878,36 @@
           img.onload = () => {
             const tex = new THREE.Texture(img);
             tex.colorSpace = THREE.SRGBColorSpace;
-            tex.flipY = false;
             tex.needsUpdate = true;
 
             const selected = state.loadedModels[state.activeModelIndex];
             if (selected) {
               selected.object.traverse((c) => {
-                // Procurar por um material que se pareça com o poster/foto/acetato
                 if (c.isMesh && c.material) {
-                  // Heurística: Aplica a textura ao material que tem 'poster', 'foto', 'image', 'picture', 'canvas' no nome, ou se não achar, no primeiro mesh.
-                  let mat = c.material;
-                  if (Array.isArray(mat)) {
-                    mat.forEach(m => {
-                      if (m.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/)) {
-                        m.map = tex;
-                        m.needsUpdate = true;
+                  let matList = Array.isArray(c.material) ? c.material : [c.material];
+                  matList.forEach(m => {
+                    if (m.name && m.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/) || (c.name && c.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/))) {
+                      m.map = tex;
+                      m.needsUpdate = true;
+                      
+                      // Lógica para evitar esticamento (Object-fit: cover)
+                      if (c.geometry.boundingBox === null) c.geometry.computeBoundingBox();
+                      const w = c.geometry.boundingBox.max.x - c.geometry.boundingBox.min.x;
+                      const h = c.geometry.boundingBox.max.y - c.geometry.boundingBox.min.y;
+                      const imgAspect = img.width / img.height;
+                      const frameAspect = w / h;
+                      
+                      if (frameAspect > imgAspect) {
+                          const scaleY = (img.width / frameAspect) / img.height;
+                          tex.repeat.set(1, scaleY);
+                          tex.offset.set(0, (1 - scaleY) / 2);
+                      } else {
+                          const scaleX = (img.height * frameAspect) / img.width;
+                          tex.repeat.set(scaleX, 1);
+                          tex.offset.set((1 - scaleX) / 2, 0);
                       }
-                    });
-                  } else {
-                    if (mat.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/)) {
-                      mat.map = tex;
-                      mat.needsUpdate = true;
-                    } else if (c.name.toLowerCase().match(/(poster|foto|image|picture|canvas|vidro)/)) {
-                      mat.map = tex;
-                      mat.needsUpdate = true;
                     }
-                  }
+                  });
                 }
               });
             }
@@ -2410,6 +2418,61 @@
           return shape;
       };
 
+      let matBack;
+      if (window.matMdf) {
+          matBack = window.matMdf.clone();
+      } else {
+          matBack = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
+      }
+
+      // Utilitário para separar o material das bordas (laterais) e dos cortes 45 graus, e ajustar o UV do MDF
+      const applyCutMaterials = (geom, side, isBackLayer) => {
+          if(geom.groups.length === 2 && geom.groups[1].count === 24) {
+              const startSides = geom.groups[1].start;
+              const isLeft = (side === 'left');
+              
+              geom.groups.splice(1, 1, 
+                  { start: startSides, count: 6, materialIndex: isLeft ? 2 : 1 },      // Outer edge (or cut for left)
+                  { start: startSides + 6, count: 6, materialIndex: isLeft ? 1 : 2 },  // 45 cut (or inner for left)
+                  { start: startSides + 12, count: 6, materialIndex: isLeft ? 2 : 1 }, // Inner edge (or cut for left)
+                  { start: startSides + 18, count: 6, materialIndex: isLeft ? 1 : 2 }  // 45 cut (or outer for left)
+              );
+
+              // Corrige o "esticamento" da textura de MDF nas faces de corte, refazendo o UV Mapping de forma planar
+              const pos = geom.attributes.position.array;
+              const uv = geom.attributes.uv.array;
+              
+              const totalDepth = frontDepth + backDepth;
+              const outerLimit = (side === 'top' || side === 'bottom') ? (hOuter / 2) : (wOuter / 2);
+              const innerLimit = (side === 'top' || side === 'bottom') ? (frontHoleHeight / 2) : (frontHoleWidth / 2);
+              const rangeA = outerLimit - innerLimit;
+              
+              // Processa cada segmento de 6 vértices (2 triângulos) separadamente
+              for(let cutStart = startSides; cutStart < startSides + 24; cutStart += 6) {
+                  const segIdx = Math.floor((cutStart - startSides) / 6);
+                  const isCut = isLeft ? (segIdx === 0 || segIdx === 2) : (segIdx === 1 || segIdx === 3);
+                  
+                  if (isCut) {
+                      // Aplica o UV usando as coordenadas REAIS do mundo. 
+                      // Isso garante que a textura flua perfeitamente do degrau da frente (geomFront)
+                      // para o degrau de trás (geomBack) como se fossem cortados de uma única peça de MDF.
+                      for(let v = cutStart; v < cutStart + 6; v++) {
+                          const x = pos[v*3], y = pos[v*3+1], z = pos[v*3+2];
+                          const a = (side === 'top' || side === 'bottom') ? y : x;
+                          
+                          // Z no ExtrudeGeometry vai de 0 a depth. Ajustamos para o espaço global da peça.
+                          const worldZ = isBackLayer ? (z - backDepth) : z;
+                          
+                          // Multiplicador 30: deixa a textura bem menor (granulada), 
+                          // mas não chega a repetir (evitando as "camadinhas" que aconteciam com 200).
+                          uv[v*2] = a * 30;
+                          uv[v*2+1] = worldZ * 30;
+                      }
+                  }
+              }
+          }
+      };
+
       const sides = ['top', 'bottom', 'left', 'right'];
 
       sides.forEach(side => {
@@ -2418,29 +2481,46 @@
           // Topo/Base (top/bottom) seguem a horizontal, então rodam 90 graus.
           const matFront = (side === 'left' || side === 'right') ? matBorder : matBorderRotated;
           
-          // Para as bordas extrudadas (espessura/Z-depth), o Three.js mapeia o UV de forma que 
-          // U é o perímetro e V é a profundidade. Para que os veios corram ao longo do perímetro,
-          // a textura aplicada aos lados precisa sempre ter veios horizontais!
+          // A borda extrudada (espessura externa) é mapeada percorrendo o perímetro no eixo U.
+          // Para que os veios corram paralelos ao perímetro, a textura aplicada DEVE ter veios horizontais sempre!
           const matSide = matBorderRotated; 
+          const matCut = matBack; 
 
-          const materiaisFrame = [matFront, matSide]; // O ThreeJS ExtrudeGeometry usa o index 0 para frente/tras e index 1 para os lados
+          const materiaisFrame = [matFront, matSide, matCut]; // 0: frente/tras, 1: bordas, 2: cortes mdf
 
           // Camada 1: Frente (Face lisa e lábio)
           const shapeFront = createTrapezoid(wOuter, hOuter, frontHoleWidth, frontHoleHeight, side);
           const geomFront = new THREE.ExtrudeGeometry(shapeFront, { depth: frontDepth, bevelEnabled: false });
+          applyCutMaterials(geomFront, side, false);
           const meshFront = new THREE.Mesh(geomFront, materiaisFrame);
           meshFront.castShadow = true;
           meshFront.receiveShadow = true;
           meshFront.position.z = 0;
-          frameGroup.add(meshFront);
 
           // Camada 2: Trás (Cava que segura o vidro e mdf, tamanho exato WxH)
           const shapeBack = createTrapezoid(wOuter, hOuter, w, h, side);
           const geomBack = new THREE.ExtrudeGeometry(shapeBack, { depth: backDepth, bevelEnabled: false });
+          applyCutMaterials(geomBack, side, true);
           const meshBack = new THREE.Mesh(geomBack, materiaisFrame);
           meshBack.castShadow = true;
           meshBack.receiveShadow = true;
           meshBack.position.z = -backDepth;
+
+          // Lógica de explosão
+          const offsetDist = 0.08;
+          let explodeT = new THREE.Vector3(0,0,0);
+          let explodeB = new THREE.Vector3(0,0,-backDepth);
+          if (side === 'top') { explodeT.y = offsetDist; explodeT.z = 0.02; explodeB.y = offsetDist; explodeB.z = -backDepth + 0.02; }
+          if (side === 'bottom') { explodeT.y = -offsetDist; explodeT.z = 0.02; explodeB.y = -offsetDist; explodeB.z = -backDepth + 0.02; }
+          if (side === 'left') { explodeT.x = -offsetDist; explodeT.z = 0.02; explodeB.x = -offsetDist; explodeB.z = -backDepth + 0.02; }
+          if (side === 'right') { explodeT.x = offsetDist; explodeT.z = 0.02; explodeB.x = offsetDist; explodeB.z = -backDepth + 0.02; }
+
+          meshFront.userData.basePosition = meshFront.position.clone();
+          meshFront.userData.explodeTarget = explodeT;
+          meshBack.userData.basePosition = meshBack.position.clone();
+          meshBack.userData.explodeTarget = explodeB;
+
+          frameGroup.add(meshFront);
           frameGroup.add(meshBack);
       });
 
@@ -2450,16 +2530,12 @@
 
       // 2. FUNDO (Back cover - MDF 3mm)
       const mdfGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.003);
-      let matBack;
-      if (window.matMdf) {
-          matBack = window.matMdf.clone();
-      } else {
-          matBack = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
-      }
-      const meshBack = new THREE.Mesh(mdfGeom, matBack);
-      meshBack.position.z = -0.0021; // Encostado atrás do poster
-      meshBack.rotation.y = Math.PI; 
-      frameGroup.add(meshBack);
+      const meshBackPlane = new THREE.Mesh(mdfGeom, matBack);
+      meshBackPlane.position.z = -0.0021; // Encostado atrás do poster
+      meshBackPlane.rotation.y = Math.PI; 
+      meshBackPlane.userData.basePosition = meshBackPlane.position.clone();
+      meshBackPlane.userData.explodeTarget = meshBackPlane.position.clone().add(new THREE.Vector3(0, 0, -0.15));
+      frameGroup.add(meshBackPlane);
 
       // 3. POSTER (Photo - 0.3mm)
       const posterGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.0003);
@@ -2485,21 +2561,26 @@
       const meshPoster = new THREE.Mesh(posterGeom, matPoster);
       meshPoster.position.z = -0.00045; // Atrás do vidro
       meshPoster.name = "poster";
+      meshPoster.userData.basePosition = meshPoster.position.clone();
+      meshPoster.userData.explodeTarget = meshPoster.position.clone().add(new THREE.Vector3(0, 0, -0.05));
       frameGroup.add(meshPoster);
 
       // 4. ACETATO (Glass front - 0.3mm)
       const glassGeom = new THREE.BoxGeometry(w - 0.001, h - 0.001, 0.0003);
-      const matGlass = new THREE.MeshStandardMaterial({
+      const matGlass = new THREE.MeshPhysicalMaterial({
           color: 0xffffff,
-          transparent: true,
-          opacity: 0.15,
-          roughness: 0.0, 
-          envMapIntensity: 3.0, 
           metalness: 0.1,
+          roughness: 0.05,
+          envMapIntensity: 2.0,
+          transmission: 1.0, 
+          ior: 1.5,
+          transparent: true,
           name: 'vidro_material'
       });
       const meshGlass = new THREE.Mesh(glassGeom, matGlass);
       meshGlass.position.z = -0.00015; // Rente à face de trás do Lábio Frontal (Z=0)
+      meshGlass.userData.basePosition = meshGlass.position.clone();
+      meshGlass.userData.explodeTarget = meshGlass.position.clone().add(new THREE.Vector3(0, 0, 0.05));
       frameGroup.add(meshGlass);
       
       // Store original materials
@@ -2770,6 +2851,18 @@ function updateMeasurements() {
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
+
+      // Animação de Visão Explodida Suave
+      const selected = state.loadedModels[state.activeModelIndex];
+      if (selected && selected.object) {
+          selected.object.traverse((c) => {
+              if (c.isMesh && c.userData.basePosition && c.userData.explodeTarget) {
+                  const target = state.isExploded ? c.userData.explodeTarget : c.userData.basePosition;
+                  c.position.lerp(target, 0.05); // Suave spring para o target
+              }
+          });
+      }
+
       // Use EffectComposer so SSAO + Bloom post-processing are applied every frame!
       composer.render();
       if (state.showMeasures) updateMeasurements();
@@ -3023,6 +3116,18 @@ function updateMeasurements() {
       }
     });
 
+    document.getElementById('cam-explode').addEventListener('click', (e) => {
+      state.isExploded = !state.isExploded;
+      const btn = e.currentTarget;
+      if (state.isExploded) {
+        btn.classList.add('active');
+        btn.style.color = 'var(--cor-destaque)';
+      } else {
+        btn.classList.remove('active');
+        btn.style.color = '';
+      }
+    });
+
     document.getElementById('cam-reset').addEventListener('click', () => {
       renderSceneMode();
     });
@@ -3085,7 +3190,6 @@ function updateMeasurements() {
         img.onload = () => {
           const tex = new THREE.Texture(img);
           tex.colorSpace = THREE.SRGBColorSpace;
-          tex.flipY = false;
           tex.needsUpdate = true;
           const selected = state.loadedModels[state.activeModelIndex];
           if (selected) {
@@ -3094,6 +3198,23 @@ function updateMeasurements() {
                 if (c.material.name === 'poster_material') {
                   c.material.map = tex;
                   c.material.needsUpdate = true;
+
+                  // Lógica para evitar que a foto fique esticada (Object-fit: cover)
+                  c.geometry.computeBoundingBox();
+                  const w = c.geometry.boundingBox.max.x - c.geometry.boundingBox.min.x;
+                  const h = c.geometry.boundingBox.max.y - c.geometry.boundingBox.min.y;
+                  const imgAspect = img.width / img.height;
+                  const frameAspect = w / h;
+                  
+                  if (frameAspect > imgAspect) {
+                      const scaleY = (img.width / frameAspect) / img.height;
+                      tex.repeat.set(1, scaleY);
+                      tex.offset.set(0, (1 - scaleY) / 2);
+                  } else {
+                      const scaleX = (img.height * frameAspect) / img.width;
+                      tex.repeat.set(scaleX, 1);
+                      tex.offset.set((1 - scaleX) / 2, 0);
+                  }
                 }
               }
             });
