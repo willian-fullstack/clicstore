@@ -1344,9 +1344,9 @@
         <div class="rot-slider-row">
           <div class="rot-slider-header">
             <span>Intensidade da Luz</span>
-            <span id="lbl-lamp-intensity">70%</span>
+            <span id="lbl-lamp-intensity">1%</span>
           </div>
-          <input type="range" id="slider-lamp-intensity" min="0" max="100" value="70" class="rot-slider">
+          <input type="range" id="slider-lamp-intensity" min="0" max="100" value="1" class="rot-slider">
         </div>
 
         <div class="section-tag" style="margin-top: 16px;">Acabamento da Madeira</div>
@@ -1354,17 +1354,17 @@
         <div class="rot-slider-row">
           <div class="rot-slider-header">
             <span>Reflexo (Brilho/Verniz)</span>
-            <span id="lbl-mat-reflexo">50%</span>
+            <span id="lbl-mat-reflexo">82%</span>
           </div>
-          <input type="range" id="slider-mat-reflexo" min="0" max="100" value="50" class="rot-slider">
+          <input type="range" id="slider-mat-reflexo" min="0" max="100" value="82" class="rot-slider">
         </div>
 
         <div class="rot-slider-row">
           <div class="rot-slider-header">
             <span>Relevo (Crespo/Bump)</span>
-            <span id="lbl-mat-relevo">200%</span>
+            <span id="lbl-mat-relevo">300%</span>
           </div>
-          <input type="range" id="slider-mat-relevo" min="0" max="300" value="200" class="rot-slider">
+          <input type="range" id="slider-mat-relevo" min="0" max="300" value="300" class="rot-slider">
         </div>
 
 
@@ -1467,7 +1467,7 @@
       multiModelMode: true, // Default: show all 8 side-by-side as in Blender!
       realisticRender: true, // DEFAULT: Photorealistic Blender PBR environment ON!
       lampColor: '#ffe4b5',   // Realistic 2700K Warm White default
-      lampIntensity: 70       // 70% default intensity
+      lampIntensity: 1        // 1% default intensity
     };
 
     // Metadata for the 8 Blender objects
@@ -2319,10 +2319,9 @@
             // 1. Clonar o material original de forma segura (MeshStandardMaterial já é PBR)
             const cloned = mat.clone();
 
-            // 2. Ajuste do acabamento da madeira (Satin / Semi-brilho)
-            // Rugosidade em 0.9 era fosco demais, escondia as sombras. 0.4 a 0.5 permite ver o brilho batendo nos veios!
-            cloned.roughness = 0.4;
-            cloned.envMapIntensity = 1.0; 
+            // 2. Ajuste do acabamento da madeira (Configuração salva: Reflexo 82%)
+            cloned.roughness = 0.262; // 1.0 - (0.82 * 0.9)
+            cloned.envMapIntensity = 1.23; // 0.82 * 1.5
             cloned.roughnessMap = null; // Remove mapas ruins que o Blender possa ter gerado
 
             // 3. Sombras de Contato (AO)
@@ -2331,14 +2330,12 @@
               cloned.aoMapIntensity = 1.5;
             }
 
-            // 4. Forçar Relevo (Ignoramos qualquer Normal Map vazio ou fraco do Blender)
+            // 4. Forçar Relevo (Configuração salva: Relevo 300%)
             cloned.normalMap = null; 
             
             if (mat.map) {
               cloned.bumpMap = mat.map;
-              // Uma escala gigante (2.0) para garantir que veremos o efeito. 
-              // Se ficar muito exagerado depois nós diminuímos.
-              cloned.bumpScale = 2.0; 
+              cloned.bumpScale = 3.0; // 300%
             }
             
             cloned.needsUpdate = true;
