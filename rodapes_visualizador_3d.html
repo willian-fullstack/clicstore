@@ -2150,24 +2150,25 @@
         if (state.environment === 'room') {
           // REALISTIC INTERIOR ROOM ILLUMINATION:
           scene.environment = pbrStudioTexture;
-          renderer.toneMappingExposure = 0.50 + 0.40 * intensityFactor; // Exposure increases dynamically!
+          // Lowered base exposure to prevent blowout (HDRI already contributes a lot)
+          renderer.toneMappingExposure = 0.35 + 0.25 * intensityFactor; 
 
           // Balanced Ambient and Main Lights
-          ambientLight.intensity = 0.08 + 0.22 * intensityFactor;
+          ambientLight.intensity = 0.05 + 0.15 * intensityFactor;
           ambientLight.color.setHex(0xffffff);
 
-          mainLight.intensity = 0.10 + 0.50 * intensityFactor;
+          mainLight.intensity = 0.05 + 0.30 * intensityFactor;
           mainLight.position.set(2, 4, 3);
-          fillLight.intensity = 0.05 + 0.25 * intensityFactor;
-          rimLight.intensity = 0.05 + 0.25 * intensityFactor;
+          fillLight.intensity = 0.02 + 0.15 * intensityFactor;
+          rimLight.intensity = 0.02 + 0.15 * intensityFactor;
 
           lampGroup.visible = true;
 
-          // Lamp lights beaming DIRECTLY ONTO THE BASEBOARD & WALL HARMONIOUSLY!
-          lampPointLight.intensity = 60.0 * intensityFactor;
-          lampSpotLight.intensity = 80.0 * intensityFactor;
-          lampStemLight.intensity = 15.0 * intensityFactor;
-          shadeMat.emissiveIntensity = 4.0 * intensityFactor;
+          // Drastically reduced lamp intensities. ACESFilmic + UnrealBloom blows out easily at >20 intensities!
+          lampPointLight.intensity = 8.0 * intensityFactor;
+          lampSpotLight.intensity = 12.0 * intensityFactor;
+          lampStemLight.intensity = 3.0 * intensityFactor;
+          shadeMat.emissiveIntensity = 2.0 * intensityFactor;
 
         } else {
           // Studio environment mode (Bright PBR HDRI studio)
