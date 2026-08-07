@@ -1349,6 +1349,25 @@
           <input type="range" id="slider-lamp-intensity" min="0" max="100" value="70" class="rot-slider">
         </div>
 
+        <div class="section-tag" style="margin-top: 16px;">Acabamento da Madeira</div>
+        
+        <div class="rot-slider-row">
+          <div class="rot-slider-header">
+            <span>Reflexo (Brilho/Verniz)</span>
+            <span id="lbl-mat-reflexo">50%</span>
+          </div>
+          <input type="range" id="slider-mat-reflexo" min="0" max="100" value="50" class="rot-slider">
+        </div>
+
+        <div class="rot-slider-row">
+          <div class="rot-slider-header">
+            <span>Relevo (Crespo/Bump)</span>
+            <span id="lbl-mat-relevo">200%</span>
+          </div>
+          <input type="range" id="slider-mat-relevo" min="0" max="300" value="200" class="rot-slider">
+        </div>
+
+
         <div class="section-tag" style="margin-top: 8px;">Cor da Parede do Ambiente</div>
         <div class="color-input-wrapper">
           <input type="color" id="inp-wall-color" value="#888888">
@@ -2203,6 +2222,52 @@
       state.lampIntensity = parseInt(e.target.value);
       document.getElementById('lbl-lamp-intensity').innerText = `${state.lampIntensity}%`;
       updateLightingBalance();
+    });
+
+    // Material Adjustments (Real-time)
+    document.getElementById('slider-mat-reflexo').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      document.getElementById('lbl-mat-reflexo').innerText = `${val}%`;
+      // Map 0-100% to roughness 1.0 - 0.1 (0% reflexo = 1.0 roughness / fosco, 100% reflexo = 0.1 roughness / polido)
+      const roughness = 1.0 - (val / 100 * 0.9);
+      
+      const updateMat = (c) => {
+        if (c.isMesh && c.material) {
+          if (Array.isArray(c.material)) {
+            c.material.forEach(m => { m.roughness = roughness; m.needsUpdate = true; });
+          } else {
+            c.material.roughness = roughness;
+            c.material.needsUpdate = true;
+          }
+        }
+      };
+      mainGroup.traverse(updateMat);
+      cornerBarGroup.traverse(updateMat);
+    });
+
+    document.getElementById('slider-mat-relevo').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      document.getElementById('lbl-mat-relevo').innerText = `${val}%`;
+      // Map 0-300% to bumpScale 0.0 - 3.0
+      const bumpScale = (val / 100);
+      
+      const updateMat = (c) => {
+        if (c.isMesh && c.material) {
+          if (Array.isArray(c.material)) {
+            c.material.forEach(m => { 
+              if (m.bumpMap) m.bumpScale = bumpScale; 
+              if (m.normalMap) m.normalScale = new THREE.Vector2(bumpScale * 2, bumpScale * 2);
+              m.needsUpdate = true; 
+            });
+          } else {
+            if (c.material.bumpMap) c.material.bumpScale = bumpScale;
+            if (c.material.normalMap) c.material.normalScale = new THREE.Vector2(bumpScale * 2, bumpScale * 2);
+            c.material.needsUpdate = true;
+          }
+        }
+      };
+      mainGroup.traverse(updateMat);
+      cornerBarGroup.traverse(updateMat);
     });
 
     // Toggle Realistic Renderer
