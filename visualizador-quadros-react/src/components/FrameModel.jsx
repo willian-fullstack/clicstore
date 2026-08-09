@@ -3,17 +3,17 @@ import * as THREE from 'three'
 import { Html, Line } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 
-export default function FrameModel({ meta, size, customColor, matReflexo, posterTex, carvalhoMat, tabacoMat, showMeasures, isExploded }) {
+export default function FrameModel({ meta, size, customColor, matReflexo, posterTex, carvalhoMat, tabacoMat, showMeasures, isExploded, isVertical = true }) {
   
   // Parâmetros do frame reais da arquitetura
-  const width = size.w
-  const height = size.h
-  const wOuter = size.wOuter
-  const hOuter = size.hOuter
+  const width = isVertical ? size.w : size.h
+  const height = isVertical ? size.h : size.w
+  const wOuter = isVertical ? size.wOuter : size.hOuter
+  const hOuter = isVertical ? size.hOuter : size.wOuter
   const frontDepth = size.frontDepth
   const backDepth = size.backDepth
-  const frontHoleWidth = size.frontHoleWidth
-  const frontHoleHeight = size.frontHoleHeight
+  const frontHoleWidth = isVertical ? size.frontHoleWidth : size.frontHoleHeight
+  const frontHoleHeight = isVertical ? size.frontHoleHeight : size.frontHoleWidth
 
   // Criar geometria do frame
   const { geometries, mdfGeom, posterGeom, glassGeom } = useMemo(() => {

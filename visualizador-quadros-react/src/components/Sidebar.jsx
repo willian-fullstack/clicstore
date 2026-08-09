@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Box as BoxIcon, Ruler, Palette, Sun, UploadCloud, CornerDownRight, Minus } from 'lucide-react'
+import { Box as BoxIcon, Ruler, Palette, Sun, UploadCloud, CornerDownRight, Minus, Layers, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCw, Trash2 } from 'lucide-react'
 import { productSizes, modelMetaMap, rodapeModelsMap } from '../App'
 
 export default function Sidebar({
-  productType,
+  productType, setProductType,
   showMeasures, setShowMeasures,
   customColor, setCustomColor,
   matReflexo, setMatReflexo,
@@ -16,10 +16,12 @@ export default function Sidebar({
   setPosterTex,
   activeModelIndex, setActiveModelIndex,
   activeSizeIndex, setActiveSizeIndex,
-  setMultiModelMode,
   cutLeft45, setCutLeft45,
   cutRight45, setCutRight45,
-  cornerMode, setCornerMode
+  cornerMode, setCornerMode,
+  placedItems, setPlacedItems,
+  selectedItemId, setSelectedItemId,
+  onMoveItem, onUpdateOrientation
 }) {
   const [activeTab, setActiveTab] = useState('models')
 
@@ -56,10 +58,11 @@ export default function Sidebar({
         gap: '4px'
       }}>
         {[
-          { id: 'models', icon: <BoxIcon size={16}/>, label: productType === 'quadros' ? 'Quadros (4)' : 'Rodapés (8)' },
+          { id: 'models', icon: <BoxIcon size={16}/>, label: 'Produtos (12)' },
           { id: 'dimensions', icon: <Ruler size={16}/>, label: 'Medidas' },
           { id: 'materials', icon: <Palette size={16}/>, label: 'Tinta Custom' },
-          { id: 'scene', icon: <Sun size={16}/>, label: 'Cenário & Piso' }
+          { id: 'scene', icon: <Sun size={16}/>, label: 'Cenário & Piso' },
+          { id: 'layers', icon: <Layers size={16}/>, label: 'Hierarquia' }
         ].map(tab => (
           <button
             key={tab.id}
@@ -81,32 +84,36 @@ export default function Sidebar({
 
       <div className="sidebar-content" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
-        {activeTab === 'models' && productType === 'quadros' && (
+        {activeTab === 'models' && (
           <div className="tab-pane">
             <div className="section-tag" style={tagStyle}>01 · Tamanho do Quadro</div>
             <select 
               value={activeSizeIndex}
               onChange={(e) => setActiveSizeIndex(parseInt(e.target.value))}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'var(--card-bg)', color: 'var(--text-main)', border: '1px solid var(--panel-border)', outline: 'none', fontWeight: 600, cursor: 'pointer' }}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'var(--card-bg)', color: 'var(--text-main)', border: '1px solid var(--panel-border)', outline: 'none', fontWeight: 600, cursor: 'pointer', marginBottom: '20px' }}
             >
               {productSizes.map((size, idx) => (
                 <option key={size.id} value={idx}>{size.title}</option>
               ))}
             </select>
             
-            <div className="section-tag" style={{...tagStyle, marginTop: '20px'}}>02 · Coleção de Quadros (Cores)</div>
+            <div className="section-tag" style={tagStyle}>02 · Coleção de Quadros (Cores)</div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
               {modelMetaMap.map((meta, idx) => (
                 <div 
                   key={meta.name}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/json', JSON.stringify({ type: 'quadros', modelIndex: idx, sizeIndex: activeSizeIndex, name: meta.name }));
+                  }}
                   onClick={() => {
+                    setProductType('quadros');
                     setActiveModelIndex(idx);
-                    setMultiModelMode(false);
                   }}
                   style={{
-                    background: activeModelIndex === idx ? 'var(--card-hover)' : 'var(--card-bg)',
-                    border: activeModelIndex === idx ? '1px solid var(--abs-dourado)' : '1px solid var(--panel-border)',
+                    background: (productType === 'quadros' && activeModelIndex === idx) ? 'var(--card-hover)' : 'var(--card-bg)',
+                    border: (productType === 'quadros' && activeModelIndex === idx) ? '1px solid var(--abs-dourado)' : '1px solid var(--panel-border)',
                     padding: '12px 16px',
                     borderRadius: '12px',
                     cursor: 'pointer',
@@ -114,12 +121,12 @@ export default function Sidebar({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     transition: 'all 0.2s',
-                    boxShadow: activeModelIndex === idx ? '0 4px 15px rgba(0,0,0,0.2)' : 'none'
+                    boxShadow: (productType === 'quadros' && activeModelIndex === idx) ? '0 4px 15px rgba(0,0,0,0.2)' : 'none'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: meta.color, border: '2px solid rgba(255,255,255,0.2)' }}></div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: activeModelIndex === idx ? 'var(--abs-dourado-claro)' : 'var(--text-main)' }}>{meta.name}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: (productType === 'quadros' && activeModelIndex === idx) ? 'var(--abs-dourado-claro)' : 'var(--text-main)' }}>{meta.name}</div>
                   </div>
                   <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', padding: '4px 8px', borderRadius: '4px' }}>
                     {meta.tag}
@@ -127,24 +134,24 @@ export default function Sidebar({
                 </div>
               ))}
             </div>
-          </div>
-        )}
 
-        {activeTab === 'models' && productType === 'rodapes' && (
-          <div className="tab-pane">
-            <div className="section-tag" style={tagStyle}>01 · Coleção de Rodapés</div>
+            <div className="section-tag" style={tagStyle}>03 · Coleção de Rodapés</div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {rodapeModelsMap.map((meta, idx) => (
                 <div 
                   key={meta.name}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/json', JSON.stringify({ type: 'rodapes', modelIndex: idx, name: meta.name }));
+                  }}
                   onClick={() => {
+                    setProductType('rodapes');
                     setActiveModelIndex(idx);
-                    setMultiModelMode(false);
                   }}
                   style={{
-                    background: activeModelIndex === idx ? 'var(--card-hover)' : 'var(--card-bg)',
-                    border: activeModelIndex === idx ? '1px solid var(--abs-dourado)' : '1px solid var(--panel-border)',
+                    background: (productType === 'rodapes' && activeModelIndex === idx) ? 'var(--card-hover)' : 'var(--card-bg)',
+                    border: (productType === 'rodapes' && activeModelIndex === idx) ? '1px solid var(--abs-dourado)' : '1px solid var(--panel-border)',
                     padding: '12px 16px',
                     borderRadius: '12px',
                     cursor: 'pointer',
@@ -152,12 +159,12 @@ export default function Sidebar({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     transition: 'all 0.2s',
-                    boxShadow: activeModelIndex === idx ? '0 4px 15px rgba(0,0,0,0.2)' : 'none'
+                    boxShadow: (productType === 'rodapes' && activeModelIndex === idx) ? '0 4px 15px rgba(0,0,0,0.2)' : 'none'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: meta.color, border: '2px solid rgba(255,255,255,0.2)' }}></div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: activeModelIndex === idx ? 'var(--abs-dourado-claro)' : 'var(--text-main)' }}>{meta.name}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: (productType === 'rodapes' && activeModelIndex === idx) ? 'var(--abs-dourado-claro)' : 'var(--text-main)' }}>{meta.name}</div>
                   </div>
                   <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', padding: '4px 8px', borderRadius: '4px' }}>
                     {meta.tag}
@@ -166,23 +173,27 @@ export default function Sidebar({
               ))}
             </div>
             
-            <div className="section-tag" style={{...tagStyle, marginTop: '20px'}}>02 · Cortes e Cantos (Mitre)</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>Corte Esquerdo (45º)</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Canto para junção</div>
+            {productType === 'rodapes' && (
+              <>
+                <div className="section-tag" style={{...tagStyle, marginTop: '20px'}}>04 · Cortes e Cantos (Mitre)</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>Corte Esquerdo (45º)</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Canto para junção</div>
+                    </div>
+                    <input type="checkbox" checked={cutLeft45} onChange={(e) => setCutLeft45(e.target.checked)} style={{ cursor: 'pointer' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>Corte Direito (45º)</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Canto para junção</div>
+                    </div>
+                    <input type="checkbox" checked={cutRight45} onChange={(e) => setCutRight45(e.target.checked)} style={{ cursor: 'pointer' }} />
+                  </div>
                 </div>
-                <input type="checkbox" checked={cutLeft45} onChange={(e) => setCutLeft45(e.target.checked)} style={{ cursor: 'pointer' }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>Corte Direito (45º)</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Canto para junção</div>
-                </div>
-                <input type="checkbox" checked={cutRight45} onChange={(e) => setCutRight45(e.target.checked)} style={{ cursor: 'pointer' }} />
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
 
@@ -297,6 +308,79 @@ export default function Sidebar({
             )}
           </div>
         )}
+
+        {activeTab === 'layers' && (
+          <div className="tab-pane">
+            <div className="section-tag" style={tagStyle}>Itens na Cena</div>
+            
+            {placedItems.filter(i => i.id !== 'initial').length === 0 && (
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>
+                Arraste produtos para a cena
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {placedItems.filter(i => i.id !== 'initial').map((item, idx) => {
+                const isSelected = item.id === selectedItemId;
+                const isQuadro = item.type === 'quadros';
+                const meta = isQuadro ? modelMetaMap[item.modelIndex] : rodapeModelsMap[item.modelIndex];
+                const size = isQuadro ? productSizes[item.sizeIndex] : null;
+
+                return (
+                  <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: isSelected ? 'var(--linha)' : 'var(--card-bg)', border: isSelected ? '1px solid var(--abs-dourado)' : '1px solid var(--panel-border)', padding: '12px', borderRadius: '12px', transition: 'all 0.2s' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setSelectedItemId(isSelected ? null : item.id)}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: meta.color }}></div>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: 700, color: isSelected ? 'var(--abs-dourado-claro)' : 'var(--text-main)' }}>
+                            {isQuadro ? 'Quadro' : 'Rodapé'} - {meta.name.split('(')[0].trim()}
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                            {item.wall === 'side' ? 'Parede Lateral' : 'Parede Principal'} {isQuadro && size ? `· ${size.title}` : ''}
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setPlacedItems(prev => prev.filter(i => i.id !== item.id)); if (isSelected) setSelectedItemId(null); }}
+                        style={{ background: 'transparent', border: 'none', color: '#ff4d4f', cursor: 'pointer', padding: '4px' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    {isSelected && (
+                      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        
+                        {isQuadro && (
+                          <button 
+                            onClick={() => onUpdateOrientation(item.id)}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', padding: '10px', borderRadius: '8px', color: 'var(--text-main)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+                          >
+                            <RotateCw size={14} /> 
+                            {item.orientation === 'vertical' ? 'Mudar para Paisagem (Horizontal)' : 'Mudar para Retrato (Vertical)'}
+                          </button>
+                        )}
+
+                        <div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textAlign: 'center' }}>Mover na Parede (5cm)</div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 36px)', gap: '4px', justifyContent: 'center' }}>
+                            <div></div>
+                            {isQuadro ? <button onClick={() => onMoveItem(item.id, 'y', 0.05)} style={dpadStyle}><ArrowUp size={16}/></button> : <div></div>}
+                            <div></div>
+                            <button onClick={() => onMoveItem(item.id, 'x', item.wall === 'side' ? 0.05 : -0.05)} style={dpadStyle}><ArrowLeft size={16}/></button>
+                            {isQuadro ? <button onClick={() => onMoveItem(item.id, 'y', -0.05)} style={dpadStyle}><ArrowDown size={16}/></button> : <div></div>}
+                            <button onClick={() => onMoveItem(item.id, 'x', item.wall === 'side' ? -0.05 : 0.05)} style={dpadStyle}><ArrowRight size={16}/></button>
+                          </div>
+                        </div>
+
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   )
@@ -304,3 +388,4 @@ export default function Sidebar({
 
 const tagStyle = { display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--tag-color)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 800, marginBottom: '6px' }
 const btnOptStyle = { padding: '10px', borderRadius: '10px', color: 'var(--text-main)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }
+const dpadStyle = { display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: 'var(--text-main)' }

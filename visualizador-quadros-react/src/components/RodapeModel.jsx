@@ -111,37 +111,63 @@ export default function RodapeModel({ activeModelIndex, cutLeft45, cutRight45, s
 
     clonedObject.updateMatrixWorld(true);
 
-    // Compute bounding box
-    const initialBbox = new THREE.Box3().setFromObject(clonedObject);
+    // 1. Calculate LOCAL bounding box (independent of parent group translation/rotation)
+    const tempObj = clonedObject.clone();
+    tempObj.position.copy(tempObj.userData.originalPosition);
+    tempObj.rotation.set(Math.PI * 1.5, Math.PI, 0);
+    tempObj.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
+    if (isCornerPiece) {
+      tempObj.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
+    }
+    tempObj.updateMatrixWorld(true);
+    const localBbox = new THREE.Box3().setFromObject(tempObj);
 
-    // Delta alignment: Center X, align bottom Y EXACTLY at 0 (on floor) and back Z EXACTLY flush at 0 (against wall!)
-    let deltaX = - (initialBbox.min.x + initialBbox.max.x) / 2;
-    const deltaY = - initialBbox.min.y; // Sitting flat on floor Y=0
-    let deltaZ = - initialBbox.min.z + 0.001; // Flush against wall Z=0
+    // 2. Calculate local centering deltas
+    let deltaX = - (localBbox.min.x + localBbox.max.x) / 2;
+    const deltaY = - localBbox.min.y; 
+    let deltaZ = - localBbox.min.z + 0.001; 
 
+    // 3. Corner piece special logic
     if (isCornerPiece && mainBboxMinX !== undefined) {
-      // 1. Back face flush against side wall (X = mainBboxMinX)
-      // 2. Back end meeting back wall (Z = 0)
-      deltaX = mainBboxMinX - initialBbox.min.x;
-      deltaZ = - initialBbox.min.z;
+      // For the corner piece, it sits in the same group as the first main piece,
+      // so it needs to align its back to the main piece's left edge.
+      const groupWorldPos = new THREE.Vector3();
+      if (groupRef.current) {
+        groupRef.current.updateMatrixWorld(true);
+        groupRef.current.getWorldPosition(groupWorldPos);
+      }
+      const localMainMinX = mainBboxMinX - groupWorldPos.x;
+      deltaX = localMainMinX - localBbox.min.x;
+      deltaZ = - localBbox.min.z;
     }
 
-    // Set position
+    // 4. Apply position
     clonedObject.position.set(
       clonedObject.userData.originalPosition.x + deltaX,
       clonedObject.userData.originalPosition.y + deltaY,
       clonedObject.userData.originalPosition.z + deltaZ
     );
     
-    // Recalculate final world bounding box for dimensions
+    // 5. Update final matrices
     clonedObject.updateMatrixWorld(true);
-    const bbox = new THREE.Box3().setFromObject(clonedObject);
+    
+    // 6. Compute final bbox for dimensions
+    // Since dimensions are rendered inside the group, they need the LOCAL bounding box of the final placed object!
+    const finalTempObj = clonedObject.clone();
+    finalTempObj.updateMatrixWorld(true);
+    const finalLocalBbox = new THREE.Box3().setFromObject(finalTempObj);
+    
     const size = new THREE.Vector3();
-    bbox.getSize(size);
-    setBboxDim({ bbox, size });
+    finalLocalBbox.getSize(size);
+    setBboxDim({ bbox: finalLocalBbox, size });
 
+    // 7. Fire onBboxUpdate with WORLD coordinates for Scene.jsx
     if (onBboxUpdate && !isCornerPiece) {
-      onBboxUpdate(bbox);
+      if (groupRef.current) {
+         groupRef.current.updateMatrixWorld(true);
+      }
+      const bboxWorld = new THREE.Box3().setFromObject(clonedObject);
+      onBboxUpdate(bboxWorld); 
     }
 
   }, [clonedObject, cutLeft45, cutRight45, isCornerPiece, mainBboxMinX]);

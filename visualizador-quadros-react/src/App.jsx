@@ -64,8 +64,90 @@ export default function App() {
   // Scene State
   const [activeModelIndex, setActiveModelIndex] = useState(0)
   const [activeSizeIndex, setActiveSizeIndex] = useState(0)
-  const [multiModelMode, setMultiModelMode] = useState(true)
+  const [placedItems, setPlacedItems] = useState([
+    { id: 'initial', type: 'quadros', modelIndex: 0, sizeIndex: 0, position: [0, 1.5, 0], orientation: 'vertical' }
+  ])
+  const [selectedItemId, setSelectedItemId] = useState(null)
   const [showMeasures, setShowMeasures] = useState(true)
+
+  const checkCollision = (proposedItem, allItems) => {
+    const sizeProp = productSizes[proposedItem.sizeIndex];
+    const isProposedVert = proposedItem.orientation === 'vertical';
+    const propW = isProposedVert ? sizeProp.wOuter : sizeProp.hOuter;
+    const propH = isProposedVert ? sizeProp.hOuter : sizeProp.wOuter;
+    const propWall = proposedItem.wall || 'main';
+    const propX = propWall === 'side' ? proposedItem.position[2] : proposedItem.position[0];
+    const propY = proposedItem.position[1];
+
+    for (const other of allItems) {
+      if (other.id === proposedItem.id || other.type !== 'quadros') continue;
+      
+      const otherWall = other.wall || 'main';
+      if (otherWall !== propWall) continue;
+
+      const otherSize = productSizes[other.sizeIndex];
+      const isOtherVert = other.orientation === 'vertical';
+      const otherW = isOtherVert ? otherSize.wOuter : otherSize.hOuter;
+      const otherH = isOtherVert ? otherSize.hOuter : otherSize.wOuter;
+      const otherX = otherWall === 'side' ? other.position[2] : other.position[0];
+      const otherY = other.position[1];
+
+      // AABB Collision check with a small threshold (0.005m / 5mm) to allow snug fits
+      if (
+        Math.abs(propX - otherX) * 2 < (propW + otherW - 0.005) &&
+        Math.abs(propY - otherY) * 2 < (propH + otherH - 0.005)
+      ) {
+        return true; 
+      }
+    }
+    return false;
+  };
+
+  const handleMoveItem = (id, axis, step) => {
+    setPlacedItems(prev => prev.map(item => {
+      if (item.id !== id) return item;
+      
+      const newPos = [...item.position];
+      const isSideWall = item.wall === 'side';
+
+      if (axis === 'x') {
+        if (isSideWall) {
+          newPos[2] += step;
+        } else {
+          newPos[0] += step;
+        }
+      } else if (axis === 'y' && item.type === 'quadros') {
+        newPos[1] += step;
+      }
+
+      // Temporarily disabled collision check on manual move to allow un-sticking items
+      // if (item.type === 'quadros') {
+      //   const proposedItem = { ...item, position: newPos };
+      //   if (checkCollision(proposedItem, prev)) {
+      //     return item; // Overlap detected, do not move
+      //   }
+      // }
+
+      return { ...item, position: newPos };
+    }));
+  };
+
+  const handleUpdateOrientation = (id) => {
+    setPlacedItems(prev => {
+      const itemIndex = prev.findIndex(i => i.id === id);
+      if (itemIndex === -1) return prev;
+      
+      const item = prev[itemIndex];
+      if (item.type !== 'quadros') return prev;
+
+      const proposedItem = { ...item, orientation: item.orientation === 'vertical' ? 'horizontal' : 'vertical' };
+      if (checkCollision(proposedItem, prev)) return prev; // block rotation if it overlaps!
+
+      const newItems = [...prev];
+      newItems[itemIndex] = proposedItem;
+      return newItems;
+    });
+  };
   
   // Custom Materials State
   const [customColor, setCustomColor] = useState('#ffffff')
@@ -130,15 +212,13 @@ export default function App() {
         setProductType={setProductType}
         theme={theme} 
         onThemeChange={applyTheme} 
-        realisticRender={realisticRender}
+        realisticRender={realisticRender} 
         onToggleRender={() => setRealisticRender(!realisticRender)}
-        multiModelMode={multiModelMode}
-        setMultiModelMode={setMultiModelMode}
         onTakePhoto={handleTakePhoto}
       />
       
       <Sidebar 
-          productType={productType}
+          productType={productType} setProductType={setProductType}
           theme={theme}
           showMeasures={showMeasures} setShowMeasures={setShowMeasures}
           customColor={customColor} setCustomColor={setCustomColor}
@@ -152,18 +232,67 @@ export default function App() {
           posterTex={posterTex} setPosterTex={setPosterTex}
           activeModelIndex={activeModelIndex} setActiveModelIndex={setActiveModelIndex}
           activeSizeIndex={activeSizeIndex} setActiveSizeIndex={setActiveSizeIndex}
-          multiModelMode={multiModelMode} setMultiModelMode={setMultiModelMode}
           lampIntensity={lampIntensity} setLampIntensity={setLampIntensity}
           cutLeft45={cutLeft45} setCutLeft45={setCutLeft45}
           cutRight45={cutRight45} setCutRight45={setCutRight45}
           cornerMode={cornerMode} setCornerMode={handleCornerMode}
+          placedItems={placedItems}
+          setPlacedItems={setPlacedItems}
+          selectedItemId={selectedItemId}
+          setSelectedItemId={setSelectedItemId}
+          onMoveItem={handleMoveItem}
+          onUpdateOrientation={handleUpdateOrientation}
         />
       
       <BottomToolbar productType={productType} activeView={cameraView} setCameraView={setCameraView} />
 
       <DimensionBadges show={showMeasures} />
 
-      <div id="webgl-container">
+      <div 
+        id="webgl-container"
+        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
+        onDrop={(e) => {
+          e.preventDefault();
+          const rect = e.currentTarget.getBoundingClientRect();
+          const dropX = e.clientX - rect.left;
+          const isSideWall = dropX < rect.width * 0.35; // 35% left side of the screen is the side wall
+
+          const itemData = e.dataTransfer.getData('application/json');
+          if (itemData) {
+            const data = JSON.parse(itemData);
+            setPlacedItems(prev => {
+              const wallTarget = isSideWall ? 'side' : 'main';
+              const itemsOnSameWall = prev.filter(i => i.type === data.type && (i.wall === wallTarget || (!i.wall && wallTarget === 'main')));
+              
+              let newX = 0;
+              let newZ = isSideWall ? 0.45 : 0; // All items on side wall start at 0.45 on Z to clear the corner
+              
+              if (itemsOnSameWall.length > 0) {
+                if (isSideWall) {
+                  const maxZ = Math.max(...itemsOnSameWall.map(i => i.position[2] || 0));
+                  newZ = maxZ + (data.type === 'quadros' ? 0.4 : 0.9);
+                } else {
+                  const maxX = Math.max(...itemsOnSameWall.map(i => i.position[0]));
+                  newX = maxX + (data.type === 'quadros' ? 0.4 : 0.9);
+                }
+              } else {
+                if (!isSideWall && data.type === 'rodapes') {
+                  newX = -0.9;
+                }
+              }
+              const yPos = data.type === 'quadros' ? 1.5 : 0;
+              const newItem = { ...data, id: Date.now().toString(), position: [newX, yPos, newZ], wall: wallTarget };
+              if (data.type === 'quadros') newItem.orientation = 'vertical';
+
+              // If it's a quadro, perform collision check to push it to a safe space or allow?
+              // For simplicity, we just add it, but it might overlap if newX/newZ didn't account for Y.
+              // We'll let it be for now since it's just a drop placement.
+              
+              return [...prev, newItem];
+            });
+          }
+        }}
+      >
         <Canvas 
           shadows
           dpr={[1, 2]}
@@ -194,7 +323,8 @@ export default function App() {
                 posterTex={posterTex}
                 activeModelIndex={activeModelIndex}
                 activeSizeIndex={activeSizeIndex}
-                multiModelMode={multiModelMode}
+                placedItems={placedItems}
+                setPlacedItems={setPlacedItems}
                 cutLeft45={cutLeft45}
                 cutRight45={cutRight45}
                 cornerMode={cornerMode}

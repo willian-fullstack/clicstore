@@ -59,10 +59,10 @@ function generateFloorTexture(type) {
   return tex
 }
 
-export default function Scene({ productType, theme, showMeasures, customColor, matReflexo, matRelevo, environment, floorType, wallColor, lampColor, lampIntensity, realisticRender, cameraView, posterTex, activeModelIndex, activeSizeIndex, multiModelMode, cutLeft45, cutRight45, cornerMode }) {
+export default function Scene({ placedItems, setPlacedItems, theme, showMeasures, customColor, matReflexo, matRelevo, environment, floorType, wallColor, lampColor, lampIntensity, realisticRender, cameraView, posterTex, cutLeft45, cutRight45, cornerMode }) {
   const { camera } = useThree()
   const controlsRef = useRef()
-  const [mainRodapeBbox, setMainRodapeBbox] = useState(null)
+  const sideWallX = -1.35
   
   // Extrair texturas base do GLTF (rodape.glb)
   const { scene: rodapeScene } = useGLTF('/quadro.glb')
@@ -100,41 +100,24 @@ export default function Scene({ productType, theme, showMeasures, customColor, m
   
   const floorTex = useMemo(() => generateFloorTexture(floorType), [floorType])
 
-  // Camera views and target update
+  // Dynamic BBox extraction for the active/last rodape
   useEffect(() => {
+    // Keep camera logic intact, assuming we center on [0,0,0] or the last placed item
     if (!controlsRef.current) return
-    const size = productSizes[activeSizeIndex]
+    const controls = controlsRef.current
     
-    let targetX = 0
-    if (multiModelMode) {
-      if (productType === 'quadros') {
-        targetX = ((modelMetaMap.length - 1) * (size.wOuter + 0.1)) / 2
-      } else {
-        targetX = ((rodapeModelsMap.length - 1) * 0.15) / 2
-      }
-    }
-
-    if (cameraView === 'iso') {
-      if (productType === 'rodapes' && cornerMode === 'miter' && mainRodapeBbox) {
-        camera.position.set(mainRodapeBbox.min.x + 0.7, 0.6, 1.45)
-        controlsRef.current.target.set(mainRodapeBbox.min.x, 0.05, 0.35)
-      } else {
-        camera.position.set(targetX + 1.1, 1.5, 3.4)
-      }
-    } else if (cameraView === 'front') {
-      camera.position.set(targetX, 1.5, 3.0)
-    } else if (cameraView === 'side') {
-      camera.position.set(targetX + 3.0, 1.5, 0)
-    }
-    
-    if (!(productType === 'rodapes' && cornerMode === 'miter' && cameraView === 'iso')) {
-      controlsRef.current.target.set(targetX, 1.5, 0)
-    }
-  }, [cameraView, camera, multiModelMode, activeSizeIndex, cornerMode, mainRodapeBbox, productType])
+    // Move camera instantly
+    camera.position.set(
+      cameraView === 'zoom' ? 0.3 : 1.1,
+      cameraView === 'zoom' ? 0.4 : 1.2,
+      cameraView === 'zoom' ? 1.0 : 3.4
+    )
+    controls.target.set(0, 0, 0)
+  }, [cameraView, camera])
 
   const lampIntensityFloat = lampIntensity / 100
   
-  const size = productSizes[activeSizeIndex]
+  const size = productSizes[0]
 
   return (
     <>
@@ -148,73 +131,87 @@ export default function Scene({ productType, theme, showMeasures, customColor, m
       {/* Realistic Environment */}
       {realisticRender && <Environment preset="city" background={false} environmentIntensity={0.15} />}
       
-      {/* Quadros */}
-      <group position={[0, 1.5, 0]}>
-        {multiModelMode && productType === 'quadros' ? (
-          modelMetaMap.map((meta, idx) => (
-            <group key={idx} position={[idx * (size.wOuter + 0.1), 0, 0]}>
-              <FrameModel 
-                meta={meta} 
-                size={size}
-                customColor={customColor} 
-                matReflexo={matReflexo} 
-                posterTex={posterTex} 
-                carvalhoMat={carvalhoMat} 
-                tabacoMat={tabacoMat} 
-                showMeasures={showMeasures}
-                isExploded={cameraView === 'explode'}
-              />
-            </group>
-          ))
-        ) : (
-          <FrameModel 
-            meta={modelMetaMap[activeModelIndex]} 
-            size={size}
-            customColor={customColor} 
-            matReflexo={matReflexo} 
-            posterTex={posterTex} 
-            carvalhoMat={carvalhoMat} 
-            tabacoMat={tabacoMat}
-            showMeasures={showMeasures}
-            isExploded={cameraView === 'explode'}
-          />
-        )}
-      </group>
-
-      {/* Rodapés */}
+      {/* Placed Items */}
       <group position={[0, 0, 0]}>
-        {multiModelMode && productType === 'rodapes' ? (
-          rodapeModelsMap.map((meta, idx) => (
-            <group key={idx} position={[idx * 0.15, 0, 0]}>
-              <RodapeModel
-                activeModelIndex={idx}
-                cutLeft45={cutLeft45}
-                cutRight45={cutRight45}
-                showMeasures={showMeasures}
-              />
+        {placedItems.map((item, idx) => {
+          const isQuadro = item.type === 'quadros'
+          const meta = isQuadro ? modelMetaMap[item.modelIndex] : rodapeModelsMap[item.modelIndex]
+          const itemSize = isQuadro ? productSizes[item.sizeIndex] : null
+
+          let isFirstMainRodape = false;
+          if (!isQuadro) {
+             const firstMain = placedItems.find(i => i.type === 'rodapes' && i.wall !== 'side');
+             if (firstMain && firstMain.id === item.id) {
+               isFirstMainRodape = true;
+             }
+          }
+
+          const isSideWall = item.wall === 'side';
+
+          let groupPosition = isQuadro ? [item.position[0], 1.5, 0] : item.position;
+          let groupRotation = [0, 0, 0];
+
+          if (isSideWall) {
+            groupPosition = isQuadro ? [sideWallX + 0.01, item.position[1], item.position[2]] : [sideWallX, 0, item.position[2]];
+            groupRotation = [0, Math.PI / 2, 0];
+          }
+
+          return (
+            <group key={item.id} position={groupPosition} rotation={groupRotation}>
+              {isQuadro ? (
+                <FrameModel 
+                  meta={meta} 
+                  size={itemSize}
+                  customColor={customColor} 
+                  matReflexo={matReflexo} 
+                  posterTex={posterTex}
+                  isVertical={item.orientation === 'vertical'}
+                  carvalhoMat={carvalhoMat} 
+                  tabacoMat={tabacoMat}
+                  showMeasures={showMeasures}
+                  isExploded={cameraView === 'explode'}
+                />
+              ) : (
+                <RodapeModel
+                  activeModelIndex={item.modelIndex}
+                  cutLeft45={cutLeft45}
+                  cutRight45={cutRight45}
+                  showMeasures={showMeasures}
+                />
+              )}
+              
+              <Html position={[isQuadro ? 0 : 0, isQuadro ? itemSize.hOuter / 2 + 0.1 : 0.2, 0]} center zIndexRange={[100, 0]}>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPlacedItems(prev => prev.filter(i => i.id !== item.id));
+                  }}
+                  style={{
+                    background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%',
+                    width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+                    opacity: 0.8, pointerEvents: 'auto'
+                  }}
+                  title="Excluir item"
+                >
+                  ×
+                </button>
+              </Html>
+
+              {/* Corner Piece for Rodape if it's the first main wall piece (leftmost) and in Miter mode */}
+              {!isQuadro && cornerMode === 'miter' && isFirstMainRodape && (
+                 <RodapeModel
+                    activeModelIndex={item.modelIndex}
+                    cutLeft45={true}
+                    cutRight45={false}
+                    showMeasures={false}
+                    isCornerPiece={true}
+                    mainBboxMinX={-1.35}
+                  />
+              )}
             </group>
-          ))
-        ) : (
-          <>
-            <RodapeModel
-              activeModelIndex={activeModelIndex}
-              cutLeft45={cutLeft45}
-              cutRight45={cutRight45}
-              showMeasures={showMeasures}
-              onBboxUpdate={setMainRodapeBbox}
-            />
-            {cornerMode === 'miter' && mainRodapeBbox && (
-              <RodapeModel
-                activeModelIndex={activeModelIndex}
-                cutLeft45={true}
-                cutRight45={false}
-                showMeasures={false}
-                isCornerPiece={true}
-                mainBboxMinX={mainRodapeBbox.min.x}
-              />
-            )}
-          </>
-        )}
+          )
+        })}
       </group>
 
       {/* Room Environment */}
@@ -239,7 +236,7 @@ export default function Scene({ productType, theme, showMeasures, customColor, m
           
           {/* Dynamic Side Wall */}
           <mesh 
-            position={[mainRodapeBbox ? mainRodapeBbox.min.x : -2, 4, 10]} 
+            position={[sideWallX, 4, 10]} 
             rotation={[0, Math.PI/2, 0]} 
             receiveShadow
           >

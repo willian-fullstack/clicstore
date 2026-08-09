@@ -1,6 +1,6 @@
 import { Camera, Image as ImageIcon, Sparkles, Lightbulb, Grid } from 'lucide-react'
 
-export default function Header({ productType, setProductType, theme, onThemeChange, realisticRender, onToggleRender, multiModelMode, setMultiModelMode, onTakePhoto }) {
+export default function Header({ productType, setProductType, theme, onThemeChange, realisticRender, onToggleRender, onTakePhoto }) {
   return (
     <header className="top-header" style={{
       position: 'absolute',
@@ -38,21 +38,6 @@ export default function Header({ productType, setProductType, theme, onThemeChan
         </div>
       </div>
 
-      {/* Product Type Toggle */}
-      <div style={{ pointerEvents: 'auto', display: 'flex', gap: '4px', background: 'var(--panel-bg)', backdropFilter: 'blur(16px)', padding: '4px', borderRadius: '30px', border: '1px solid var(--panel-border)', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-        <button 
-          onClick={() => setProductType('quadros')}
-          style={{ padding: '8px 24px', borderRadius: '26px', border: 'none', background: productType === 'quadros' ? 'linear-gradient(135deg, var(--abs-dourado), var(--abs-dourado-claro))' : 'transparent', color: productType === 'quadros' ? '#111' : 'var(--text-main)', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}
-        >
-          Quadros 3D
-        </button>
-        <button 
-          onClick={() => setProductType('rodapes')}
-          style={{ padding: '8px 24px', borderRadius: '26px', border: 'none', background: productType === 'rodapes' ? 'linear-gradient(135deg, var(--abs-dourado), var(--abs-dourado-claro))' : 'transparent', color: productType === 'rodapes' ? '#111' : 'var(--text-main)', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}
-        >
-          Rodapés 3D
-        </button>
-      </div>
 
       <div className="header-actions" style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <button 
@@ -103,24 +88,7 @@ export default function Header({ productType, setProductType, theme, onThemeChan
           ))}
         </div>
 
-        <button 
-          className={`btn-action ${multiModelMode ? 'primary' : ''}`} 
-          onClick={() => setMultiModelMode(!multiModelMode)}
-          style={{
-            background: multiModelMode ? 'linear-gradient(135deg, var(--abs-dourado), var(--abs-dourado-claro))' : 'var(--panel-bg)',
-            color: multiModelMode ? '#111111' : 'var(--text-main)',
-            border: multiModelMode ? 'none' : '1px solid var(--panel-border)',
-            padding: '10px 16px',
-            borderRadius: 'var(--radius)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            fontWeight: 700,
-          }}
-        >
-          <Grid size={16} /> Exibir Todos Lado a Lado
-        </button>
+
 
         <button 
           className="btn-action primary" 
