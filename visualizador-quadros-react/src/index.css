@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css');
+
+@font-face {
+  font-family: 'NoirPro';
+  src: url('/noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff2') format('woff2'),
+       url('/noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NoirPro';
+  src: url('/noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff2') format('woff2'),
+       url('/noirpro-semi-bold_freefontdownload_org/noirpro-semi-bold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* --- CLICSTORE OFFICIAL VISUAL IDENTITY DESIGN SYSTEM TOKENS --- */
+:root {
+  --abs-preto: #111111;
+  --abs-preto-fosco: #1a1a1a;
+  --abs-dourado: #C59D4A;
+  --abs-dourado-claro: #E0BD7A;
+  --abs-creme: #F3EBE3;
+  --abs-offwhite: #E7D8C3;
+
+  --preto: var(--abs-preto);
+  --preto-fosco: var(--abs-preto-fosco);
+  --dourado: var(--abs-dourado);
+  --dourado-claro: var(--abs-dourado-claro);
+  --creme: var(--abs-creme);
+  --offwhite: var(--abs-offwhite);
+  --linha: rgba(197, 157, 74, 0.35);
+
+  --bg-dark: var(--preto);
+  --panel-bg: rgba(26, 26, 26, 0.92);
+  --panel-border: var(--linha);
+  --accent: var(--dourado);
+  --accent-hover: var(--dourado-claro);
+  --accent-glow: rgba(197, 157, 74, 0.35);
+  --text-main: var(--creme);
+  --text-muted: var(--offwhite);
+  --tag-color: var(--abs-dourado-claro);
+  --card-bg: rgba(17, 17, 17, 0.70);
+  --card-hover: rgba(197, 157, 74, 0.18);
+  --radius: 12px;
+}
+
+html[data-theme="creme"] {
+  --preto: var(--abs-creme);
+  --preto-fosco: var(--abs-offwhite);
+  --creme: #111111;
+  --offwhite: #2a2a2a;
+  --dourado-claro: #8b6823;
+  --dourado: #111111;
+  --tag-color: #725213;
+  --linha: rgba(17, 17, 17, 0.25);
+  --panel-bg: rgba(243, 235, 227, 0.94);
+  --panel-border: rgba(17, 17, 17, 0.25);
+  --card-bg: rgba(231, 216, 195, 0.65);
+  --card-hover: rgba(197, 157, 74, 0.35);
+  --text-main: #111111;
+  --text-muted: #333333;
+}
+
+html[data-theme="offwhite"] {
+  --preto: var(--abs-offwhite);
+  --preto-fosco: var(--abs-creme);
+  --creme: #111111;
+  --offwhite: #2a2a2a;
+  --dourado-claro: #8b6823;
+  --dourado: #111111;
+  --tag-color: #725213;
+  --linha: rgba(17, 17, 17, 0.25);
+  --panel-bg: rgba(231, 216, 195, 0.94);
+  --panel-border: rgba(17, 17, 17, 0.25);
+  --card-bg: rgba(243, 235, 227, 0.65);
+  --card-hover: rgba(197, 157, 74, 0.35);
+  --text-main: #111111;
+  --text-muted: #333333;
+}
+
+html[data-theme="dourado"] {
+  --preto: var(--abs-dourado);
+  --preto-fosco: var(--abs-dourado-claro);
+  --creme: #111111;
+  --offwhite: #222222;
+  --dourado-claro: #111111;
+  --dourado: #111111;
+  --tag-color: #111111; 
+  --linha: rgba(17, 17, 17, 0.35);
+  --panel-bg: rgba(197, 157, 74, 0.94);
+  --panel-border: rgba(17, 17, 17, 0.35);
+  --card-bg: rgba(243, 235, 227, 0.55);
+  --card-hover: rgba(17, 17, 17, 0.2);
+  --text-main: #111111;
+  --text-muted: #2a2a2a;
+}
+
+html[data-theme="dourado-claro"] {
+  --preto: var(--abs-dourado-claro);
+  --preto-fosco: var(--abs-dourado);
+  --creme: #111111;
+  --offwhite: #222222;
+  --dourado-claro: #111111;
+  --dourado: #111111;
+  --tag-color: #111111; 
+  --linha: rgba(17, 17, 17, 0.35);
+  --panel-bg: rgba(224, 189, 122, 0.94);
+  --panel-border: rgba(17, 17, 17, 0.35);
+  --card-bg: rgba(243, 235, 227, 0.55);
+  --card-hover: rgba(17, 17, 17, 0.2);
+  --text-main: #111111;
+  --text-muted: #2a2a2a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'NoirPro', 'Plus Jakarta Sans', sans-serif;
+  user-select: none;
+}
+
+body, html, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--preto);
+  color: var(--text-main);
+}
+
+h1, h2, h3, .serif, em {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Gold Progress Rail */
+#rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--abs-dourado), var(--abs-dourado-claro));
+  z-index: 999;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--linha);
+  border-radius: 3px;
+}
+
+#webgl-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
