@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { Html, Line } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 
-export default function FrameModel({ meta, size, customColor, matReflexo, posterTex, carvalhoMat, tabacoMat, showMeasures, isExploded, isVertical = true }) {
+export default function FrameModel({ meta, size, customColor, matReflexo, posterTex, carvalhoMat, tabacoMat, mdfMat, showMeasures, isExploded, isVertical = true }) {
   
   // Parâmetros do frame reais da arquitetura
   const width = isVertical ? size.w : size.h
@@ -121,7 +121,7 @@ export default function FrameModel({ meta, size, customColor, matReflexo, poster
 
     const glassMaterials = [matGlassSides, matGlassSides, matGlassSides, matGlassSides, matGlassFront, matGlassFront]
 
-    const back = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 })
+    const back = mdfMat ? mdfMat.clone() : new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 })
     
     // Poster Dinamico
     const canvas = document.createElement('canvas')
@@ -129,29 +129,31 @@ export default function FrameModel({ meta, size, customColor, matReflexo, poster
     canvas.height = Math.round(1024 * (height / width))
     const ctx = canvas.getContext('2d')
     
+    const H = canvas.height;
+    
     ctx.fillStyle = '#e8e8e8'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillRect(0, 0, canvas.width, H)
     
     ctx.fillStyle = '#0a0a0a'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     
-    ctx.font = 'bold 450px sans-serif'
-    ctx.fillText(size.posterLine1, canvas.width / 2, canvas.height / 2 - 200)
+    ctx.font = `bold ${Math.round(H * 0.3)}px sans-serif`
+    ctx.fillText(size.posterLine1, canvas.width / 2, H * 0.35)
     
-    ctx.font = 'bold 240px sans-serif'
-    ctx.fillText(size.posterLine2, canvas.width / 2, canvas.height / 2 + 150)
+    ctx.font = `bold ${Math.round(H * 0.16)}px sans-serif`
+    ctx.fillText(size.posterLine2, canvas.width / 2, H * 0.60)
     
-    ctx.font = 'bold 110px sans-serif'
-    ctx.fillText('com acetato', canvas.width / 2, canvas.height / 2 + 350)
+    ctx.font = `bold ${Math.round(H * 0.075)}px sans-serif`
+    ctx.fillText('com acetato', canvas.width / 2, H * 0.75)
     
-    const barHeight = 160
+    const barHeight = Math.round(H * 0.11)
     ctx.fillStyle = '#e30613'
-    ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight)
+    ctx.fillRect(0, H - barHeight, canvas.width, barHeight)
     
     ctx.fillStyle = '#ffffff'
-    ctx.font = 'italic bold 105px sans-serif'
-    ctx.fillText('clicstore', canvas.width / 2, canvas.height - (barHeight / 2))
+    ctx.font = `italic bold ${Math.round(H * 0.07)}px sans-serif`
+    ctx.fillText('clicstore', canvas.width / 2, H - (barHeight / 2))
     
     const tex = new THREE.CanvasTexture(canvas)
     tex.colorSpace = THREE.SRGBColorSpace
@@ -172,7 +174,7 @@ export default function FrameModel({ meta, size, customColor, matReflexo, poster
     }
 
     return { frameMaterial: mat, matBorderRotated, glassMaterial: glassMaterials, backMaterial: back, defaultPosterMaterial: defaultPoster }
-  }, [meta, customColor, matReflexo, carvalhoMat, tabacoMat])
+  }, [meta, customColor, matReflexo, carvalhoMat, tabacoMat, mdfMat, size.posterLine1, size.posterLine2, isVertical])
 
   const posterMat = useMemo(() => {
     if (!posterTex) return defaultPosterMaterial
@@ -191,13 +193,16 @@ export default function FrameModel({ meta, size, customColor, matReflexo, poster
   useFrame(() => {
     const lerpSpeed = 0.1
     if (mdfRef.current) {
-        mdfRef.current.position.lerp(new THREE.Vector3(0, 0, isExploded ? -0.15 : -0.0021), lerpSpeed)
+        // MDF moves slightly forward (or stays put)
+        mdfRef.current.position.lerp(new THREE.Vector3(0, 0, isExploded ? 0.02 : -0.0021), lerpSpeed)
     }
     if (posterRef.current) {
-        posterRef.current.position.lerp(new THREE.Vector3(0, 0, isExploded ? -0.05 : -0.0008), lerpSpeed)
+        // Poster moves further forward
+        posterRef.current.position.lerp(new THREE.Vector3(0, 0, isExploded ? 0.08 : -0.0008), lerpSpeed)
     }
     if (glassRef.current) {
-        glassRef.current.position.lerp(new THREE.Vector3(0, 0, isExploded ? 0.05 : -0.00015), lerpSpeed)
+        // Glass moves even further forward
+        glassRef.current.position.lerp(new THREE.Vector3(0, 0, isExploded ? 0.14 : -0.00015), lerpSpeed)
     }
   })
 
@@ -210,10 +215,10 @@ function FrameSide({ side, geomFront, geomBack, materialsArray, backDepth, isExp
   const explodeB = useMemo(() => new THREE.Vector3(0,0,-backDepth), [backDepth])
 
   useMemo(() => {
-    if (side === 'top') { explodeT.y = offsetDist; explodeT.z = 0.02; explodeB.y = offsetDist; explodeB.z = -backDepth + 0.02; }
-    if (side === 'bottom') { explodeT.y = -offsetDist; explodeT.z = 0.02; explodeB.y = -offsetDist; explodeB.z = -backDepth + 0.02; }
-    if (side === 'left') { explodeT.x = -offsetDist; explodeT.z = 0.02; explodeB.x = -offsetDist; explodeB.z = -backDepth + 0.02; }
-    if (side === 'right') { explodeT.x = offsetDist; explodeT.z = 0.02; explodeB.x = offsetDist; explodeB.z = -backDepth + 0.02; }
+    if (side === 'top') { explodeT.y = offsetDist; explodeT.z = 0.18; explodeB.y = offsetDist; explodeB.z = -backDepth + 0.18; }
+    if (side === 'bottom') { explodeT.y = -offsetDist; explodeT.z = 0.18; explodeB.y = -offsetDist; explodeB.z = -backDepth + 0.18; }
+    if (side === 'left') { explodeT.x = -offsetDist; explodeT.z = 0.18; explodeB.x = -offsetDist; explodeB.z = -backDepth + 0.18; }
+    if (side === 'right') { explodeT.x = offsetDist; explodeT.z = 0.18; explodeB.x = offsetDist; explodeB.z = -backDepth + 0.18; }
   }, [side, explodeT, explodeB, backDepth])
 
   useFrame(() => {
@@ -296,7 +301,7 @@ function DimensionLines({ width, height, zOffset, totalDepth }) {
       {geometries.map(({ side, geomFront, geomBack }) => {
         const matFront = (side === 'left' || side === 'right') ? frameMaterial : matBorderRotated;
         const matSide = matBorderRotated; 
-        const matCut = backMaterial; 
+        const matCut = matFront; 
         const materialsArray = [matFront, matSide, matCut];
 
         return (

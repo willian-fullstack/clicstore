@@ -67,9 +67,10 @@ export default function Scene({ placedItems, setPlacedItems, theme, showMeasures
   // Extrair texturas base do GLTF (rodape.glb)
   const { scene: rodapeScene } = useGLTF('/quadro.glb')
   
-  const { carvalhoMat, tabacoMat } = useMemo(() => {
+  const { carvalhoMat, tabacoMat, mdfMat } = useMemo(() => {
     let carvalho = null
     let tabaco = null
+    let mdf = null
     if (rodapeScene) {
       rodapeScene.traverse((c) => {
         if (c.isMesh && c.material) {
@@ -85,17 +86,36 @@ export default function Scene({ placedItems, setPlacedItems, theme, showMeasures
           }
           if ((m.name?.toLowerCase().includes('tabaco') || c.name?.toLowerCase().includes('tabaco')) && !tabaco) {
              tabaco = m.clone()
-             if(tabaco.map) {
-                 tabaco.map = tabaco.map.clone()
-                 tabaco.map.wrapS = THREE.RepeatWrapping
-                 tabaco.map.wrapT = THREE.RepeatWrapping
-                 tabaco.map.repeat.set(1.5, 1.5)
-             }
-          }
+              if(tabaco.normalMap) {
+                 tabaco.normalMap = tabaco.normalMap.clone()
+                 tabaco.normalMap.wrapS = THREE.RepeatWrapping
+                 tabaco.normalMap.wrapT = THREE.RepeatWrapping
+                 tabaco.normalMap.repeat.set(1.5, 1.5)
+              }
+           }
+           if ((m.name?.toLowerCase().includes('mdf') || c.name?.toLowerCase().includes('mdf')) && !mdf && m.map) {
+              mdf = m.clone()
+              if(mdf.map) {
+                  mdf.map = mdf.map.clone()
+                  mdf.map.matrixAutoUpdate = true
+                  mdf.map.wrapS = THREE.RepeatWrapping
+                  mdf.map.wrapT = THREE.RepeatWrapping
+                  mdf.map.repeat.set(1, 1)
+                  mdf.map.offset.set(0.5, 0.5)
+              }
+              if(mdf.normalMap) {
+                  mdf.normalMap = mdf.normalMap.clone()
+                  mdf.normalMap.matrixAutoUpdate = true
+                  mdf.normalMap.wrapS = THREE.RepeatWrapping
+                  mdf.normalMap.wrapT = THREE.RepeatWrapping
+                  mdf.normalMap.repeat.set(1, 1)
+                  mdf.normalMap.offset.set(0.5, 0.5)
+              }
+           }
         }
       })
     }
-    return { carvalhoMat: carvalho, tabacoMat: tabaco }
+    return { carvalhoMat: carvalho, tabacoMat: tabaco, mdfMat: mdf }
   }, [rodapeScene])
   
   const floorTex = useMemo(() => generateFloorTexture(floorType), [floorType])
@@ -148,7 +168,7 @@ export default function Scene({ placedItems, setPlacedItems, theme, showMeasures
 
           const isSideWall = item.wall === 'side';
 
-          let groupPosition = isQuadro ? [item.position[0], 1.5, 0] : item.position;
+          let groupPosition = isQuadro ? [item.position[0], item.position[1], 0] : item.position;
           let groupRotation = [0, 0, 0];
 
           if (isSideWall) {
@@ -166,8 +186,9 @@ export default function Scene({ placedItems, setPlacedItems, theme, showMeasures
                   matReflexo={matReflexo} 
                   posterTex={posterTex}
                   isVertical={item.orientation === 'vertical'}
-                  carvalhoMat={carvalhoMat} 
+                  carvalhoMat={carvalhoMat}
                   tabacoMat={tabacoMat}
+                  mdfMat={mdfMat}
                   showMeasures={showMeasures}
                   isExploded={cameraView === 'explode'}
                 />
@@ -246,7 +267,7 @@ export default function Scene({ placedItems, setPlacedItems, theme, showMeasures
 
           {/* PBR Lamp */}
           {realisticRender && lampIntensityFloat > 0 && (
-            <group position={[mainRodapeBbox ? mainRodapeBbox.min.x + 0.45 : -1.5, 0, 0.45]}>
+            <group position={[-0.9, 0, 0.45]}>
               <mesh position={[0, 0.01, 0]} castShadow><cylinderGeometry args={[0.12, 0.13, 0.02, 32]}/><meshStandardMaterial color="#3d352a" metalness={0.8}/></mesh>
               <mesh position={[0, 0.71, 0]} castShadow><cylinderGeometry args={[0.01, 0.01, 1.4]}/><meshStandardMaterial color="#c59d4a" metalness={0.8}/></mesh>
               <mesh position={[0, 1.30, 0]}>
